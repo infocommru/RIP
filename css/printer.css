@@ -1,0 +1,114 @@
+#wrap{
+    margin: 0 auto;
+    font-family: "Times New Roman", Times, Arial;
+    font-size: 16px;
+}
+
+#verh_block{
+    float: right;
+    width: 400px;
+    min-height: 600px;
+    margin-right: 30px;
+}
+
+.div_under{
+    width: 58%;
+    height: auto;
+    border-bottom: 1px solid #808080;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.div_under_small{
+    width: 58%;
+    height: auto;
+    border-bottom: 1px solid #808080;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.div_in_verh{
+
+}
+
+.div_in_verh_spravka{
+font-size: 18px;
+}
+
+#center_block{
+    width: 900px;
+    margin: 0 auto;
+    padding-top: 400px;
+}
+
+.text_paragraph{
+    word-spacing: 40px;
+}
+
+.text-bigspace{
+    word-spacing: 40px;
+    font-size: 14px;
+}
+
+.text-nospace{
+    font-size: 14px;
+}
+
+.undertext{
+    font-size: 14px;
+    white-space:nowrap;
+    overflow:hidden;
+    /* text-decoration: underline;*/
+}
+
+.undertext_real{
+    font-size: 14px;
+    border-bottom: 1px solid black;
+    width: 100%;
+}
+
+.hinttext{
+    font-size: 10px;
+    padding-left: 100px;
+}
+
+
+.logo_line{
+    text-align: center;
+    font-size: 10px;
+}
+
+.logo_line_small{
+    text-align: center;
+    font-size: 10px;
+}
+
+.logo_line_upper{
+    text-transform: uppercase;
+}
+
+.logo_line_bold{
+    font-weight: bold;
+}
+
+.comment_ips{
+    font-size: 12px;
+    color:#444;
+    font-style: italic;
+}
+
+print {
+    html, body {
+        width: 10mm;
+    }
+    
+    @page {
+        margin: 0;
+    }
+
+    
+}
+
+@page {
+        margin: 0;
+}
