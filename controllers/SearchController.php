@@ -210,11 +210,16 @@ class SearchController extends Controller {
                         $query->andWhere("rip_day = $rip_d");
             }
         }
-        
-        if ($_GET['zags']){
-        	switch ($_GET['zags_cont']) {
+
+        if ($_GET['zags']) {
+            switch ($_GET['zags_cont']) {
                 case 1:
-                    $query->andWhere(["$table_name.zags" => $_GET['zags']]);
+                    $zags = \app\models\Zags::find()->andWhere(['name' => $_GET['zags']])->one();
+                    if (!$zags) {
+                        $query->andWhere(["$table_name.zags" => $_GET['zags']]);
+                    } else {
+                        $query->andWhere(["$table_name.zags_id" => $zags->id]);
+                    }
                     break;
                 case 2:
                     $query->andWhere(['like', "$table_name.zags", $_GET['zags']]);
@@ -228,13 +233,13 @@ class SearchController extends Controller {
             }
             //$query->andWhere(["$table_name.zags" => $_GET['zags']]);
         }
-        
+
         if ($_GET['docnum']) {
-        	$query->andWhere(['like', $table_name . '.docnum', $_GET['docnum']]);
+            $query->andWhere(['like', $table_name . '.docnum', $_GET['docnum']]);
         }
-        
+
         if ($_GET['comment']) {
-        	$query->andWhere(['like', $table_name . '.comment', $_GET['comment']]);
+            $query->andWhere(['like', $table_name . '.comment', $_GET['comment']]);
         }
 
         if (isset($_GET['ext_search'])) {

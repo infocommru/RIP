@@ -77,6 +77,13 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                         ],
                     ];
 
+                    $items[] = ['label' => 'ЗАГС',
+                        'items' => [
+                            ['label' => 'ЗАГС', 'url' => '/web/zags'],
+                            ['label' => 'Опечатки', 'url' => '/web/zags-raw'],
+                        ],
+                    ];
+
                     //$items[] = ['label' => 'Дебаг',
                     //    'url' => '/web/bad'
                     //];

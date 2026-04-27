@@ -77,6 +77,8 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
                         </thead>
                         <tbody>
                             <?php
+                            $zagsIds = Helper::regionsWithIds();
+
                             for ($i = 0; $i < sizeof($list); $i++) {
                                 $elem = $list[$i];
                                 $num = $i + 1;
@@ -97,9 +99,10 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
                                 $rip_year = Helper::formatDate($elem['record']['rip_date']);
                                 //$zags = \app\models\Helper::regionToText($elem['zags_num']);
                                 #$zags = $elem['zags_num'];
-
                                 #if ($zags == '-')
-                                    $zags = $elem['zags'];
+                                $zags = $elem['zags'];
+                                if ($elem['record']['zags_id'])
+                                    $zags = $zagsIds[$elem['record']['zags_id']];
 
                                 $rip_style = \app\models\Record::ripStyleTypes()[$elem['record']['rip_style']];
                                 if ((isset($elem['book_rip_style'])) && ($elem['book_rip_style'])) {
@@ -179,7 +182,7 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
 
                         </tbody>
                     </table>
-                    <?php if ($pages > 1) { ?>
+    <?php if ($pages > 1) { ?>
                         <div class="row">
                             <div class="col-sm-12">
 
@@ -242,7 +245,7 @@ HERE;
                     }
                     ?>
                 </div>            
-            <?php endforeach; ?>
+<?php endforeach; ?>
 
 
         </div> 

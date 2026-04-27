@@ -37,7 +37,28 @@ class Helper {
         return $result;
     }
 
+    public static function regionsWithIds() {
+        $zagsList = Zags::find()->andWhere(['deleted' => 0])->orderBy("id")->all();
+        $result = [];
+        $result[null] = '-';
+        foreach ($zagsList as $zags) {
+            $result[$zags->id] = $zags->name;
+        }
+
+
+
+        return $result;
+    }
+
     public static function regions() {
+        $zagsList = Zags::find()->andWhere(['deleted' => 0])->orderBy("name")->all();
+        $result = [];
+        foreach ($zagsList as $zags) {
+            $result[] = $zags->name;
+        }
+
+        return $result;
+
         $filepath = "../data/spb_region.txt";
         if (!file_exists($filepath))
             $filepath = "./data/spb_region.txt";
