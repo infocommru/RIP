@@ -18,6 +18,7 @@ use Yii;
  * @property string|null $rip_date
  * @property string|null $docnum
  * @property string|null $zags
+ * @property string|null $zags_id
  * @property string|null $riper
  * @property string|null $area_num
  * @property string|null $row_num
@@ -52,7 +53,7 @@ class Record extends \yii\db\ActiveRecord {
         return [
             [['book_id'], 'required'],
             [['book_id', 'numReg', 'rip_style', 'updated_at',
-            'user_id', 'vopros', 'is_unknown'], 'integer'],
+            'user_id', 'vopros', 'is_unknown', 'zags_id'], 'integer'],
             [['comment'], 'string'],
             [['numLiteral', 'death_date', 'rip_date'], 'string', 'max' => 32],
             [['fio', 'zags', 'age', 'area_num', 'row_num', 'rip_num', 'docnum'], 'string', 'max' => 128],
@@ -78,6 +79,7 @@ class Record extends \yii\db\ActiveRecord {
             'rip_date' => 'Дата захоронения',
             'docnum' => 'Номер документа ЗАГС',
             'zags' => 'ЗАГС',
+            'zags_id' => 'id ЗАГС',
             'riper' => 'Землекоп',
             'area_num' => 'Номер участка',
             'row_num' => 'Номер ряда',

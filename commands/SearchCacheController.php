@@ -221,6 +221,7 @@ class SearchCacheController extends Controller {
                     $sfb_ripnum = $r_new['ripnum'];
                     $sfb_relative = $r_new['relative'];
                     $sfb_zags = $r_new['zags'];
+                    $sfb_zags_id = $record['zags_id'];
                     $sfb_unknown = $record['is_unknown'];
                     $sfb_rip_style = $r_new['rip_style'];
                     //////////////////////////////
@@ -285,6 +286,7 @@ class SearchCacheController extends Controller {
                     	$sfb_rip_day,
                     	$sfb_rip_date,
                     	$sfb_zags,
+                    	$sfb_zags_id,
                     	$sfb_rip_style,
                     	$sfb_unknown,
                     	$sfb_unknown_number,
@@ -308,7 +310,7 @@ class SearchCacheController extends Controller {
                         $table_name,
 		                [
 		                    "record_id", "regnum", "fam", "nam", "ot", "age", "dead_year", "dead_month", 
-		                    "dead_day", "dead_date", "rip_year", "rip_month", "rip_day", "rip_date", "zags",
+		                    "dead_day", "dead_date", "rip_year", "rip_month", "rip_day", "rip_date", "zags", "zags_id",
 		                    "rip_style", "unknown", "unknown_number", "docnum", "areanum", "rownum", "ripnum",
 		                    "relative", "svazka_num", "book_num", "page_num", "page_punkt", "comment", "comment_book",
 		                    "book_id", "book_rip_style"
@@ -325,7 +327,7 @@ class SearchCacheController extends Controller {
                     $table_name,
                     [
                         "record_id", "regnum", "fam", "nam", "ot", "age", "dead_year", "dead_month", 
-                        "dead_day", "dead_date", "rip_year", "rip_month", "rip_day", "rip_date", "zags",
+                        "dead_day", "dead_date", "rip_year", "rip_month", "rip_day", "rip_date", "zags", "zags_id",
                         "rip_style", "unknown", "unknown_number", "docnum", "areanum", "rownum", "ripnum",
                         "relative", "svazka_num", "book_num", "page_num", "page_punkt", "comment", "comment_book",
                         "book_id", "book_rip_style"
