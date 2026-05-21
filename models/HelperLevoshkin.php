@@ -118,7 +118,7 @@ HERE;
         }
 
         if (!$result['year'])
-            return false;
+            return $result;
 
         if (preg_match("#(\d\d?)\D(\d\d?)\D(\d\d\d\d)#", $sDate, $m)) {
             $result['day'] = intval(ltrim($m[1], '0'));
