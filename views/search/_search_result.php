@@ -78,43 +78,53 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
                         <tbody>
                             <?php
                             for ($i = 0; $i < sizeof($list); $i++) {
-                                $elem = $list[$i];
+                                $elem = $list[$i]['_source'];
                                 $num = $i + 1;
                                 $regnum = '';
-                                if (isset($elem['regnum']))
+                                //if (isset($elem['regnum']))
                                     $regnum = $elem['regnum'];
 
-                                $regnum = $elem['record']['numReg'];
-                                if (!$regnum)
-                                    $regnum = $elem['record']['numLiteral'];
+                                //$regnum = $elem['record']['numReg'];
+                                //if (!$regnum)
+                                    //$regnum = $elem['record']['numLiteral'];
 
                                 if ($page > 1)
                                     $num += 100 * ($page - 1);
-                                $fio = $elem['fam'] . ' ' . $elem['nam'] . ' ' . $elem['ot'];
-                                $fio = $elem['record']['fio'];
-                                $age = $elem['record']['age'];
-                                $dead_year = Helper::formatDate($elem['record']['death_date']);
-                                $rip_year = Helper::formatDate($elem['record']['rip_date']);
+                                $fio = $elem['fio_display'];
+                                //$fio = $elem['record']['fio'];
+                                //$age = $elem['record']['age'];
+                                $age = $elem['age'];
+                                $dead_year = Helper::formatDate($elem['dead_date']);
+                                $rip_year = Helper::formatDate($elem['rip_date']);
+                                //$dead_year = Helper::formatDate($elem['record']['death_date']);
+                                //$rip_year = Helper::formatDate($elem['record']['rip_date']);
                                 //$zags = \app\models\Helper::regionToText($elem['zags_num']);
                                 #$zags = $elem['zags_num'];
 
                                 #if ($zags == '-')
                                     $zags = $elem['zags'];
 
-                                $rip_style = \app\models\Record::ripStyleTypes()[$elem['record']['rip_style']];
+                                //$rip_style = \app\models\Record::ripStyleTypes()[$elem['record']['rip_style']];
+                                $rip_style = \app\models\Record::ripStyleTypes()[$elem['rip_style']];
                                 if ((isset($elem['book_rip_style'])) && ($elem['book_rip_style'])) {
                                     $rip_style = \app\models\Record::ripStyleTypes()[$elem['book_rip_style']];
                                 }
 
-                                $docnum = $elem['record']['docnum'];
-                                $areanum = $elem['record']['area_num'];
-                                $rownum = $elem['record']['row_num'];
-                                $ripnum = $elem['record']['rip_num'];
-                                $relative = $elem['record']['relative_fio'];
+                                //$docnum = $elem['record']['docnum'];
+                                //$areanum = $elem['record']['area_num'];
+                                //$rownum = $elem['record']['row_num'];
+                                //$ripnum = $elem['record']['rip_num'];
+                                //$relative = $elem['record']['relative_fio'];
+                                $docnum = $elem['docnum'];
+                                $areanum = $elem['areanum'];
+                                $rownum = $elem['rownum'];
+                                $ripnum = $elem['ripnum'];
+                                $relative = $elem['relative'];
 
                                 //$record = app\models\Record::find()->andWhere(['id'=>$elem['record_id']])->one();
 
-                                $comment = $elem['record']['comment'];
+                                //$comment = $elem['record']['comment'];
+                                $comment = $elem['comment'];
 
                                 $dopInfo = "<spac style='font-size:13px;'>св. $elem[svazka_num], кн. $elem[book_num], стр. $elem[page_num], строка: $elem[page_punkt]";
 
@@ -132,9 +142,9 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
 
                                 //$flink = "/"
                                 $filelink = '';
-                                if ($elem['record']['filename']) {
+                                if ($elem['filename']) {
 
-                                    $im_url = "/upload/rip2/" . $elem['record']['filename'];
+                                    $im_url = "/upload/rip2/" . $elem['filename'];
 
                                     $im_url = str_replace(" ", "%20", $im_url);
 
@@ -143,10 +153,10 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
 
                                 if ($user->role != -4) {
 
-                                    if (!$elem['record']['vopros'])
+                                    if (!$elem['vopros'])
                                         $filelink .= "<a id='vopros$elem[record_id]' title='требуется уточнить данные'   href='javascript:vopros(" . $elem['record_id'] . ");'><img src='/img/vopros.png' width='24px' /></a>";
 
-                                    if ($elem['record']['updated_at']) {
+                                    if ($elem['updated_at']) {
                                         $filelink .= "<a target='_blank' id='vopros$elem[record_id]' title='история изменения'   href='/web/record-history/?record_id=" . $elem['record_id'] . "'><img src='/img/history.png' width='24px' /></a>";
                                     }
                                     $filelink .= "<a target='_blank' id='print$elem[record_id]' title='печать'   href='/web/print/?record_id=$elem[record_id]'><img src='/img/print.png' width='24px' /></a>";

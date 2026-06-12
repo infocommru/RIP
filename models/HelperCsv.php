@@ -10,7 +10,13 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 class HelperCsv {
-
+	private static function updateBookIndex($bookId){
+		$books = Book::find()
+        	->andWhere(['id' => $bookId])
+        	->all();
+                   
+		\app\models\HelperCache::updateCache($books);
+	}
     public static function processBookCsv($bookId, $filepath, $bad_flag = 0) {
         $riper_exists = true;
 
@@ -210,12 +216,13 @@ class HelperCsv {
 
             if ($valid) {
                 //$record->bad_flag = 2; //$bad_flag;
-                if (!$record->save()) {
-                    //print_r($record);
+                if ($record->save()) {
+                    
                 }
             }
         }
 
+		self::updateBookIndex($bookId);
         $statInfo['records'] = \app\models\Record::find()->andWhere(['book_id' => $bookId])->count();
 
         $rCount = [];

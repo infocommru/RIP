@@ -67,7 +67,7 @@ class Helper {
         if (preg_match("#(\d\d\d\d)\D(\d\d)\D(\d\d)#", $date, $m)) {
             return $m[3] . '.' . $m[2] . '.' . $m[1];
         }
-
+	
         return $date;
     }
 }

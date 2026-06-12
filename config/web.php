@@ -29,6 +29,14 @@ $config = [
 		    'port' => 6379,
 		    'database' => 0,
     	],
+    	'elasticsearch' => [
+		    'class' => 'yii\elasticsearch\Connection',
+		    'nodes' => [
+		        ['http_address' => 'opensearch-node:9200'], // Адрес вашего OpenSearch
+		    ],
+		    'auth' => ['username' => 'admin', 'password' => getenv('OPENSEARCH_INITIAL_ADMIN_PASSWORD')],
+		    'dslVersion' => 7,
+    	],
         'cache' => [
            //'class' => 'yii\caching\FileCache',
            'class' => 'yii\redis\Cache',

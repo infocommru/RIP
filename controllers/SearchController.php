@@ -48,93 +48,108 @@ class SearchController extends Controller {
     }
 
     protected function searchCemetery($c_id) {
-        $table_name = "__search_form_$c_id";
-        $GLOBALS['search_form_table'] = $table_name;
+        //$table_name = "__search_form_$c_id";
+        //$GLOBALS['search_form_table'] = $table_name;
+        \app\models\CacheRecords::$c_id = $c_id;
 
         if (empty($_GET)) {
             return false;
         }
 
-        $query = \app\models\SearchFormBasic::find();
+        $query = \app\models\CacheRecords::find();
+		$elasticQuery = [];
 
         if ($_GET['regnum']) {
             // phpinfo();exit;
             //print_r($_GET);
             //exit;
+            $regnum = mb_strtolower($_GET['regnum']);
+            
             switch ($_GET['rg_cont']) {
                 case 1:
-                    $query->andWhere(['regnum' => $_GET['regnum']]);
+                	$condition = ['term' => ['regnum' => $regnum]];
                     break;
                 case 2:
-                    $query->andWhere(['like', 'regnum', $_GET['regnum']]);
+                	$condition = ['wildcard' => ['regnum.wildcard' => '*' . $regnum . '*']];
                     break;
                 case 3:
-                    $query->andWhere(['like', 'regnum', $_GET['regnum'] . '%', false]);
+                	$condition = ['prefix' => ['regnum' => $regnum]];
                     break;
                 case 4:
-                    $query->andWhere(['like', 'regnum', '%' . $_GET['regnum'], false]);
+                	$condition = ['wildcard' => ['regnum.wildcard' => '*' . $regnum]];
                     break;
             }
+            
+            $elasticQuery['bool']['must'][] = $condition;
         }
 
         if ($_GET['fam']) {
+        	$fam = mb_strtolower($_GET['fam']);
+        	
             switch ($_GET['fam_cont']) {
                 case 1:
-                    $query->andWhere(['fam' => $_GET['fam']]);
+                	$condition = ['term' => ['fam' => $fam]];
                     break;
                 case 2:
-                    $query->andWhere(['like', 'fam', $_GET['fam']]);
+                	$condition = ['wildcard' => ['fam.wildcard' => '*' . $fam . '*']];
                     break;
                 case 3:
-                    $query->andWhere(['like', 'fam', $_GET['fam'] . '%', false]);
+                	$condition = ['prefix' => ['fam' => $fam]];
                     break;
                 case 4:
-                    $query->andWhere(['like', 'fam', '%' . $_GET['fam'], false]);
+                	$condition = ['wildcard' => ['fam.wildcard' => '*' . $fam]];
                     break;
             }
+            $elasticQuery['bool']['must'][] = $condition;
         }
 
         if ($_GET['nam']) {
+        	$nam = mb_strtolower($_GET['nam']);
+        	
             switch ($_GET['nam_cont']) {
                 case 1:
-                    $query->andWhere(['nam' => $_GET['nam']]);
+                	$condition = ['term' => ['nam' => $nam]];
                     break;
                 case 2:
-                    $query->andWhere(['like', 'nam', $_GET['nam']]);
+                	$condition = ['wildcard' => ['nam.wildcard' => '*' . $nam . '*']];
                     break;
                 case 3:
-                    $query->andWhere(['like', 'nam', $_GET['nam'] . '%', false]);
+                	$condition = ['prefix' => ['nam' => $nam]];
                     break;
                 case 4:
-                    $query->andWhere(['like', 'nam', '%' . $_GET['nam'], false]);
+                	$condition = ['wildcard' => ['nam.wildcard' => '*' . $nam]];
                     break;
             }
+            $elasticQuery['bool']['must'][] = $condition;
         }
 
 
         if ($_GET['ot']) {
+        	$ot = mb_strtolower($_GET['ot']);
+        	
             switch ($_GET['ot_cont']) {
                 case 1:
-                    $query->andWhere(['ot' => $_GET['ot']]);
+                	$condition = ['term' => ['ot' => $ot]];
                     break;
                 case 2:
-                    $query->andWhere(['like', 'ot', $_GET['ot']]);
+                	$condition = ['wildcard' => ['ot.wildcard' => '*' . $ot . '*']];
                     break;
                 case 3:
-                    $query->andWhere(['like', 'ot', $_GET['ot'] . '%', false]);
+                	$condition = ['prefix' => ['ot' => $ot]];
                     break;
                 case 4:
-                    $query->andWhere(['like', 'ot', '%' . $_GET['ot'], false]);
+                	$condition = ['wildcard' => ['ot.wildcard' => '*' . $ot]];
                     break;
             }
+            $elasticQuery['bool']['must'][] = $condition;
         }
 
         if (isset($_GET['unknown'])) {
-            $query->andWhere(['unknown' => 1]);
+        	$elasticQuery['bool']['must'][] = ['term' => ['unknown' => 1]];
         }
 
         if ($_GET['unknown_number']) {
-            $query->andWhere(['like', 'unknown_number', $_GET['unknown_number']]);
+        	$elasticQuery['bool']['must'][] = ['wildcard' => ['unknown_number' => '*' . $_GET['unknown_number'] . '*']];
         }
 
         if ($_GET['age']) {
@@ -142,14 +157,15 @@ class SearchController extends Controller {
 
             switch (intval($_GET['age_cmp'])) {
                 case 3:
-                    $query->andWhere("$table_name.age > $age");
+                    $condition = ['range' => ['age_int' => ['gt' => $age]]];
                     break;
                 case 2:
-                    $query->andWhere("$table_name.age < $age");
+                	$condition = ['range' => ['age_int' => ['lt' => $age]]];
                     break;
                 default:
-                    $query->andWhere("$table_name.age = $age");
+                	$condition = ['term' => ['age_int' => $age]];
             }
+            $elasticQuery['bool']['must'][] = $condition;
         }
 
         if ($_GET['rip_style']) {
@@ -158,7 +174,21 @@ class SearchController extends Controller {
             switch ($rStyle) {
                 case 2:
                 case 1:
-                    $query->andWhere("(($table_name.rip_style = $rStyle)and($table_name.book_rip_style=0))or($table_name.book_rip_style=$rStyle)");
+                	$elasticQuery['bool']['must'][] = [
+                	'bool' => [
+		            	'should' => [
+		            		[
+		            			'bool' => [
+		            				'must' => [
+		            					['term' => ['rip_style' => $rStyle]],
+		            			 		['term' => ['book_rip_style' => 0]]
+		            			 	]
+		            			 ]
+		            		],
+		            			['term' => ['book_rip_style' => $rStyle]]
+		            		]
+		            	]
+		            ];
                     break;
                 default:
                     break;
@@ -170,22 +200,26 @@ class SearchController extends Controller {
             $dead_m = intval($_GET['dead_m']);
             $dead_d = intval($_GET['dead_d']);
 
-            $dead_date = $dead_year . '' . ($dead_m < 10 ? '0' . $dead_m : $dead_m) . ($dead_d < 10 ? '0' . $dead_d : $dead_d);
+            $dead_date = ($dead_d < 10 ? '0' . $dead_d : $dead_d) . '/' . ($dead_m < 10 ? '0' . $dead_m : $dead_m) . '/' . $dead_year;
 
             switch (intval($_GET['dead_year_cmp'])) {
                 case 3:
-                    $query->andWhere("dead_date > $dead_date");
+                    $condition = ['range' => ['dead_date.date' => ['gt' => $dead_date]]];
                     break;
                 case 2:
-                    $query->andWhere("dead_date < $dead_date");
+                    $condition = ['range' => ['dead_date.date' => ['lt' => $dead_date]]];
                     break;
                 default:
-                    $query->andWhere("dead_year = $dead_year");
+                	$condition = ['bool' => ['must' => []]];
+                	$condition['bool']['must'][] = ['term' => ['dead_year' => $dead_year]];
+                	
                     if ($dead_m)
-                        $query->andWhere("dead_month = $dead_m");
+                        $condition['bool']['must'][] = ['term' => ['dead_month' => $dead_m]];
                     if ($dead_d)
-                        $query->andWhere("dead_day = $dead_d");
+                        $condition['bool']['must'][] = ['term' => ['dead_day' => $dead_d]];
             }
+            
+            $elasticQuery['bool']['must'][] = $condition;
         }
 
         if ($_GET['rip_y']) {
@@ -193,107 +227,137 @@ class SearchController extends Controller {
             $rip_m = intval($_GET['rip_m']);
             $rip_d = intval($_GET['rip_d']);
 
-            $rip_date = $rip_year . '' . ($rip_m < 10 ? '0' . $rip_m : $rip_m) . ($rip_d < 10 ? '0' . $rip_d : $rip_d);
+            $rip_date = ($rip_d < 10 ? '0' . $rip_d : $rip_d) . '/' . ($rip_m < 10 ? '0' . $rip_m : $rip_m) . '/' . $rip_year;
 
             switch (intval($_GET['rip_year_cmp'])) {
                 case 3:
-                    $query->andWhere("$table_name.rip_date > $rip_date");
+                    $condition = ['range' => ['rip_date.date' => ['gt' => $rip_date]]];
                     break;
                 case 2:
-                    $query->andWhere("$table_name.rip_date < $rip_date");
+                    $condition = ['range' => ['rip_date.date' => ['lt' => $rip_date]]];
                     break;
                 default:
-                    $query->andWhere("rip_year = $rip_year");
+                	$condition = ['bool' => ['must' => []]];
+                    $condition['bool']['must'][] = ['term' => ['rip_year' => $rip_year]];
+                    
                     if ($rip_m)
-                        $query->andWhere("rip_month = $rip_m");
+                        $condition['bool']['must'][] = ['term' => ['rip_month' => $rip_m]];
                     if ($rip_d)
-                        $query->andWhere("rip_day = $rip_d");
+                    	$condition['bool']['must'][] = ['term' => ['rip_day' => $rip_d]];
             }
+            
+            $elasticQuery['bool']['must'][] = $condition;
         }
         
-        if ($_GET['zags']){
-        	switch ($_GET['zags_cont']) {
-                case 1:
-                    $query->andWhere(["$table_name.zags" => $_GET['zags']]);
-                    break;
-                case 2:
-                    $query->andWhere(['like', "$table_name.zags", $_GET['zags']]);
-                    break;
-                case 3:
-                    $query->andWhere(['like', "$table_name.zags", $_GET['zags'] . '%', false]);
-                    break;
-                case 4:
-                    $query->andWhere(['like', "$table_name.zags", '%' . $_GET['zags'], false]);
-                    break;
-            }
-            //$query->andWhere(["$table_name.zags" => $_GET['zags']]);
+        if ($_GET['zags']){  
+            $elasticQuery['bool']['must'][] = ['bool' => ['should' => [
+            		[
+		        		'match' => ['zags' => [
+		        			'query' => $_GET['zags'],
+		        			'fuzziness' => 'auto',
+		        			'boost' => 5]]
+            		],
+            		[
+            		'match' => [
+            			'zags.autocomplete' => $_GET['zags']]
+            		]
+            	]]];
         }
         
         if ($_GET['docnum']) {
-        	$query->andWhere(['like', $table_name . '.docnum', $_GET['docnum']]);
+        	$elasticQuery['bool']['must'][] = ['wildcard' => ['docnum' => '*' . $_GET['docnum'] . '*']];
         }
         
         if ($_GET['comment']) {
-        	$query->andWhere(['like', $table_name . '.comment', $_GET['comment']]);
+            $elasticQuery['bool']['must'][] = ['bool' => ['should' => [
+            		[
+		        		'match' => ['comment' => [
+		        			'query' => $_GET['comment'],
+		        			'fuzziness' => 'auto',
+		        			'boost' => 5]]
+            		],
+            		[
+            		'match' => [
+            			'comment.autocomplete' => $_GET['comment']]
+            		]
+            	]]];
         }
 
         if (isset($_GET['ext_search'])) {
             if ($_GET['areanum']) {
                 switch ($_GET['area_cont']) {
                     case 1:
-                        $query->andWhere(['areanum' => $_GET['areanum']]);
-                        break;
-                    case 2:
-                        $query->andWhere(['like', 'areanum', $_GET['areanum']]);
-                        break;
-                    case 3:
-                        $query->andWhere(['like', 'areanum', $_GET['areanum'] . '%', false]);
-                        break;
-                    case 4:
-                        $query->andWhere(['like', 'areanum', '%' . $_GET['areanum'], false]);
-                        break;
+		            	$condition = ['term' => ['areanum' => $_GET['areanum']]];
+		                break;
+		            case 2:
+		            	$condition = ['wildcard' => ['areanum.wildcard' => '*' . $_GET['areanum'] . '*']];
+		                break;
+		            case 3:
+		            	$condition = ['prefix' => ['areanum' => $_GET['areanum']]];
+		                break;
+		            case 4:
+		            	$condition = ['wildcard' => ['areanum.wildcard' => '*' . $_GET['areanum']]];
+		                break;
                 }
+                $elasticQuery['bool']['must'][] = $condition;
             }
 
             if ($_GET['rownum']) {
                 switch ($_GET['row_cont']) {
                     case 1:
-                        $query->andWhere(['rownum' => $_GET['rownum']]);
-                        break;
-                    case 2:
-                        $query->andWhere(['like', 'rownum', $_GET['rownum']]);
-                        break;
-                    case 3:
-                        $query->andWhere(['like', 'rownum', $_GET['rownum'] . '%', false]);
-                        break;
-                    case 4:
-                        $query->andWhere(['like', 'rownum', '%' . $_GET['rownum'], false]);
-                        break;
+		            	$condition = ['term' => ['rownum' => $_GET['rownum']]];
+		                break;
+		            case 2:
+		            	$condition = ['wildcard' => ['rownum.wildcard' => '*' . $_GET['rownum'] . '*']];
+		                break;
+		            case 3:
+		            	$condition = ['prefix' => ['rownum' => $_GET['rownum']]];
+		                break;
+		            case 4:
+		            	$condition = ['wildcard' => ['rownum.wildcard' => '*' . $_GET['rownum']]];
+		                break;
                 }
+                $elasticQuery['bool']['must'][] = $condition;
             }
 
             if ($_GET['ripnum']) {
                 switch ($_GET['rip_cont']) {
                     case 1:
-                        $query->andWhere(['ripnum' => $_GET['ripnum']]);
-                        break;
-                    case 2:
-                        $query->andWhere(['like', 'ripnum', $_GET['ripnum']]);
-                        break;
-                    case 3:
-                        $query->andWhere(['like', 'ripnum', $_GET['ripnum'] . '%', false]);
-                        break;
-                    case 4:
-                        $query->andWhere(['like', 'ripnum', '%' . $_GET['ripnum'], false]);
-                        break;
+		            	$condition = ['term' => ['ripnum' => $_GET['ripnum']]];
+		                break;
+		            case 2:
+		            	$condition = ['wildcard' => ['ripnum.wildcard' => '*' . $_GET['ripnum'] . '*']];
+		                break;
+		            case 3:
+		            	$condition = ['prefix' => ['ripnum' => $_GET['ripnum']]];
+		                break;
+		            case 4:
+		            	$condition = ['wildcard' => ['ripnum.wildcard' => '*' . $_GET['ripnum']]];
+		                break;
                 }
+                $elasticQuery['bool']['must'][] = $condition;
             }
 
             if ($_GET['rel']) {
-                $query->andWhere(['like', 'relative', $_GET['rel']]);
+            	$elasticQuery['bool']['must'][] = ['bool' => ['should' => [
+            		[
+		        		'match' => ['relative' => [
+		        			'query' => $_GET['rel'],
+		        			'fuzziness' => 'auto',
+		        			'boost' => 5]]
+            		],
+            		[
+            		'match' => [
+            			'relative.autocomplete' => $_GET['rel']]
+            		]
+            	]]];
             }
         }
 
+		if (!empty($elasticQuery['bool']['must'])) {
+    		$query->query($elasticQuery);
+		}
+		
         $count = $query->count();
 
         $curpage = 1;
@@ -309,8 +373,15 @@ class SearchController extends Controller {
 
         $offset = ($curpage - 1) * $this->searchLimit;
 
-        $result = $query->orderBy($table_name . '.id')->offset($offset)->limit($this->searchLimit)->joinWith('record')->asArray()->all();
-        //print_r($result);exit;
+        //$result = $query->orderBy($table_name . '.id')->offset($offset)->limit($this->searchLimit)->joinWith('record')->asArray()->all();
+        
+        $result = $query->orderBy(['_score' => SORT_DESC, 'record_id' => SORT_DESC])
+        	->offset($offset)
+			->limit($this->searchLimit)
+			->asArray()
+			->all();
+			
+        //print_r($result);
         return [$result, $count];
     }
 
@@ -340,7 +411,7 @@ class SearchController extends Controller {
         }
 
         return $this->render('index', [
-                    'search_data' => $search_data
+        	'search_data' => $search_data
         ]);
     }
 
@@ -382,7 +453,7 @@ class SearchController extends Controller {
         foreach ($data[0] as $elem) {
             $one = [];
 
-            $one[] = $elem['regnum'];
+            /*$one[] = $elem['regnum'];
             $one[] = $elem['record']['fio'];
             $one[] = $elem['record']['age'];
             $one[] = $elem['record']['death_date'];
@@ -394,11 +465,27 @@ class SearchController extends Controller {
             $one[] = $elem['record']['area_num'];
             $one[] = $elem['record']['row_num'];
             $one[] = $elem['record']['rip_num'];
+            $one[] = $elem['relative'];*/
+            
+            $one[] = $elem['regnum'];
+            $one[] = $elem['fio'];
+            $one[] = $elem['age'];
+            $one[] = $elem['death_date'];
+            $one[] = $elem['rip_date'];
+            $one[] = $elem['docnum'];
+            $one[] = $elem['zags'];
+            $one[] = $elem['rip_style'] == 1 ? "Гроб" : "Урна";
+            //$one[] = $elem->riper;
+            $one[] = $elem['area_num'];
+            $one[] = $elem['row_num'];
+            $one[] = $elem['rip_num'];
             $one[] = $elem['relative'];
 
             $dopInfo = "св. $elem[svazka_num], кн. $elem[book_num], стр. $elem[page_num], п/п: $elem[page_punkt]";
-            if ($elem['record']['comment'])
-                $dopInfo .= "\n " . $elem['record']['comment'];
+            //if ($elem['record']['comment'])
+            //    $dopInfo .= "\n " . $elem['record']['comment'];
+            if ($elem['comment'])
+                $dopInfo .= "\n " . $elem['comment'];
 
             $one[] = $dopInfo;
             $data_all[] = $one;

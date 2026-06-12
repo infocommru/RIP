@@ -5,7 +5,7 @@ namespace app\controllers;
 use app\models\Book;
 use app\models\Record;
 use app\models\Cemetery;
-use app\models\SearchFormBasic;
+use app\models\CacheRecords;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -59,10 +59,10 @@ class PrintController extends Controller {
                 ->andWhere(['id' => $book->cemetery_id])
                 ->one();
 
-        $table_name = "__search_form_" . $cemetery->id;
-        $GLOBALS['search_form_table'] = "__search_form_" . $cemetery->id;
+        $table_name = "cache_records_" . $cemetery->id;
+        CacheRecords::$c_id = $cemetery->id;
 
-        $sdata = SearchFormBasic::find()->andWhere(['record_id' => $record_id])->one();
+        $sdata = CacheRecords::find()->query(['term' => ['record_id' => $record_id]])->one();
         $user = \app\models\User::findIdentity(\Yii::$app->user->id);
         return $this->render('index',
                         [

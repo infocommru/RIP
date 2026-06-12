@@ -287,9 +287,6 @@ function echo_select_soderzit($name) {
         				<input name="zags" id="zags" class="form-control" value="<?= get_input_value("zags") ?>">
     				</div>
 				</div>
-				<div class="col-sm-1">
-                    <?= echo_select_soderzit('zags_cont') ?>
-                </div>
 				
 				<div class="col-sm-2">
                         <div class="form-group">

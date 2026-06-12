@@ -20,7 +20,8 @@
         "yiisoft/yii2-symfonymailer": "~2.0.3",
         "2amigos/yii2-gallery-widget": "~1.0",
         "parsecsv/php-parsecsv": "^1.3",
-        "yiisoft/yii2-redis": "~2.0.0"
+        "yiisoft/yii2-redis": "~2.0.0",
+        "yiisoft/yii2-elasticsearch": "~2.1.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
@@ -41,6 +42,9 @@
         "process-timeout": 1800,
         "fxp-asset": {
             "enabled": false
+        },
+        "platform": {
+            "php": "7.4.33"
         }
     },
     "scripts": {

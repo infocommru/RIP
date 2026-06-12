@@ -4,6 +4,36 @@ namespace app\models;
 
 class HelperLevoshkin {
 
+	public static function getDate($sDate) {
+        $result = [
+            'day' => null,
+            'month' => null,
+            'year' => null,
+            'date' => null,
+        ];
+
+        if (preg_match("#(\d\d\d\d)#", $sDate, $m)) {
+            $result['year'] = $m[1];
+        }
+
+        if (!$result['year'])
+            return $result;
+
+        if (preg_match("#(\d\d?)\D(\d\d?)\D(\d\d\d\d)#", $sDate, $m)) {
+            $result['day'] = intval(ltrim($m[1], '0'));
+            $result['month'] = intval(ltrim($m[2], '0'));
+        }
+
+        if (preg_match("#(\d\d\d\d)\D(\d\d?)\D(\d\d?)#", $sDate, $m)) {
+            $result['day'] = intval(ltrim($m[3], '0'));
+            $result['month'] = intval(ltrim($m[2], '0'));
+        }
+
+        $result['date'] = $sDate;
+
+        return $result;
+    }
+
     public static function region($txt) {
         $txt_lower = mb_strtolower($txt, 'utf-8');
         $regions = Helper::readFileToList("../data/spb_region.txt");
@@ -105,62 +135,6 @@ HERE;
         }
     }
 
-    private static function getDate($sDate) {
-        $result = [
-            'day' => null,
-            'month' => null,
-            'year' => null,
-            'date' => null,
-        ];
-
-        if (preg_match("#(\d\d\d\d)#", $sDate, $m)) {
-            $result['year'] = $m[1];
-        }
-
-        if (!$result['year'])
-            return $result;
-
-        if (preg_match("#(\d\d?)\D(\d\d?)\D(\d\d\d\d)#", $sDate, $m)) {
-            $result['day'] = intval(ltrim($m[1], '0'));
-            $result['month'] = intval(ltrim($m[2], '0'));
-        }
-
-        if (preg_match("#(\d\d\d\d)\D(\d\d?)\D(\d\d?)#", $sDate, $m)) {
-            $result['day'] = intval(ltrim($m[3], '0'));
-            $result['month'] = intval(ltrim($m[2], '0'));
-        }
-
-        if (($result['year']) && (strlen($result['year'] . '') == 4)) {
-            $result['date'] = $result['year'] . '';
-        } else {
-            $result['date'] = '1000';
-        }
-
-        if ($result['month']) {
-            if ($result['month'] <= 9) {
-                $result['date'] .= '0' . $result['month'];
-            } else {
-                $result['date'] .= $result['month'];
-            }
-        } else {
-            $result['date'] .= '00';
-        }
-
-        if ($result['day']) {
-            if ($result['day'] <= 9) {
-                $result['date'] .= '0' . $result['day'];
-            } else {
-                $result['date'] .= $result['day'];
-            }
-        } else {
-            $result['date'] .= '00';
-        }
-
-        $result['date'] = intval($result['date']);
-
-        return $result;
-    }
-
     public static function updateSearchRecord($record) {
         $book = Book::find()
                 ->andWhere(['id' => $record->book_id])
@@ -170,7 +144,7 @@ HERE;
                 ->andWhere(['id' => $book->cemetery_id])
                 ->one();
 
-        $GLOBALS['search_form_table'] = "__search_form_" . $cemetery->id;
+        \app\models\CacheRecords::$c_id = $cemetery->id;
 
         $zags_list = Helper::regions();
 
@@ -178,14 +152,8 @@ HERE;
             "fam" => null,
             "nam" => null,
             "ot" => null,
-            "age" => null,
-            "dead_year" => null,
-            "dead_month" => null,
-            "dead_day" => null,
+            "age_int" => null,
             "dead_date" => null,
-            "rip_year" => null,
-            "rip_month" => null,
-            "rip_day" => null,
             "rip_date" => null,
         ];
         $fio = $record->fio;
@@ -202,12 +170,12 @@ HERE;
         }
 
 
-        $r_new['age'] = intval($record->age);
-        if ($r_new['age'] > 200)
-            $r_new['age'] = null;
+        $r_new['age_int'] = intval($record->age);
+        if ($r_new['age_int'] > 200)
+            $r_new['age_int'] = null;
 
-        $r_new['dead_year'] = $record->death_date;
-        $r_new['rip_year'] = $record->rip_date;
+        $r_new['dead_date'] = $record->death_date;
+        $r_new['rip_date'] = $record->rip_date;
 
         $r_new['docnum'] = $record->docnum;
         $r_new['areanum'] = $record->area_num;
@@ -217,22 +185,27 @@ HERE;
         $r_new['rip_style'] = $record->rip_style;
         $r_new['zags'] = $record->zags;
 
-        $sfb = \app\models\SearchFormBasic::find()
+        /*$sfb = \app\models\CacheRecords::find()
                 ->andWhere(['record_id' => $record->id])
-                ->one();
+                ->one();*/
+                
+		$sfb = \app\models\CacheRecords::find()->query(['term' => ['record_id' => $record->id]])->one();
 
         if (!$sfb) {
-            $sfb = new \app\models\SearchFormBasic();
+            $sfb = new \app\models\CacheRecords();
         }
 
-        $deadYearInf = self::getDate($r_new['dead_year']);
-        $ripYearInf = self::getDate($r_new['rip_year']);
+        $deadYearInf = \app\models\HelperLevoshkin::getDate($r_new['dead_date']);
+        $ripYearInf = \app\models\HelperLevoshkin::getDate($r_new['rip_date']);
 
         $sfb->record_id = $record->id;
         $sfb->fam = $r_new['fam'];
         $sfb->nam = $r_new['nam'];
         $sfb->ot = $r_new['ot'];
-        $sfb->age = intval($r_new['age']);
+        $sfb->fio_display = $record->fio;
+        
+        $sfb->age = $record->age;
+        $sfb->age_int = $r_new['age_int'];
 
         $sfb->dead_year = $deadYearInf['year'];
         $sfb->dead_month = $deadYearInf['month'];
@@ -292,6 +265,10 @@ HERE;
         if (preg_match("#.*?/([^/]*?)\.jp.*?$#", $fname, $pmatch)) {
             $sfb->page_num = ltrim($pmatch[1], "0");
         }
+        
+        $sfb->filename = $record->filename;
+        $sfb->vopros = $record->vopros;
+        $sfb->updated_at = $record->updated_at;
 
         $sfb->save();
     }

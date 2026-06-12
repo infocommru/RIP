@@ -81,6 +81,21 @@ class CemeteryController extends Controller {
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id) {
+    	$dir_book = './upload/book/';
+    	$part_book = './upload/part/';
+    	
+    	if(!is_dir($dir_book)){
+    		mkdir($dir_book, 0755);
+    		chown($dir_book, 'www-data');
+    		chgrp($dir_book, "www-data");
+    	}
+    	
+    	if(!is_dir($part_book)){
+    		mkdir($part_book, 0755);
+    		chown($part_book, 'www-data');
+    		chgrp($part_book, "www-data");
+    	}
+    	
         if ($this->request->post()) {
             //print_r($_FILES);
             if (substr_count($_FILES['zipfile']['name'], ".zip")) {
