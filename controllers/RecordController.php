@@ -449,11 +449,9 @@ class RecordController extends Controller {
         $model->save();
         $book = Book::find()->andWhere(['id' => $model->book_id])->one();
         $c_id = $book->cemetery_id;
-        $table_name = "__search_form_$c_id";
+        \app\models\CacheRecords::$c_id = $c_id;
 
-        $GLOBALS['search_form_table'] = $table_name;
-
-        $sCache = \app\models\SearchFormBasic::find()->andWhere(['record_id' => $model->id])->one();
+        $sCache = \app\models\CacheRecords::find()->query(['term' => ['record_id' => $model->id]])->one();
         if ($sCache) {
             $sCache->delete();
         }

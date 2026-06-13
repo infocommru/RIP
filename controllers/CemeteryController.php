@@ -86,14 +86,10 @@ class CemeteryController extends Controller {
     	
     	if(!is_dir($dir_book)){
     		mkdir($dir_book, 0755);
-    		chown($dir_book, 'www-data');
-    		chgrp($dir_book, "www-data");
     	}
     	
     	if(!is_dir($part_book)){
     		mkdir($part_book, 0755);
-    		chown($part_book, 'www-data');
-    		chgrp($part_book, "www-data");
     	}
     	
         if ($this->request->post()) {

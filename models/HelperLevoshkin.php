@@ -184,15 +184,13 @@ HERE;
         $r_new['relative'] = $record->relative_fio;
         $r_new['rip_style'] = $record->rip_style;
         $r_new['zags'] = $record->zags;
-
-        /*$sfb = \app\models\CacheRecords::find()
-                ->andWhere(['record_id' => $record->id])
-                ->one();*/
                 
 		$sfb = \app\models\CacheRecords::find()->query(['term' => ['record_id' => $record->id]])->one();
 
         if (!$sfb) {
             $sfb = new \app\models\CacheRecords();
+            $sfb->_id = $record->id;
+            $sfb->page_punkt = 0;
         }
 
         $deadYearInf = \app\models\HelperLevoshkin::getDate($r_new['dead_date']);
@@ -233,9 +231,9 @@ HERE;
         $sfb->book_num = $book->number;
 
         if ($record->numReg) {
-            $sfb->regnum = $record->numReg;
+            $sfb->regnum = (string)$record->numReg;
         } else {
-            $sfb->regnum = $record->numLiteral;
+            $sfb->regnum = (string)$record->numLiteral;
         }
 
         $sfb->comment = $record->comment;

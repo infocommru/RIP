@@ -453,39 +453,25 @@ class SearchController extends Controller {
         foreach ($data[0] as $elem) {
             $one = [];
 
-            /*$one[] = $elem['regnum'];
-            $one[] = $elem['record']['fio'];
-            $one[] = $elem['record']['age'];
-            $one[] = $elem['record']['death_date'];
-            $one[] = $elem['record']['rip_date'];
-            $one[] = $elem['docnum'];
-            $one[] = $elem['record']['zags'];
-            $one[] = $elem['rip_style'] == 1 ? "Гроб" : "Урна";
+            $one[] = $elem['_source']['regnum'];
+            $one[] = $elem['_source']['fio_display'];
+            $one[] = $elem['_source']['age'];
+            $one[] = $elem['_source']['dead_date'];
+            $one[] = $elem['_source']['rip_date'];
+            $one[] = $elem['_source']['docnum'];
+            $one[] = $elem['_source']['zags'];
+            $one[] = $elem['_source']['rip_style'] == 1 ? "Гроб" : "Урна";
             //$one[] = $elem->riper;
-            $one[] = $elem['record']['area_num'];
-            $one[] = $elem['record']['row_num'];
-            $one[] = $elem['record']['rip_num'];
-            $one[] = $elem['relative'];*/
-            
-            $one[] = $elem['regnum'];
-            $one[] = $elem['fio'];
-            $one[] = $elem['age'];
-            $one[] = $elem['death_date'];
-            $one[] = $elem['rip_date'];
-            $one[] = $elem['docnum'];
-            $one[] = $elem['zags'];
-            $one[] = $elem['rip_style'] == 1 ? "Гроб" : "Урна";
-            //$one[] = $elem->riper;
-            $one[] = $elem['area_num'];
-            $one[] = $elem['row_num'];
-            $one[] = $elem['rip_num'];
-            $one[] = $elem['relative'];
+            $one[] = $elem['_source']['areanum'] ?? '';
+            $one[] = $elem['_source']['rownum'] ?? '';
+            $one[] = $elem['_source']['ripnum'] ?? '';
+            $one[] = $elem['_source']['relative'] ?? '';
 
-            $dopInfo = "св. $elem[svazka_num], кн. $elem[book_num], стр. $elem[page_num], п/п: $elem[page_punkt]";
+            $dopInfo = "св. {$elem['_source']['svazka_num']}, кн. {$elem['_source']['book_num']}, стр. {$elem['_source']['page_num']}, п/п: {$elem['_source']['page_punkt']}";
             //if ($elem['record']['comment'])
             //    $dopInfo .= "\n " . $elem['record']['comment'];
-            if ($elem['comment'])
-                $dopInfo .= "\n " . $elem['comment'];
+            if ($elem['_source']['comment'])
+                $dopInfo .= "\n " . $elem['_source']['comment'];
 
             $one[] = $dopInfo;
             $data_all[] = $one;
