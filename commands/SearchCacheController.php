@@ -153,13 +153,11 @@ class SearchCacheController extends Controller {
 			$c_id = $cemetery->id;
 			$table_name = "cache_records_$c_id";
 			$this->createIndex($table_name);
+			echo $table_name . PHP_EOL;
 	
 			$books = Book::find()
                    ->andWhere(['cemetery_id' => $cemetery->id])
                    ->all();
-
-            $batchRows = CacheRecords::getDb()->createBulkCommand();
-            $counter = 0;
 
             \app\models\HelperCache::updateCache($books);
        	}

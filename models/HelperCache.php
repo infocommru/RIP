@@ -57,7 +57,7 @@ class HelperCache {
 
                     $r_new['age_int'] = intval($record['age']);
                     if ($r_new['age_int'] > 200)
-                        $r_new['age_int'] = 0;
+                        $r_new['age_int'] = null;
 
                     $r_new['docnum'] = $record['docnum'];
                     $r_new['areanum'] = $record['area_num'];
@@ -128,9 +128,11 @@ class HelperCache {
                         }
                     }
 
-                    if ((($record['is_unknown']) && (!$sfb_unknown_number))) {
+                    /*if ((($record['is_unknown']) && (!$sfb_unknown_number))) {
                         echo $record['fio'] . "\n";
-                    }
+                    }*/
+
+                    $sfb_page_num = '';
 
                     $fname = strtr($record['filename'], ["\\" => '/']);
                     if (preg_match("#.*?/([^/]*?)\.jp.*?$#", $fname, $pmatch)) {

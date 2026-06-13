@@ -240,6 +240,8 @@ HERE;
         $sfb->comment_book = $book->comment;
         $sfb->book_id = $book->id;
         $sfb->book_rip_style = $book->rip_style;
+        $sfb_unknown = $record->is_unknown;
+        $sfb->unknown_number = '';
 
         if (preg_match("#№\s+([\d\\/]+)#", $record->fio, $m)) {
             $sfb->unknown_number = $m[1];
@@ -260,6 +262,8 @@ HERE;
         }
 
         $fname = strtr($record->filename, ["\\" => '/']);
+        $sfb->page_num = '';
+
         if (preg_match("#.*?/([^/]*?)\.jp.*?$#", $fname, $pmatch)) {
             $sfb->page_num = ltrim($pmatch[1], "0");
         }

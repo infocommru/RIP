@@ -16,34 +16,38 @@ $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 
 $record1 = Record::find()->andWhere(['book_id' => $model->id])->orderBy('id')->one();
+$obloshka = '';
 
-$filepath = str_replace("\\", "/", $record1->filename);
-$index_last = strrpos($filepath, "/");
-$folderpath = substr($filepath, 0, $index_last);
-$fname = substr($filepath, $index_last + 1);
+if ($record1) {
+    $filepath = str_replace("\\", "/", $record1->filename);
+    $index_last = strrpos($filepath, "/");
+    $folderpath = substr($filepath, 0, $index_last);
+    //$fname = substr($filepath, $index_last + 1);
 
-$fullpath = "../upload/rip2/$folderpath";
+    $fullpath = "../upload/rip2/$folderpath";
 
-$files = glob($fullpath . "/*.*");
-$file0 = '';
-if ($files)
-    $file0 = strtr($files[0], ["../upload" => "/upload"]);
+    $files = glob($fullpath . "/*.*");
+    $file0 = '';
+    if ($files)
+        $file0 = strtr($files[0], ["../upload" => "/upload"]);
 
-//print_r($files);exit;
+    //print_r($files);exit;
 
 
-$fname = strtr($record1->filename, [
-    '002.' => "001.",
-    '003.' => "001.",
-    '004.' => "001.",
-    '005.' => "001.",
-    '006.' => "001.",
-    '007.' => "001.",
-    '008.' => "001.",
-    '009.' => "009.",
-        ]);
+    /*$fname = strtr($record1->filename, [
+        '002.' => "001.",
+        '003.' => "001.",
+        '004.' => "001.",
+        '005.' => "001.",
+        '006.' => "001.",
+        '007.' => "001.",
+        '008.' => "001.",
+        '009.' => "009.",
+            ]);*/
 
-$obloshka = "$file0";
+    $obloshka = "$file0";
+}
+
 ?>
 <div class="book-view">
 

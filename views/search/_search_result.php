@@ -126,7 +126,7 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
                                 //$comment = $elem['record']['comment'];
                                 $comment = $elem['comment'];
 
-                                $dopInfo = "<spac style='font-size:13px;'>св. $elem[svazka_num], кн. $elem[book_num], стр. $elem[page_num], строка: $elem[page_punkt]";
+                                $dopInfo = "<span style='font-size:13px;'>св. $elem[svazka_num], кн. $elem[book_num], стр. $elem[page_num], строка: $elem[page_punkt]";
 
                                 if ((isset($elem['comment_book'])) && ($elem['comment_book'])) {
                                     $comment .= " " . $elem['comment_book'];
