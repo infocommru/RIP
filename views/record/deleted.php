@@ -48,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function ($model) {
                     if (!$model->updated_at)
                         return '-';
-                    return date("Y-m-d H:i");
+                    return date("Y-m-d H:i", $model->updated_at);
                 }
             ],
             'numReg',

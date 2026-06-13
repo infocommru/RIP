@@ -39,9 +39,10 @@ class Book extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['cemetery_id', 'name', 'records'], 'required'],
-            [['cemetery_id', 'part_id', 'per_page', 'status'], 'integer'],
+            [['cemetery_id', 'part_id', 'per_page', 'status', 'rip_style'], 'integer'],
             [['number', 'svazka'], 'string', 'max' => 128],
             [['year1', 'year2', 'records'], 'string', 'max' => 32],
+            [['comment'], 'string'],
             [['cemetery_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cemetery::class, 'targetAttribute' => ['cemetery_id' => 'id']],
         ];
     }

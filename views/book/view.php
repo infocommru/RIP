@@ -57,7 +57,7 @@ $obloshka = "$file0";
         <?php endif; ?>
         <?php
         if ($is_admin) {
-            echo Html::a('Удалить', ['Удалить', 'id' => $model->id], [
+            echo Html::a('Удалить', ['delete', 'id' => $model->id], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => 'Точно удалить?',

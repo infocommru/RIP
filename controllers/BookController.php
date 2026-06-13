@@ -255,14 +255,6 @@ class BookController extends Controller {
         $model = new Book();
 
         if ($this->request->isPost) {
-            if (isset($_POST['Book']['comment'])) {
-                $model->comment = $_POST['Book']['comment'];
-            }
-
-            if (isset($_POST['Book']['rip_style'])) {
-                $model->rip_style = $_POST['Book']['rip_style'];
-            }
-
             if ($model->load($this->request->post()) && $model->save()) {
                 return $this->redirect(['view', 'id' => $model->id]);
             }
@@ -284,23 +276,9 @@ class BookController extends Controller {
      */
     public function actionUpdate($id) {
         $model = $this->findModel($id);
-        if (isset($_POST['Book']['comment'])) {
-            $model->comment = $_POST['Book']['comment'];
-        }
-
-        if (isset($_POST['Book']['rip_style'])) {
-            $model->rip_style = $_POST['Book']['rip_style'];
-        }
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            if ($model->rip_style) {
-                //$cemetery = \app\models\Cemetery::find()
-                //        ->andWhere([])
-                //        ->one();
-
-                $GLOBALS['search_form_table'] = "__search_form_" . $model->cemetery_id;
-                \app\models\SearchFormBasic::updateAll(['book_rip_style' => $model->rip_style], 'book_id = ' . $model->id);
-            }
+            \app\models\HelperCache::updateCache([$model]);
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -320,6 +298,9 @@ class BookController extends Controller {
         $book = $this->findModel($id);
         $book->deleted = 1;
         $book->save();
+
+        \app\models\CacheRecords::$c_id = $book->cemetery_id;
+        \app\models\CacheRecords::deleteAll(['book_id' => $book->id]);
 
         return $this->redirect(['index']);
     }
