@@ -2,11 +2,10 @@ name: opensearch
 
 services:
   rip:
-    init: true
     image: rip
+    init: true
     build: .
     restart: unless-stopped
-    container_name: opensearch_rip
     volumes:
       - /mnt/images:/var/www/html/upload/rip2 #Поменять на свое значение
       - rip_upload:/var/www/html/web/upload
@@ -29,11 +28,11 @@ services:
       - mysql
       - redis
       - opensearch-node
+      - chromium
 
   redis:
     image: redis
     restart: unless-stopped
-    container_name: opensearch_redis
     command: ["redis-server", "--save", "60", "1", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
@@ -41,7 +40,6 @@ services:
   mysql:
     restart: unless-stopped
     image: mysql
-    container_name: opensearch_mysql
     ports:
       - "127.0.0.1:5000:3306"
     volumes:
@@ -67,7 +65,6 @@ services:
   phpmyadmin:
     restart: unless-stopped
     image: phpmyadmin
-    container_name: opensearch_phpmyadmin
     environment:
       - PMA_HOST=mysql
       - PMA_ABSOLUTE_URI=http://0.0.0.0/pma/
@@ -88,7 +85,6 @@ services:
   traefik:
     image: traefik
     restart: unless-stopped
-    container_name: opensearch_traefik
     ports:
       - 80:80
     command:
@@ -126,6 +122,11 @@ services:
     ports:
       - 127.0.0.1:9200:9200
       - 127.0.0.1:9600:9600
+
+  chromium:
+    restart: unless-stopped
+    image: ghcr.io/browserless/chromium:latest
+    shm_size: '4gb'
       
 volumes:
   opensearch-data:
