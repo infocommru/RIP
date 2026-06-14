@@ -59,9 +59,6 @@ class PrintController extends Controller {
                 ->andWhere(['id' => $book->cemetery_id])
                 ->one();
 
-        $table_name = "cache_records_" . $cemetery->id;
-        CacheRecords::$c_id = $cemetery->id;
-
         $sdata = CacheRecords::find()->query(['term' => ['record_id' => $record_id]])->one();
         $user = \app\models\User::findIdentity(\Yii::$app->user->id);
         return $this->render('index',

@@ -5,12 +5,11 @@ use yii\elasticsearch\ActiveRecord;
 
 class CacheRecords extends ActiveRecord
 {
-	public static $c_id;
 	
     // Определяем атрибуты, которые будут храниться в OpenSearch
     public function attributes()
     {
-        return [ "record_id", "cemetery_id", "regnum", "fam", "nam", "ot", "fio_display", "age", "age_int",
+        return [ "record_id", "cemetery_id", "cemetery_id", "regnum", "fam", "nam", "ot", "fio_display", "age", "age_int",
 			"dead_year", "dead_month", "dead_day", "dead_date",
 			"rip_year", "rip_month", "rip_day", "rip_date",
 		 	"zags", "rip_style", "unknown", "unknown_number", "docnum", "areanum", "rownum", "ripnum",
@@ -21,11 +20,6 @@ class CacheRecords extends ActiveRecord
     // Имя индекса в OpenSearch (аналог таблицы в БД)
     public static function index()
     {
-    	if (self::$c_id !== null) {
-            // Преобразуем в нижний регистр, так как ES не принимает заглавные буквы в именах индексов
-            return 'cache_records_' . strtolower(self::$c_id);
-        }
-        
         return 'cache_records';
     }
 
@@ -39,7 +33,7 @@ class CacheRecords extends ActiveRecord
     public function rules()
     {
         return [
-            [['record_id', 'cemetery_id', 'age_int', 'dead_year', 'dead_month', 'dead_day', 
+            [['record_id', 'cemetery_id', 'cemetery_id', 'age_int', 'dead_year', 'dead_month', 'dead_day', 
             	'rip_year', 'rip_month', 'rip_day', 'rip_style', 
             	'unknown', 'page_punkt', 'book_id', 'book_rip_style', 'vopros', 'updated_at'], 'integer'],
             [['regnum', 'unknown_number', 'svazka_num', 'book_num', 

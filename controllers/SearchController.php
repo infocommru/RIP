@@ -48,9 +48,6 @@ class SearchController extends Controller {
     }
 
     protected function searchCemetery($c_id) {
-        //$table_name = "__search_form_$c_id";
-        //$GLOBALS['search_form_table'] = $table_name;
-        \app\models\CacheRecords::$c_id = $c_id;
 
         if (empty($_GET)) {
             return false;
@@ -58,6 +55,7 @@ class SearchController extends Controller {
 
         $query = \app\models\CacheRecords::find();
 		$elasticQuery = [];
+        $elasticQuery['bool']['must'][] = ['term' => ['cemetery_id' => $c_id]];
 
         if ($_GET['regnum']) {
             // phpinfo();exit;

@@ -299,7 +299,6 @@ class BookController extends Controller {
         $book->deleted = 1;
         $book->save();
 
-        \app\models\CacheRecords::$c_id = $book->cemetery_id;
         \app\models\CacheRecords::deleteAll(['book_id' => $book->id]);
 
         return $this->redirect(['index']);

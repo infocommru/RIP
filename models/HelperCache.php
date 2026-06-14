@@ -70,19 +70,15 @@ class HelperCache {
                     $deadYearInf = \app\models\HelperLevoshkin::getDate($record['death_date']);
                     $ripYearInf = \app\models\HelperLevoshkin::getDate($record['rip_date']);
 
-                    //if ($deadYearInf) {
-                        $r_new['dead_year'] = $deadYearInf['year'];
-                        $sfb_dead_month = $deadYearInf['month'];
-                        $sfb_dead_day = $deadYearInf['day'];
-                        $sfb_dead_date = $deadYearInf['date'];
-                    //}
+                    $r_new['dead_year'] = $deadYearInf['year'];
+                    $sfb_dead_month = $deadYearInf['month'];
+                    $sfb_dead_day = $deadYearInf['day'];
+                    $sfb_dead_date = $deadYearInf['date'];
 
-                    //if ($ripYearInf) {
-                        $r_new['rip_year'] = $ripYearInf['year'];
-                        $sfb_rip_month = $ripYearInf['month'];
-                        $sfb_rip_day = $ripYearInf['day'];
-                        $sfb_rip_date = $ripYearInf['date'];
-                    //}
+                    $r_new['rip_year'] = $ripYearInf['year'];
+                    $sfb_rip_month = $ripYearInf['month'];
+                    $sfb_rip_day = $ripYearInf['day'];
+                    $sfb_rip_date = $ripYearInf['date'];
 
                     $sfb_record_id = $record['id'];
                     $sfb_fam = $r_new['fam'];
@@ -149,12 +145,13 @@ class HelperCache {
                     $batchRows->addAction(
                     	[
 		                	'index' => [
-						        '_index' => 'cache_records_' . $book->cemetery_id,
+						        '_index' => \app\models\CacheRecords::index(),
 						        '_id'    => $sfb_record_id,
 				        	]
 		            	],
                     	[
 		                	'record_id' => $sfb_record_id,
+                            'cemetery_id' => $book->cemetery_id,
 		                	'regnum' => $sfb_regnum,
 		                	'fam' => $sfb_fam,
 		                	'nam' => $sfb_nam,

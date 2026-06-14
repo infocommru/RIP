@@ -447,16 +447,14 @@ class RecordController extends Controller {
 
         $model->deleted = 1;
         $model->save();
-        $book = Book::find()->andWhere(['id' => $model->book_id])->one();
-        $c_id = $book->cemetery_id;
-        \app\models\CacheRecords::$c_id = $c_id;
 
         $sCache = \app\models\CacheRecords::find()->query(['term' => ['record_id' => $model->id]])->one();
+        
         if ($sCache) {
             $sCache->delete();
         }
 
-        return $this->redirect(['index', 'book' => $book->id]);
+        return $this->redirect(['index', 'book' => $model->book_id]);
     }
 
     /**

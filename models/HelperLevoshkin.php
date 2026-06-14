@@ -144,8 +144,6 @@ HERE;
                 ->andWhere(['id' => $book->cemetery_id])
                 ->one();
 
-        \app\models\CacheRecords::$c_id = $cemetery->id;
-
         $zags_list = Helper::regions();
 
         $r_new = [
@@ -197,6 +195,7 @@ HERE;
         $ripYearInf = \app\models\HelperLevoshkin::getDate($r_new['rip_date']);
 
         $sfb->record_id = $record->id;
+        $sfb->cemetery_id = $cemetery->id;
         $sfb->fam = $r_new['fam'];
         $sfb->nam = $r_new['nam'];
         $sfb->ot = $r_new['ot'];

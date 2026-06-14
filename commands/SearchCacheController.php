@@ -19,9 +19,9 @@ class SearchCacheController extends Controller {
 	private function createIndex($table_name) {
 		$db = CacheRecords::getDb();
 		$command = $db->createCommand();
-		
-		if ($command->indexExists($table_name))
-			$command->deleteIndex($table_name);
+
+		if ($command->indexExists(\app\models\CacheRecords::index()))
+			$command->deleteIndex(\app\models\CacheRecords::index());
 
 		$command->createIndex($table_name, [
 			'settings' => [
@@ -47,6 +47,7 @@ class SearchCacheController extends Controller {
 			'mappings' => [
 				'properties' => [
 				    'record_id' => ['type' => 'integer'],
+					'cemetery_id' => ['type' => 'integer'],
 				    'regnum' => ['type' => 'keyword', 'normalizer' => 'lowercase', 
 				    	'fields' => ['wildcard' => [
 							'type' => 'wildcard',
@@ -145,15 +146,18 @@ class SearchCacheController extends Controller {
     
     public function actionIndex($cemetery_id = 0) {  	
         //$zags_list = Helper::regions();
-        $cemeteries = Cemetery::find()->orderBy('id')->all();
-        if ($cemetery_id)
+        
+        if ($cemetery_id) {
             $cemeteries = Cemetery::find()->andWhere(['id' => $cemetery_id])->all();
-           
+			\app\models\CacheRecords::deleteAll(['cemetery_id' => $cemetery_id]);
+		}
+		else {
+			$cemeteries = Cemetery::find()->orderBy('id')->all();
+			$this->createIndex(\app\models\CacheRecords::index());
+		}
+
         foreach ($cemeteries as $cemetery) {
-			$c_id = $cemetery->id;
-			$table_name = "cache_records_$c_id";
-			$this->createIndex($table_name);
-			echo $table_name . PHP_EOL;
+			echo $cemetery->name . PHP_EOL;
 	
 			$books = Book::find()
                    ->andWhere(['cemetery_id' => $cemetery->id])
