@@ -1,0 +1,134 @@
+name: opensearch
+
+services:
+  rip:
+    init: true
+    image: rip
+    build: .
+    restart: unless-stopped
+    container_name: opensearch_rip
+    volumes:
+      - /mnt/images:/var/www/html/upload/rip2 #Поменять на свое значение
+      - rip_upload:/var/www/html/web/upload
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rip.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.rip.entrypoints=web"
+      - "traefik.http.services.rip.loadbalancer.server.port=80"
+    environment:
+      - DB_HOST=mysql
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - COOKIE_VALIDATION_KEY=${COOKIE_VALIDATION_KEY}
+      - YII2_DEBUG=${YII2_DEBUG}
+      - YII2_ENV=${YII2_ENV}
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+      - TZ=Europe/Moscow
+    depends_on:
+      - mysql
+      - redis
+      - opensearch-node
+
+  redis:
+    image: redis
+    restart: unless-stopped
+    container_name: opensearch_redis
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+  mysql:
+    restart: unless-stopped
+    image: mysql
+    container_name: opensearch_mysql
+    ports:
+      - "127.0.0.1:5000:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_COLLATION=utf8mb4_unicode_ci
+      - TZ=Europe/Moscow
+    command:
+      - "--innodb_flush_log_at_trx_commit=2"
+      - "--innodb_flush_method=O_DIRECT"
+      - "--sync_binlog=0"
+      - "--skip-log-bin"
+      - "--innodb_buffer_pool_size=4G"
+      - "--innodb_io_capacity=100"
+      - "--innodb_io_capacity_max=200"
+      - "--gtid-mode=OFF"
+      - "--enforce-gtid-consistency=OFF"
+
+  phpmyadmin:
+    restart: unless-stopped
+    image: phpmyadmin
+    container_name: opensearch_phpmyadmin
+    environment:
+      - PMA_HOST=mysql
+      - PMA_ABSOLUTE_URI=http://0.0.0.0/pma/
+      - TZ=Europe/Moscow
+      - UPLOAD_LIMIT=10000M
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pma.rule=PathPrefix(`/pma`)"
+      - "traefik.http.routers.pma.entrypoints=web"
+      - "traefik.http.middlewares.pma-strip.stripprefix.prefixes=/pma"
+      - "traefik.http.middlewares.pma-redirect.redirectregex.regex=^(.*)/pma$$"
+      - "traefik.http.middlewares.pma-redirect.redirectregex.replacement=$${1}/pma/"
+      - "traefik.http.routers.pma.middlewares=pma-redirect,pma-strip"
+      - "traefik.http.services.pma.loadbalancer.server.port=80"
+    depends_on:
+      - mysql
+
+  traefik:
+    image: traefik
+    restart: unless-stopped
+    container_name: opensearch_traefik
+    ports:
+      - 80:80
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.constraints=Label(`com.docker.compose.project`, `${COMPOSE_PROJECT_NAME}`)"
+      - "--entrypoints.web.address=:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - rip
+      - phpmyadmin
+      
+  opensearch-node:
+    image: opensearchproject/opensearch:latest
+    restart: unless-stopped
+    environment:
+      - plugins.security.disabled=false
+      - plugins.security.ssl.http.enabled=false
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    ports:
+      - 127.0.0.1:9200:9200
+      - 127.0.0.1:9600:9600
+      
+volumes:
+  opensearch-data:
+  redis_data:
+  mysql_data:
+  rip_upload:
