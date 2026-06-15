@@ -148,11 +148,14 @@ class SearchCacheController extends Controller {
         //$zags_list = Helper::regions();
         
         if ($cemetery_id) {
-            $cemeteries = Cemetery::find()->andWhere(['id' => $cemetery_id])->all();
-			\app\models\CacheRecords::deleteAll(['cemetery_id' => $cemetery_id]);
+            $cemeteries = Cemetery::find()
+				->andWhere(['id' => $cemetery_id])
+				->andWhere(['deleted' => 0])
+				->all();
+			\app\models\HelperCache::deleteCemetery($cemetery_id);
 		}
 		else {
-			$cemeteries = Cemetery::find()->orderBy('id')->all();
+			$cemeteries = Cemetery::find()->andWhere(['deleted' => 0])->orderBy('id')->all();
 			$this->createIndex(\app\models\CacheRecords::index());
 		}
 

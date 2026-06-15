@@ -119,13 +119,9 @@ class BookController extends Controller {
         $book = $this->findModel($id);
         if (!empty($_FILES)) {
             set_time_limit(0);
-//print_r($_FILES);
-//exit;
-            $csv = new \ParseCsv\Csv();
-//$csv->offset = 1;
-            $csv->delimiter = ",";
 
-// print_r($_FILES);exit;
+            $csv = new \ParseCsv\Csv();
+            $csv->delimiter = ",";
 
             $base_path = $_FILES['csv']['tmp_name'];
             @exec("rm -f ./temp/out.csv");
@@ -134,115 +130,16 @@ class BookController extends Controller {
                 $base_path = "./temp/out.csv";
             }
 
-            //print_r($_POST);
-            //exit;
-
             \app\models\HelperCsv::processBookCsv($id, $base_path);
 
             if (isset($_POST['create_part'])) {
                 HelperLevoshkin::setBookPart($book);
                 HelperLevoshkin::setPartRecords();
             }
-
-            /*
-              $csv->parseFile($base_path);
-
-              $counter = 0;
-              foreach ($csv->data as $row) {
-              $query_last = \app\models\Record::find()->andWhere(['book_id' => $id]);
-              $record = new \app\models\Record();
-              $record->book_id = $id;
-              $cnt = 0;
-              $valid = true;
-              foreach ($row as $k => $v) {
-              switch ($cnt) {
-              case 0:
-              $vv = (intval($v)) . "";
-              $query_last->andWhere(['book_id' => $record->book_id ]);
-              if ($v == $vv) {
-              $record->numReg = $v;
-              $query_last->andWhere(['numReg' => $v]);
-              } else {
-              $record->numLiteral = $v;
-              if ($v)
-              $query_last->andWhere(['numLiteral' => $v]);
-              }
-
-              if (!$v) {
-              $counter++;
-              }
-
-              if ($v == "NumReg") {
-              $valid = false;
-              }
-
-              if ($query_last->one()) {
-              if($v)
-              $valid = false;
-              }
-
-              break;
-              case 1:
-              $record->fio = $v;
-              break;
-              case 2:
-              $record->age = $v;
-              break;
-              case 3:
-              $record->death_date = $v;
-              break;
-              case 4:
-              $record->rip_date = $v;
-              break;
-              case 5:
-              $record->docnum = $v;
-              break;
-              case 6:
-              $record->zags = $v;
-              break;
-              case 7:
-              $record->riper = $v;
-              break;
-              case 8:
-              $record->area_num = $v;
-              break;
-              case 9:
-              $record->row_num = $v;
-              break;
-              case 10:
-              $record->rip_num = $v;
-              break;
-              case 11:
-              $record->relative_fio = $v;
-              break;
-              case 15:
-              $record->filename = $v;
-              break;
-              case 16:
-              $record->comment = $v;
-              break;
-              case 17:
-              if (($v == "Гроб") || ($v == "гроб")) {
-              $record->rip_style = 1;
-              } else {
-              $record->rip_style = 2;
-              }
-              break;
-              }
-              $cnt++;
-              }
-
-              if ($valid)
-              if (!$record->save()) {
-              //print_r($record);
-              }
-              }
-
-              //print_r($csv->data); */
         }
 
         return $this->render('view', [
-                    'model' => $this->findModel($id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -299,8 +196,7 @@ class BookController extends Controller {
         $book->deleted = 1;
         $book->save();
 
-        \app\models\CacheRecords::deleteAll(['book_id' => $book->id]);
-
+        \app\models\HelperCache::deleteBook($book->id);
         return $this->redirect(['index']);
     }
 

@@ -6,16 +6,19 @@ import os
 async def generate_pdf(url, pdf_path):
     os.environ["PUPPETEER_SKIP_CHROMIUM_DOWNLOAD"] = "true"
 
-    browser = await pyppeteer.connect(browserWSEndpoint='ws://chromium:3000')
-    page = await browser.newPage()
+    try:
+        browser = await pyppeteer.connect(browserWSEndpoint='ws://chromium:3000')
+        page = await browser.newPage()
 
-    await page.goto(url)
-    pdf = await page.pdf({'format': 'A5',})
+        await page.goto(url, {'timeout': 5000})
+        pdf = await page.pdf({'format': 'A5',})
 
-    with open(pdf_path, 'wb') as f:
-        f.write(pdf)
-
-    await browser.disconnect()
+        with open(pdf_path, 'wb') as f:
+            f.write(pdf)
+    except Exception as e:
+        print(f"Ошибка при генерации PDF: {e}", file=sys.stderr)
+    finally:
+        await browser.close()
 
 
 # Run the function

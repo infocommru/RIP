@@ -85,11 +85,11 @@ class CemeteryController extends Controller {
     	$part_book = './upload/part/';
     	
     	if(!is_dir($dir_book)){
-    		mkdir($dir_book, 0755);
+    		mkdir($dir_book, 0755, true);
     	}
     	
     	if(!is_dir($part_book)){
-    		mkdir($part_book, 0755);
+    		mkdir($part_book, 0755, true);
     	}
     	
         if ($this->request->post()) {
@@ -170,6 +170,7 @@ class CemeteryController extends Controller {
         $cemetery->save();
         //$this->findModel($id)->delete();
 
+        \app\models\HelperCache::deleteCemetery($cemetery->id);
         return $this->redirect(['index']);
     }
 

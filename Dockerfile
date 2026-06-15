@@ -35,7 +35,7 @@ COPY --chown=www-data:www-data composer.json composer.lock ./
 ENV COMPOSER_CACHE_DIR=/tmp/.cache/composer
 RUN --mount=type=cache,target=/tmp/.cache/composer php /usr/local/bin/composer.phar install --no-interaction --prefer-dist --optimize-autoloader
 COPY --chown=www-data:www-data . .
-RUN rm rip.conf && mkdir web/assets && chown www-data:www-data web/assets
+RUN rm rip.conf && mkdir web/assets && chown www-data:www-data web/assets && mkdir web/upload && chown www-data:www-data web/upload
 USER root
 
 EXPOSE 80

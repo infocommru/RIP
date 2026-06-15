@@ -3,6 +3,30 @@
 namespace app\models;
 
 class HelperCache {
+    public static function deleteCemetery($cemetery) {
+        $response = \Yii::$app->elasticsearch->post(
+            [ \app\models\CacheRecords::index(), '_delete_by_query' ],
+            ['wait_for_completion' => 'false',],
+            json_encode([
+                'query' => [
+                    'term' => ['cemetery_id' => $cemetery]
+                ]
+            ])
+        );
+    }
+
+    public static function deleteBook($book) {
+        $response = \Yii::$app->elasticsearch->post(
+            [ \app\models\CacheRecords::index(), '_delete_by_query' ],
+            ['wait_for_completion' => 'false',],
+            json_encode([
+                'query' => [
+                    'term' => ['book_id' => $book]
+                ]
+            ])
+        );
+    }
+
 	public static function updateCache($books){
             $batchRows = CacheRecords::getDb()->createBulkCommand();
             $counter = 0;

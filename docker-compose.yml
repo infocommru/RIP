@@ -40,8 +40,6 @@ services:
   mysql:
     restart: unless-stopped
     image: mysql
-    ports:
-      - "127.0.0.1:5000:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     environment:
@@ -119,9 +117,6 @@ services:
         hard: 65536
     volumes:
       - opensearch-data:/usr/share/opensearch/data
-    ports:
-      - 127.0.0.1:9200:9200
-      - 127.0.0.1:9600:9600
 
   chromium:
     restart: unless-stopped
