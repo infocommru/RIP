@@ -30,3 +30,4 @@ $RECYCLE.BIN/
 *.lnk
 
 .env
+*.sql

@@ -271,6 +271,8 @@ class RecordController extends Controller {
                 $model->updated_at = time();
 
                 if ($model->save()) {
+                    \app\models\HelperLevoshkin::update_unknown($book);
+                    $model->refresh();
                     \app\models\HelperLevoshkin::updateSearchRecord($model);
                     return $this->redirect(['view', 'id' => $model->id]);
                 } else {
@@ -299,6 +301,7 @@ class RecordController extends Controller {
         $user = \app\models\User::findIdentity(Yii::$app->user->id);
 
         $model = $this->findModel($id);
+        $book = \app\models\Book::find()->andWhere(["id" => $model->book_id])->one();
 
         $next = Record::find()->andWhere("id > $id")->andWhere(['book_id' => $model->book_id])->orderBy("id")->one();
         $prev = Record::find()->andWhere("id < $id")->andWhere(['book_id' => $model->book_id])->orderBy("id desc")->one();
@@ -320,7 +323,10 @@ class RecordController extends Controller {
             $rHistory->user_id = Yii::$app->user->id;
             $rHistory->info = serialize($model1->attributes);
             $rHistory->save();
+
             if ($model->save()) {
+                \app\models\HelperLevoshkin::update_unknown($book);
+                $model->refresh();
                 \app\models\HelperLevoshkin::updateSearchRecord($model);
 
                 $id_next = $next ? $next->id : $model->id;

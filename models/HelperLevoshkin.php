@@ -3,6 +3,21 @@
 namespace app\models;
 
 class HelperLevoshkin {
+    public static function update_unknown($book){
+        $updated = Record::updateAll([
+            'is_unknown' => 1,
+            ], [
+                'and',
+                    ['book_id' => $book->id],
+                    ['or',
+                        ['like', 'fio', 'неизвестн'],
+                        ['like', 'fio', 'н/м'],
+                        ['like', 'fio', 'н/ж'],
+                    ],
+            ]);
+            
+        return $updated;
+    }
 
 	public static function getDate($sDate) {
         $result = [
@@ -222,8 +237,7 @@ HERE;
         $sfb->relative = $r_new['relative'];
         $sfb->zags = $r_new['zags'];
         $sfb->unknown = $record->is_unknown;
-        if (!$sfb->unknown)
-            $sfb->unknown = 0;
+
         $sfb->rip_style = $r_new['rip_style'];
         //////////////////////////////
         $sfb->svazka_num = $book->svazka;
@@ -239,7 +253,6 @@ HERE;
         $sfb->comment_book = $book->comment;
         $sfb->book_id = $book->id;
         $sfb->book_rip_style = $book->rip_style;
-        $sfb_unknown = $record->is_unknown;
         $sfb->unknown_number = '';
 
         if (preg_match("#№\s+([\d\\/]+)#", $record->fio, $m)) {

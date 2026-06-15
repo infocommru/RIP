@@ -11,11 +11,12 @@ use yii\filters\VerbFilter;
 
 class HelperCsv {
 	private static function updateBookIndex($bookId){
-		$books = Book::find()
+		$book = Book::find()
         	->andWhere(['id' => $bookId])
-        	->all();
+        	->one();
                    
-		\app\models\HelperCache::updateCache($books);
+        \app\models\HelperLevoshkin::update_unknown($book);
+		\app\models\HelperCache::updateCache([$book]);
 	}
     public static function processBookCsv($bookId, $filepath, $bad_flag = 0) {
         $riper_exists = true;
