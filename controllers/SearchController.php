@@ -47,6 +47,29 @@ class SearchController extends Controller {
         );
     }
 
+    public function actionSearchSuggest($q, $variable)
+    {
+        $query = \app\models\CacheRecords::find();
+
+        $elasticQuery = [
+            'multi_match' => [
+                'query' => $q,
+                'type'  => 'bool_prefix',
+                'fields' => [
+                    $variable . '.autocomplete',
+                    $variable . '.autocomplete._2gram',
+                    $variable . '.autocomplete._3gram',
+                ],
+            ]
+        ];
+
+        $query->query($elasticQuery);
+        $response = $query->orderBy(['_score' => SORT_DESC, 'record_id' => SORT_DESC])->limit(10)->all();
+        $response = array_unique(\yii\helpers\ArrayHelper::getColumn($response, $variable));
+
+        return json_encode($response);
+    }
+
     protected function searchCemetery($c_id) {
 
         if (empty($_GET)) {
@@ -253,11 +276,18 @@ class SearchController extends Controller {
 		        		'match' => ['zags' => [
 		        			'query' => $_GET['zags'],
 		        			'fuzziness' => 'auto',
-		        			'boost' => 5]]
+		        			'boost' => 10]]
             		],
             		[
-            		'match' => [
-            			'zags.autocomplete' => $_GET['zags']]
+                        'multi_match' => [
+                            'query' => $_GET['zags'],
+                            'type'  => 'bool_prefix',
+                            'fields' => [
+                                'zags.autocomplete',
+                                'zags.autocomplete._2gram',
+                                'zags.autocomplete._3gram',
+                            ],
+                        ]
             		]
             	]]];
         }
@@ -272,12 +302,20 @@ class SearchController extends Controller {
 		        		'match' => ['comment' => [
 		        			'query' => $_GET['comment'],
 		        			'fuzziness' => 'auto',
-		        			'boost' => 5]]
+		        			'boost' => 10]]
             		],
             		[
-            		'match' => [
-            			'comment.autocomplete' => $_GET['comment']]
+                        'multi_match' => [
+                            'query' => $_GET['comment'],
+                            'type'  => 'bool_prefix',
+                            'fields' => [
+                                'comment.autocomplete',
+                                'comment.autocomplete._2gram',
+                                'comment.autocomplete._3gram',
+                            ],
+                        ]
             		]
+                    
             	]]];
         }
 
@@ -342,11 +380,18 @@ class SearchController extends Controller {
 		        		'match' => ['relative' => [
 		        			'query' => $_GET['rel'],
 		        			'fuzziness' => 'auto',
-		        			'boost' => 5]]
+		        			'boost' => 10]]
             		],
             		[
-            		'match' => [
-            			'relative.autocomplete' => $_GET['rel']]
+                        'multi_match' => [
+                            'query' => $_GET['rel'],
+                            'type'  => 'bool_prefix',
+                            'fields' => [
+                                'relative.autocomplete',
+                                'relative.autocomplete._2gram',
+                                'relative.autocomplete._3gram',
+                            ],
+                        ]
             		]
             	]]];
             }
@@ -370,9 +415,7 @@ class SearchController extends Controller {
         }
 
         $offset = ($curpage - 1) * $this->searchLimit;
-
-        //$result = $query->orderBy($table_name . '.id')->offset($offset)->limit($this->searchLimit)->joinWith('record')->asArray()->all();
-        
+       
         $result = $query->orderBy(['_score' => SORT_DESC, 'record_id' => SORT_DESC])
         	->offset($offset)
 			->limit($this->searchLimit)

@@ -27,22 +27,6 @@ class SearchCacheController extends Controller {
 			'settings' => [
 				'number_of_shards' => 1,
 				'number_of_replicas' => 0,
-				'analysis' => [
-					'tokenizer' => [
-						'autocomplete_tokenizer' => [
-							'type' => 'edge_ngram',
-							'min_gram' => 2,
-							'max_gram' => 20,
-							'token_chars' => ['letter', ' digit']
-						]
-					],
-					'analyzer' => [
-						'autocomplete' => [
-							'tokenizer' => 'autocomplete_tokenizer',
-							'filter' => 'lowercase'
-						]
-					]
-				]
 			],
 			'mappings' => [
 				'properties' => [
@@ -90,9 +74,8 @@ class SearchCacheController extends Controller {
 				    	'ignore_malformed' => true]]],
 				    
 				    'zags' => ['type' => 'text', 'analyzer' => 'russian', 'fields' => ['autocomplete' => [
-				    	'type' => 'text', 
-				    	'analyzer' => 'autocomplete',
-				    	'search_analyzer' => 'russian']]],
+				    	'type' => 'search_as_you_type']
+				    ]],
 				    'rip_style' => ['type' => 'integer'],
 				    
 				    'unknown' => ['type' => 'integer'],
@@ -115,9 +98,8 @@ class SearchCacheController extends Controller {
 							'normalizer' => 'lowercase'
 					]]],
 				    'relative' => ['type' => 'text', 'analyzer' => 'russian', 'fields' => ['autocomplete' => [
-				    	'type' => 'text', 
-				    	'analyzer' => 'autocomplete',
-				    	'search_analyzer' => 'russian']]],
+				    	'type' => 'search_as_you_type']
+				    ]],
 				    
 				    'svazka_num' => ['type' => 'keyword', 'index' => 'false'],
 				    'book_num' => ['type' => 'keyword', 'index' => 'false'],
@@ -125,14 +107,10 @@ class SearchCacheController extends Controller {
 				    'page_punkt' => ['type' => 'integer'],
 				    
 				    'comment' => ['type' => 'text', 'analyzer' => 'russian', 'fields' => ['autocomplete' => [
-				    	'type' => 'text', 
-				    	'analyzer' => 'autocomplete',
-				    	'search_analyzer' => 'russian']]],
-				    'comment_book' => ['type' => 'text', 'analyzer' => 'russian', 'fields' => ['autocomplete' => [
-				    	'type' => 'text', 
-				    	'analyzer' => 'autocomplete',
-				    	'search_analyzer' => 'russian']]],
-				    
+				    	'type' => 'search_as_you_type']
+				    ]],
+
+				    'comment_book' => ['type' => 'keyword', 'index' => 'false'],
 				    'book_id' => ['type' => 'integer'],
 				    'book_rip_style' => ['type' => 'integer'],
 				    

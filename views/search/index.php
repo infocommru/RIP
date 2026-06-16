@@ -424,7 +424,57 @@ function echo_select_soderzit($name) {
             source: availableTags
         })
         $("#zags").autocomplete({
-        	source: famTags
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?= \yii\helpers\Url::to(['search/search-suggest']) ?>",
+                    dataType: "json",
+                    data: {
+                        q: request.term,
+                        variable: "zags"
+                    },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+
+            minLength: 2
+        });
+
+        $("#comment").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?= \yii\helpers\Url::to(['search/search-suggest']) ?>",
+                    dataType: "json",
+                    data: {
+                        q: request.term,
+                        variable: "comment"
+                    },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+
+            minLength: 2
+        });
+
+        $("#rel").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "<?= \yii\helpers\Url::to(['search/search-suggest']) ?>",
+                    dataType: "json",
+                    data: {
+                        q: request.term,
+                        variable: "relative"
+                    },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+
+            minLength: 2
         });
 <?php if (isset($_GET['ext_search'])): ?>
             extended_search();
