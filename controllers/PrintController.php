@@ -17,35 +17,7 @@ class PrintController extends Controller {
     /**
      * @inheritDoc
      */
-    /*
-      public function behaviors() {
 
-      return array_merge(
-      parent::behaviors(),
-      [
-      'verbs' => [
-      'class' => VerbFilter::className(),
-      'actions' => [
-      'delete' => ['POST'],
-      ],
-      ],
-      'access' => [
-      'class' => AccessControl::className(),
-      'rules' => [
-      [
-      'allow' => false,
-      'roles' => ['?'],
-      ],
-      [
-      'allow' => true,
-      'roles' => ['@'],
-      ],
-      ],
-      ],
-      ]
-      );
-      }
-     */
     public function actionIndex($record_id) {
         $record = Record::find()
                 ->andWhere(['id' => $record_id])

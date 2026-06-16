@@ -40,6 +40,8 @@ services:
   mysql:
     restart: unless-stopped
     image: mysql
+    #ports:
+    #  - 5000:3306
     volumes:
       - mysql_data:/var/lib/mysql
     environment:
