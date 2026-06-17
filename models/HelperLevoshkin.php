@@ -10,9 +10,8 @@ class HelperLevoshkin {
                 'and',
                     ['book_id' => $book->id],
                     ['or',
-                        ['like', 'fio', 'неизвестн'],
-                        ['like', 'fio', 'н/м'],
-                        ['like', 'fio', 'н/ж'],
+                        ['like', 'fio', 'неиз'],
+                        ['like', 'fio', 'н/'],
                     ],
             ]);
             

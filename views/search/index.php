@@ -48,6 +48,32 @@ function echo_select_soderzit($name) {
     $r .= "</select>";
     return $r;
 }
+function echo_select_fuzziness($name) {
+    $r = "<label for = \"$name\">Вхождение</label>";
+    //$r = '';
+    $r .= "<select id = \"$name\" name='$name' class=\"form-control\">";
+
+    $values = [
+        1 => 'Точная фраза',
+        2 => 'Искать с опечатками',
+    ];
+
+    foreach ($values as $k => $v) {
+        $selected = '';
+        if (isset($_GET[$name])) {
+            if ($_GET[$name] == $k)
+                $selected = "selected";
+        } else {
+            if ($k == 1)
+                $selected = "selected";
+        }
+
+        $r .= "<option $selected value='$k'>" . $v . "</option>";
+    }
+
+    $r .= "</select>";
+    return $r;
+}
 ?>
 <form method='get' onsubmit="return validateForm(true)">
     <h2>Поиск по захоронениям г. Санкт-Петербурга</h2>
@@ -61,14 +87,14 @@ function echo_select_soderzit($name) {
                     <input value="<?= get_input_value("fam") ?>" type="text" class='form-control' name='fam' id='fam' />
                 </div>
                 <div class="col-sm-1">
-                    <?= echo_select_soderzit('fam_cont') ?>
+                    <?= echo_select_fuzziness('fam_cont') ?>
                 </div>
                 <div class="col-sm-2">
                     <label for='nam'>Имя</label>
                     <input value="<?= get_input_value("nam") ?>" type="text" class='form-control' name='nam' id='nam' />
                 </div>
                 <div class="col-sm-1">
-                    <?= echo_select_soderzit('nam_cont') ?>
+                    <?= echo_select_fuzziness('nam_cont') ?>
                 </div>
                 <div class="col-sm-2">
                     <label for='ot'>Отчество</label>
@@ -76,18 +102,12 @@ function echo_select_soderzit($name) {
 
                 </div>
                 <div class="col-sm-1">
-                    <?= echo_select_soderzit('ot_cont') ?>
-
+                    <?= echo_select_fuzziness('ot_cont') ?>
                 </div>
 
                 <div class="col-sm-2">
                     <label for='regnum'>Номер записи</label>
                     <input value="<?= get_input_value("regnum") ?>" type="text" class='form-control' name='regnum' id='regnum' />
-                </div>
-
-                <div class="col-sm-1">
-                    <?= echo_select_soderzit('rg_cont') ?>
-
                 </div>
 
 
@@ -281,14 +301,18 @@ function echo_select_soderzit($name) {
                 </div>
              
              	<div class="row">
-				<div class="col-sm-3">
-    				<div class="form-group">
-        				<label for="zags">ЗАГС</label>
-        				<input name="zags" id="zags" class="form-control" value="<?= get_input_value("zags") ?>">
-    				</div>
-				</div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label for="zags">ЗАГС</label>
+                            <input name="zags" id="zags" class="form-control" value="<?= get_input_value("zags") ?>">
+                        </div>
+                    </div>
+
+                    <div class="col-sm-1">
+                        <?= echo_select_fuzziness('zags_cont') ?>
+                    </div>
 				
-				<div class="col-sm-2">
+				    <div class="col-sm-2">
                         <div class="form-group">
                             <label for="docnum">Номер документа</label>
                             <input value="<?= get_input_value("docnum") ?>" type=text class='form-control' id='docnum' name='docnum' />
@@ -305,7 +329,7 @@ function echo_select_soderzit($name) {
 				<div class="col-sm-2">
                     <button type="submit" class="btn btn-primary btn-lg btn-block search_btn">Найти</button>            
                 </div>
-                </div>
+             </div>
 
             
 
@@ -358,7 +382,7 @@ function echo_select_soderzit($name) {
                         <input value="<?= get_input_value("areanum") ?>" type=text class='form-control' id='areanum' name='areanum' />
                     </div>
                     <div class="col-sm-2">
-                        <?= echo_select_soderzit('area_cont') ?>
+                        <?= echo_select_fuzziness('area_cont') ?>
                     </div>
                     <div class="col-sm-2">
                         <label for="rownum">Номер ряда</label>
@@ -366,7 +390,7 @@ function echo_select_soderzit($name) {
                     </div>
 
                     <div class="col-sm-2">
-                        <?= echo_select_soderzit('row_cont') ?>
+                        <?= echo_select_fuzziness('row_cont') ?>
                     </div>
 
                     <div class="col-sm-2">
@@ -375,7 +399,7 @@ function echo_select_soderzit($name) {
                     </div>
 
                     <div class="col-sm-2">
-                        <?= echo_select_soderzit('rip_cont') ?>
+                        <?= echo_select_fuzziness('rip_cont') ?>
                     </div>
 
                 </div>
@@ -413,71 +437,45 @@ function echo_select_soderzit($name) {
 
     document.addEventListener("DOMContentLoaded", function (event) {
         jQuery('#tabs').tabs();
-        var availableTags = [
-            "неизвестный",
-            "неизвестная",
-            "н/м",
-            "н/ж",
-        ];
-        var famTags = <?php echo json_encode(array_values(Helper::regions())); ?>;
-        $("#fam").autocomplete({
-            source: availableTags
-        })
-        $("#zags").autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: "<?= \yii\helpers\Url::to(['search/search-suggest']) ?>",
-                    dataType: "json",
-                    data: {
-                        q: request.term,
-                        variable: "zags"
-                    },
-                    success: function (data) {
-                        response(data);
-                    }
-                });
-            },
 
-            minLength: 2
-        });
+        function initAutocomplete(selector, variableName) {
+            $(selector).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "<?= \yii\helpers\Url::to(['search/search-suggest']) ?>",
+                        dataType: "json",
+                        data: {
+                            q: request.term,
+                            variable: variableName
+                        },
+                        success: function (data) {
+                            console.log(data);
+                            response(data);
+                        }
+                    });
+                },
 
-        $("#comment").autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: "<?= \yii\helpers\Url::to(['search/search-suggest']) ?>",
-                    dataType: "json",
-                    data: {
-                        q: request.term,
-                        variable: "comment"
-                    },
-                    success: function (data) {
-                        response(data);
-                    }
-                });
-            },
+                minLength: 2
+            })
+        }
 
-            minLength: 2
-        });
+        initAutocomplete("#regnum", "regnum");
+        initAutocomplete("#fam", "fam");
+        initAutocomplete("#nam", "nam");
+        initAutocomplete("#ot", "ot");
 
-        $("#rel").autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: "<?= \yii\helpers\Url::to(['search/search-suggest']) ?>",
-                    dataType: "json",
-                    data: {
-                        q: request.term,
-                        variable: "relative"
-                    },
-                    success: function (data) {
-                        response(data);
-                    }
-                });
-            },
+        initAutocomplete("#zags", "zags");
+        initAutocomplete("#comment", "comment");
+        initAutocomplete("#rel", "relative");
+        
+        initAutocomplete("#unknown_number", "unknown_number");
 
-            minLength: 2
-        });
+        initAutocomplete("#docnum", "docnum");
+        initAutocomplete("#areanum", "areanum");
+        initAutocomplete("#rownum", "rownum");
+        initAutocomplete("#ripnum", "ripnum");
 <?php if (isset($_GET['ext_search'])): ?>
-            extended_search();
+        extended_search();
 <?php endif; ?>
     });
     function  validateForm(show_alert) {

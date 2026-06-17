@@ -64,12 +64,77 @@ class SearchController extends Controller {
         ];
 
         $query->query($elasticQuery);
-        $response = $query->orderBy(['_score' => SORT_DESC, 'record_id' => SORT_DESC])->limit(10)->all();
-        $response = array_unique(\yii\helpers\ArrayHelper::getColumn($response, $variable));
+        $query->addCollapse(['field' => $variable . '.keyword']);
+
+        $response = $query->orderBy(['_score' => SORT_DESC, 'record_id' => SORT_DESC])->all();
+        $response = \yii\helpers\ArrayHelper::getColumn($response, $variable);
 
         return json_encode($response);
     }
+    protected function searchTermConditions($search_string, $name_var) {
+        $condition = ['bool' => ['should' => [
+            [
+                'match_phrase' => [
+                    $name_var => [
+                        'query' => $search_string,
+                    ]
+                ]
+            ],
+            [
+                'term' => [
+                    $name_var . '.keyword' => [
+                        'value' => mb_strtolower($search_string),
+                        'boost' => 10
+                    ]
+                ]
+            ]
+        ]]];
 
+        return $condition;
+    }
+    protected function searchFuzzinessConditions($search_string, $name_var) {
+        $condition = ['bool' => ['should' => [
+            [
+                'term' => [
+                    $name_var . '.keyword' => [
+                        'value' => mb_strtolower($search_string),
+                        'boost' => 10
+                    ]
+                ]
+            ],
+            [
+                'match_phrase' => [
+                    $name_var => [
+                        'query' => $search_string,
+                        'boost' => 7
+                    ]
+                ]
+            ],
+            [
+                'multi_match' => [
+                    'query' => $search_string,
+                    'type'  => 'bool_prefix',
+                    'fields' => [
+                        $name_var . '.autocomplete',
+                        $name_var . '.autocomplete._2gram',
+                        $name_var . '.autocomplete._3gram',
+                    ],
+                    'boost' => 5
+                ]
+            ],
+            [
+                'match' => [
+                    $name_var => [
+                        'query' => $search_string,
+                        'fuzziness' => 'AUTO',
+                        'boost' => 1
+                    ]
+                ]
+            ],
+        ],
+        ]];
+        return $condition;
+    }
     protected function searchCemetery($c_id) {
 
         if (empty($_GET)) {
@@ -81,87 +146,47 @@ class SearchController extends Controller {
         $elasticQuery['bool']['must'][] = ['term' => ['cemetery_id' => $c_id]];
 
         if ($_GET['regnum']) {
-            // phpinfo();exit;
-            //print_r($_GET);
-            //exit;
-            $regnum = mb_strtolower($_GET['regnum']);
-            
-            switch ($_GET['rg_cont']) {
-                case 1:
-                	$condition = ['term' => ['regnum' => $regnum]];
-                    break;
-                case 2:
-                	$condition = ['wildcard' => ['regnum.wildcard' => '*' . $regnum . '*']];
-                    break;
-                case 3:
-                	$condition = ['prefix' => ['regnum' => $regnum]];
-                    break;
-                case 4:
-                	$condition = ['wildcard' => ['regnum.wildcard' => '*' . $regnum]];
-                    break;
-            }
+            $condition = self::searchTermConditions($_GET['regnum'], 'regnum');
             
             $elasticQuery['bool']['must'][] = $condition;
         }
 
         if ($_GET['fam']) {
-        	$fam = mb_strtolower($_GET['fam']);
-        	
             switch ($_GET['fam_cont']) {
                 case 1:
-                	$condition = ['term' => ['fam' => $fam]];
+                    $condition = self::searchTermConditions($_GET['fam'], 'fam');
                     break;
                 case 2:
-                	$condition = ['wildcard' => ['fam.wildcard' => '*' . $fam . '*']];
-                    break;
-                case 3:
-                	$condition = ['prefix' => ['fam' => $fam]];
-                    break;
-                case 4:
-                	$condition = ['wildcard' => ['fam.wildcard' => '*' . $fam]];
+                    $condition = self::searchFuzzinessConditions($_GET['fam'], 'fam');
                     break;
             }
+
             $elasticQuery['bool']['must'][] = $condition;
         }
 
         if ($_GET['nam']) {
-        	$nam = mb_strtolower($_GET['nam']);
-        	
             switch ($_GET['nam_cont']) {
                 case 1:
-                	$condition = ['term' => ['nam' => $nam]];
+                    $condition = self::searchTermConditions($_GET['nam'], 'nam');
                     break;
                 case 2:
-                	$condition = ['wildcard' => ['nam.wildcard' => '*' . $nam . '*']];
-                    break;
-                case 3:
-                	$condition = ['prefix' => ['nam' => $nam]];
-                    break;
-                case 4:
-                	$condition = ['wildcard' => ['nam.wildcard' => '*' . $nam]];
+                    $condition = self::searchFuzzinessConditions($_GET['nam'], 'nam');
                     break;
             }
+
             $elasticQuery['bool']['must'][] = $condition;
         }
 
-
         if ($_GET['ot']) {
-        	$ot = mb_strtolower($_GET['ot']);
-        	
             switch ($_GET['ot_cont']) {
                 case 1:
-                	$condition = ['term' => ['ot' => $ot]];
+                    $condition = self::searchTermConditions($_GET['ot'], 'ot');
                     break;
                 case 2:
-                	$condition = ['wildcard' => ['ot.wildcard' => '*' . $ot . '*']];
-                    break;
-                case 3:
-                	$condition = ['prefix' => ['ot' => $ot]];
-                    break;
-                case 4:
-                	$condition = ['wildcard' => ['ot.wildcard' => '*' . $ot]];
+                    $condition = self::searchFuzzinessConditions($_GET['ot'], 'ot');
                     break;
             }
+
             $elasticQuery['bool']['must'][] = $condition;
         }
 
@@ -170,7 +195,7 @@ class SearchController extends Controller {
         }
 
         if ($_GET['unknown_number']) {
-        	$elasticQuery['bool']['must'][] = ['wildcard' => ['unknown_number' => '*' . $_GET['unknown_number'] . '*']];
+            $elasticQuery['bool']['must'][] = self::searchTermConditions( $_GET['unknown_number'], 'unknown_number');
         }
 
         if ($_GET['age']) {
@@ -270,130 +295,69 @@ class SearchController extends Controller {
             $elasticQuery['bool']['must'][] = $condition;
         }
         
-        if ($_GET['zags']){  
-            $elasticQuery['bool']['must'][] = ['bool' => ['should' => [
-            		[
-		        		'match' => ['zags' => [
-		        			'query' => $_GET['zags'],
-		        			'fuzziness' => 'auto',
-		        			'boost' => 10]]
-            		],
-            		[
-                        'multi_match' => [
-                            'query' => $_GET['zags'],
-                            'type'  => 'bool_prefix',
-                            'fields' => [
-                                'zags.autocomplete',
-                                'zags.autocomplete._2gram',
-                                'zags.autocomplete._3gram',
-                            ],
-                        ]
-            		]
-            	]]];
+        if ($_GET['zags']){
+            switch ($_GET['zags_cont']) {
+                case 1:
+                    $condition = self::searchTermConditions($_GET['zags'], 'zags');
+                    break;
+                case 2:
+                    $condition = self::searchFuzzinessConditions($_GET['zags'], 'zags');
+                    break;
+            }
+
+            $elasticQuery['bool']['must'][] = $condition;
         }
         
         if ($_GET['docnum']) {
-        	$elasticQuery['bool']['must'][] = ['wildcard' => ['docnum' => '*' . $_GET['docnum'] . '*']];
+            $elasticQuery['bool']['must'][] = self::searchTermConditions($_GET['docnum'], 'docnum');
         }
         
         if ($_GET['comment']) {
-            $elasticQuery['bool']['must'][] = ['bool' => ['should' => [
-            		[
-		        		'match' => ['comment' => [
-		        			'query' => $_GET['comment'],
-		        			'fuzziness' => 'auto',
-		        			'boost' => 10]]
-            		],
-            		[
-                        'multi_match' => [
-                            'query' => $_GET['comment'],
-                            'type'  => 'bool_prefix',
-                            'fields' => [
-                                'comment.autocomplete',
-                                'comment.autocomplete._2gram',
-                                'comment.autocomplete._3gram',
-                            ],
-                        ]
-            		]
-                    
-            	]]];
+            $elasticQuery['bool']['must'][] = self::searchTermConditions($_GET['comment'], 'comment');
         }
 
         if (isset($_GET['ext_search'])) {
             if ($_GET['areanum']) {
                 switch ($_GET['area_cont']) {
                     case 1:
-		            	$condition = ['term' => ['areanum' => $_GET['areanum']]];
-		                break;
-		            case 2:
-		            	$condition = ['wildcard' => ['areanum.wildcard' => '*' . $_GET['areanum'] . '*']];
-		                break;
-		            case 3:
-		            	$condition = ['prefix' => ['areanum' => $_GET['areanum']]];
-		                break;
-		            case 4:
-		            	$condition = ['wildcard' => ['areanum.wildcard' => '*' . $_GET['areanum']]];
-		                break;
+                        $condition = self::searchTermConditions( $_GET['areanum'], 'areanum');
+                        break;
+                    case 2:
+                        $condition = self::searchFuzzinessConditions( $_GET['areanum'], 'areanum');
+                        break;
                 }
+
                 $elasticQuery['bool']['must'][] = $condition;
             }
 
             if ($_GET['rownum']) {
                 switch ($_GET['row_cont']) {
                     case 1:
-		            	$condition = ['term' => ['rownum' => $_GET['rownum']]];
-		                break;
-		            case 2:
-		            	$condition = ['wildcard' => ['rownum.wildcard' => '*' . $_GET['rownum'] . '*']];
-		                break;
-		            case 3:
-		            	$condition = ['prefix' => ['rownum' => $_GET['rownum']]];
-		                break;
-		            case 4:
-		            	$condition = ['wildcard' => ['rownum.wildcard' => '*' . $_GET['rownum']]];
-		                break;
+                        $condition = self::searchTermConditions( $_GET['rownum'], 'rownum');
+                        break;
+                    case 2:
+                        $condition = self::searchFuzzinessConditions( $_GET['rownum'], 'rownum');
+                        break;
                 }
+
                 $elasticQuery['bool']['must'][] = $condition;
             }
 
             if ($_GET['ripnum']) {
                 switch ($_GET['rip_cont']) {
                     case 1:
-		            	$condition = ['term' => ['ripnum' => $_GET['ripnum']]];
-		                break;
-		            case 2:
-		            	$condition = ['wildcard' => ['ripnum.wildcard' => '*' . $_GET['ripnum'] . '*']];
-		                break;
-		            case 3:
-		            	$condition = ['prefix' => ['ripnum' => $_GET['ripnum']]];
-		                break;
-		            case 4:
-		            	$condition = ['wildcard' => ['ripnum.wildcard' => '*' . $_GET['ripnum']]];
-		                break;
+                        $condition = self::searchTermConditions( $_GET['ripnum'], 'ripnum');
+                        break;
+                    case 2:
+                        $condition = self::searchFuzzinessConditions( $_GET['ripnum'], 'ripnum');
+                        break;
                 }
+
                 $elasticQuery['bool']['must'][] = $condition;
             }
 
             if ($_GET['rel']) {
-            	$elasticQuery['bool']['must'][] = ['bool' => ['should' => [
-            		[
-		        		'match' => ['relative' => [
-		        			'query' => $_GET['rel'],
-		        			'fuzziness' => 'auto',
-		        			'boost' => 10]]
-            		],
-            		[
-                        'multi_match' => [
-                            'query' => $_GET['rel'],
-                            'type'  => 'bool_prefix',
-                            'fields' => [
-                                'relative.autocomplete',
-                                'relative.autocomplete._2gram',
-                                'relative.autocomplete._3gram',
-                            ],
-                        ]
-            		]
-            	]]];
+            	$elasticQuery['bool']['must'][] = self::searchTermConditions($_GET['rel'], 'relative');
             }
         }
 

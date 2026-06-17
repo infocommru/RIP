@@ -16,14 +16,30 @@ use app\models\CacheRecords;
 
 class SearchCacheController extends Controller {
 
-	private function createIndex($table_name) {
+	private function createIndex() {
 		$db = CacheRecords::getDb();
 		$command = $db->createCommand();
 
 		if ($command->indexExists(\app\models\CacheRecords::index()))
 			$command->deleteIndex(\app\models\CacheRecords::index());
 
-		$command->createIndex($table_name, [
+		$standard_type = [
+			'type' => 'text', 
+			'analyzer' => 'standard', 
+			'norms' => false,
+
+			'fields' => [
+				'autocomplete' => [
+					'type' => 'search_as_you_type'
+				],
+				'keyword' => [
+					'type' => 'keyword',
+					'normalizer' => 'lowercase'
+				]
+			]
+		];
+
+		$command->createIndex(\app\models\CacheRecords::index(), [
 			'settings' => [
 				'number_of_shards' => 1,
 				'number_of_replicas' => 0,
@@ -32,26 +48,13 @@ class SearchCacheController extends Controller {
 				'properties' => [
 				    'record_id' => ['type' => 'integer'],
 					'cemetery_id' => ['type' => 'integer'],
-				    'regnum' => ['type' => 'keyword', 'normalizer' => 'lowercase', 
-				    	'fields' => ['wildcard' => [
-							'type' => 'wildcard',
-							'normalizer' => 'lowercase'
-					]]],
-				    'fam' => ['type' => 'keyword', 'normalizer' => 'lowercase', 
-				    	'fields' => ['wildcard' => [
-							'type' => 'wildcard',
-							'normalizer' => 'lowercase'
-					]]],
-				    'nam' => ['type' => 'keyword', 'normalizer' => 'lowercase', 
-				    	'fields' => ['wildcard' => [
-							'type' => 'wildcard',
-							'normalizer' => 'lowercase'
-					]]],
-				    'ot' => ['type' => 'keyword', 'normalizer' => 'lowercase', 
-				    	'fields' => ['wildcard' => [
-							'type' => 'wildcard',
-							'normalizer' => 'lowercase'
-					]]],
+
+					'regnum' => $standard_type,
+
+					'fam' => $standard_type,
+					'nam' => $standard_type,
+					'ot' => $standard_type,
+
 					'fio_display' => ['type' => 'keyword', 'index' => 'false'],
 					
 				    'age_int' => ['type' => 'integer'],
@@ -73,42 +76,25 @@ class SearchCacheController extends Controller {
 				    	'format' => 'dd/MM/yyyy',
 				    	'ignore_malformed' => true]]],
 				    
-				    'zags' => ['type' => 'text', 'analyzer' => 'russian', 'fields' => ['autocomplete' => [
-				    	'type' => 'search_as_you_type']
-				    ]],
+				    'zags' => $standard_type,
 				    'rip_style' => ['type' => 'integer'],
 				    
 				    'unknown' => ['type' => 'integer'],
-				    'unknown_number' => ['type' => 'wildcard', 'normalizer' => 'lowercase'],
+					'unknown_number' => $standard_type,
 				    
-				    'docnum' => ['type' => 'wildcard', 'normalizer' => 'lowercase'],
-				    'areanum' => ['type' => 'keyword', 'normalizer' => 'lowercase', 
-				    	'fields' => ['wildcard' => [
-							'type' => 'wildcard',
-							'normalizer' => 'lowercase'
-					]]],
-				    'rownum' => ['type' => 'keyword', 'normalizer' => 'lowercase', 
-				    	'fields' => ['wildcard' => [
-							'type' => 'wildcard',
-							'normalizer' => 'lowercase'
-					]]],
-				    'ripnum' => ['type' => 'keyword', 'normalizer' => 'lowercase', 
-				    	'fields' => ['wildcard' => [
-							'type' => 'wildcard',
-							'normalizer' => 'lowercase'
-					]]],
-				    'relative' => ['type' => 'text', 'analyzer' => 'russian', 'fields' => ['autocomplete' => [
-				    	'type' => 'search_as_you_type']
-				    ]],
+				    'docnum' => $standard_type,
+					'areanum' => $standard_type,
+					'rownum' => $standard_type,
+					'ripnum' => $standard_type,
+
+				    'relative' => $standard_type,
 				    
 				    'svazka_num' => ['type' => 'keyword', 'index' => 'false'],
 				    'book_num' => ['type' => 'keyword', 'index' => 'false'],
 				    'page_num' => ['type' => 'keyword', 'index' => 'false'],
-				    'page_punkt' => ['type' => 'integer'],
+				    'page_punkt' => ['type' => 'integer', 'index' => 'false'],
 				    
-				    'comment' => ['type' => 'text', 'analyzer' => 'russian', 'fields' => ['autocomplete' => [
-				    	'type' => 'search_as_you_type']
-				    ]],
+				    'comment' => $standard_type,
 
 				    'comment_book' => ['type' => 'keyword', 'index' => 'false'],
 				    'book_id' => ['type' => 'integer'],
@@ -134,7 +120,7 @@ class SearchCacheController extends Controller {
 		}
 		else {
 			$cemeteries = Cemetery::find()->andWhere(['deleted' => 0])->orderBy('id')->all();
-			$this->createIndex(\app\models\CacheRecords::index());
+			$this->createIndex();
 		}
 
         foreach ($cemeteries as $cemetery) {
