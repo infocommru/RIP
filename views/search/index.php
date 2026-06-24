@@ -54,8 +54,10 @@ function echo_select_fuzziness($name) {
     $r .= "<select id = \"$name\" name='$name' class=\"form-control\">";
 
     $values = [
-        1 => 'Точная фраза',
-        2 => 'Искать с опечатками',
+        1 => 'точная фраза',
+        2 => 'искать с опечатками',
+        3 => 'начинается с',
+        4 => 'заканчивается на'
     ];
 
     foreach ($values as $k => $v) {

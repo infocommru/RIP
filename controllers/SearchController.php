@@ -92,6 +92,26 @@ class SearchController extends Controller {
 
         return $condition;
     }
+    protected function searchStartFromConditions($search_string, $name_var) {
+        $condition = [
+            'prefix' => [
+                $name_var . '.keyword' => $search_string
+            ]
+        ];
+
+        return $condition;
+    }
+    protected function searchEndFromConditions($search_string, $name_var) {
+        $condition = [
+            'wildcard' => [
+                $name_var . '.wildcard' => [
+                    'value' => '*' . addcslashes($search_string, '*?\\'),
+                ],
+            ]   
+        ];
+
+        return $condition;
+    }
     protected function searchFuzzinessConditions($search_string, $name_var) {
         $condition = ['bool' => ['should' => [
             [
@@ -135,6 +155,26 @@ class SearchController extends Controller {
         ]];
         return $condition;
     }
+
+    protected function searchValue($switch ,$search_string, $name_var){
+        switch ($switch) {
+            case 1:
+                $condition = self::searchTermConditions($search_string, $name_var);
+                break;
+            case 2:
+                $condition = self::searchFuzzinessConditions($search_string, $name_var);
+                break;
+            case 3:
+                $condition = self::searchStartFromConditions($search_string, $name_var);
+                break;
+            case 4:
+                $condition = self::searchEndFromConditions($search_string, $name_var);
+                break;
+        }
+
+        return $condition;
+    }
+    
     protected function searchCemetery($c_id) {
 
         if (empty($_GET)) {
@@ -147,47 +187,19 @@ class SearchController extends Controller {
 
         if ($_GET['regnum']) {
             $condition = self::searchTermConditions($_GET['regnum'], 'regnum');
-            
             $elasticQuery['bool']['must'][] = $condition;
         }
 
         if ($_GET['fam']) {
-            switch ($_GET['fam_cont']) {
-                case 1:
-                    $condition = self::searchTermConditions($_GET['fam'], 'fam');
-                    break;
-                case 2:
-                    $condition = self::searchFuzzinessConditions($_GET['fam'], 'fam');
-                    break;
-            }
-
-            $elasticQuery['bool']['must'][] = $condition;
+            $elasticQuery['bool']['must'][] = self::searchValue($_GET['fam_cont'], $_GET['fam'], 'fam');
         }
 
         if ($_GET['nam']) {
-            switch ($_GET['nam_cont']) {
-                case 1:
-                    $condition = self::searchTermConditions($_GET['nam'], 'nam');
-                    break;
-                case 2:
-                    $condition = self::searchFuzzinessConditions($_GET['nam'], 'nam');
-                    break;
-            }
-
-            $elasticQuery['bool']['must'][] = $condition;
+            $elasticQuery['bool']['must'][] = self::searchValue($_GET['nam_cont'], $_GET['nam'], 'nam');
         }
 
         if ($_GET['ot']) {
-            switch ($_GET['ot_cont']) {
-                case 1:
-                    $condition = self::searchTermConditions($_GET['ot'], 'ot');
-                    break;
-                case 2:
-                    $condition = self::searchFuzzinessConditions($_GET['ot'], 'ot');
-                    break;
-            }
-
-            $elasticQuery['bool']['must'][] = $condition;
+            $elasticQuery['bool']['must'][] = self::searchValue($_GET['ot_cont'], $_GET['ot'], 'ot');
         }
 
         if (isset($_GET['unknown'])) {
@@ -296,16 +308,7 @@ class SearchController extends Controller {
         }
         
         if ($_GET['zags']){
-            switch ($_GET['zags_cont']) {
-                case 1:
-                    $condition = self::searchTermConditions($_GET['zags'], 'zags');
-                    break;
-                case 2:
-                    $condition = self::searchFuzzinessConditions($_GET['zags'], 'zags');
-                    break;
-            }
-
-            $elasticQuery['bool']['must'][] = $condition;
+            $elasticQuery['bool']['must'][] = self::searchValue($_GET['zags_cont'], $_GET['zags'], 'zags');
         }
         
         if ($_GET['docnum']) {
@@ -318,42 +321,15 @@ class SearchController extends Controller {
 
         if (isset($_GET['ext_search'])) {
             if ($_GET['areanum']) {
-                switch ($_GET['area_cont']) {
-                    case 1:
-                        $condition = self::searchTermConditions( $_GET['areanum'], 'areanum');
-                        break;
-                    case 2:
-                        $condition = self::searchFuzzinessConditions( $_GET['areanum'], 'areanum');
-                        break;
-                }
-
-                $elasticQuery['bool']['must'][] = $condition;
+                $elasticQuery['bool']['must'][] = self::searchValue($_GET['area_cont'], $_GET['areanum'], 'areanum');
             }
 
             if ($_GET['rownum']) {
-                switch ($_GET['row_cont']) {
-                    case 1:
-                        $condition = self::searchTermConditions( $_GET['rownum'], 'rownum');
-                        break;
-                    case 2:
-                        $condition = self::searchFuzzinessConditions( $_GET['rownum'], 'rownum');
-                        break;
-                }
-
-                $elasticQuery['bool']['must'][] = $condition;
+                $elasticQuery['bool']['must'][] = self::searchValue($_GET['row_cont'], $_GET['rownum'], 'rownum');
             }
 
             if ($_GET['ripnum']) {
-                switch ($_GET['rip_cont']) {
-                    case 1:
-                        $condition = self::searchTermConditions( $_GET['ripnum'], 'ripnum');
-                        break;
-                    case 2:
-                        $condition = self::searchFuzzinessConditions( $_GET['ripnum'], 'ripnum');
-                        break;
-                }
-
-                $elasticQuery['bool']['must'][] = $condition;
+                $elasticQuery['bool']['must'][] = self::searchValue($_GET['rip_cont'], $_GET['ripnum'], 'ripnum');
             }
 
             if ($_GET['rel']) {

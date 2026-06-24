@@ -35,7 +35,11 @@ class SearchCacheController extends Controller {
 				'keyword' => [
 					'type' => 'keyword',
 					'normalizer' => 'lowercase'
-				]
+				],
+				'wildcard' => [
+					'type' => 'wildcard',
+					"normalizer" => "lowercase"
+				],
 			]
 		];
 
