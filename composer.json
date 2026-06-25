@@ -21,7 +21,8 @@
         "2amigos/yii2-gallery-widget": "~1.0",
         "parsecsv/php-parsecsv": "^1.3",
         "yiisoft/yii2-redis": "~2.0.0",
-        "yiisoft/yii2-elasticsearch": "~2.1.0"
+        "yiisoft/yii2-elasticsearch": "~2.1.0",
+        "avadim/fast-excel-writer": "^6.13"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

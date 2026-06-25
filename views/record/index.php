@@ -18,6 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('Добавить запись', ['create', 'book_id' => $book_id], ['class' => 'btn btn-success']) ?>
         <?= Html::a('Экспорт CSV', "/web/record/export-csv?id=" . $book_id, ['class' => 'btn btn-warning']) ?>
+        <?= Html::a('Экспорт Excel', "/web/record/export-excel?id=" . $book_id, ['class' => 'btn btn-warning']) ?>
         <?= Html::a('Сбросить фильтры', "/web/record/index?book=" . $book_id, ['class' => 'btn btn-info']) ?>
     </p>
 

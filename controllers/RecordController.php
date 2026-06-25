@@ -10,6 +10,7 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use \avadim\FastExcelWriter\Excel;
 use Yii;
 
 /**
@@ -350,17 +351,7 @@ class RecordController extends Controller {
         ]);
     }
 
-    public function actionExportCsv($id) {
-
-        header('Content-type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="book_' . $id . '.csv"');
-        //echo 111;exit;
-
-        $csv = new \ParseCsv\Csv();
-        //echo 1112233411111;exit;
-
-        $csv->linefeed = "\n";
-
+    private function exportData($id) {
         $header = [
             'Номер записи',
             'ФИО',
@@ -400,6 +391,7 @@ class RecordController extends Controller {
         $data_all = [];
         $data_all[] = $header2;
         $list = Record::find()->andWhere(['book_id' => $id])->all();
+
         foreach ($list as $elem) {
             $one = [];
             if ($elem->numReg) {
@@ -424,21 +416,38 @@ class RecordController extends Controller {
             $one[] = $elem->rip_style == 1 ? "Гроб" : "Урна";
             $data_all[] = $one;
         }
-        //$fp = fopen('out.csv', 'w');
-        /*
-          fputcsv($fp, $header, ',', '"', '');
 
-          foreach ($data_all as $fields) {
-          fputcsv($fp, $fields, ',', '"', '');
-          }
+        return [$data_all, $header];
+    }
 
-          fclose($fp);
-         */
-        //echo 123;exit;
-        $csv->output("book_$id.csv", $data_all, $header, ';');
-        //      $csv->save();
-        //echo 1111111;
-        exit;
+    public function actionExportCsv($id) {
+
+        header('Content-type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="book_' . $id . '.csv"');
+
+        $csv = new \ParseCsv\Csv();
+
+        $csv->linefeed = "\n";
+        $data = $this->exportData($id);
+
+        $csv->output("book_$id.csv", $data[0], $data[1], ';');
+        exit();
+    }
+
+    public function actionExportExcel($id) {
+        $data = $this->exportData($id);
+        $excel = Excel::create();
+        $sheet = $excel->sheet();
+        
+        $sheet->writeRow($data[1]);
+        $sheet->writeArrayTo('A2', $data[0]);
+
+        if (ob_get_contents()) {
+            ob_end_clean();
+        }
+
+        $excel->download('book_' . $id . '.xlsx');
+        exit();
     }
 
     /**
