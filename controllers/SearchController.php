@@ -8,6 +8,7 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use \avadim\FastExcelWriter\Excel;
 use Yii;
 
 /**
@@ -396,22 +397,16 @@ class SearchController extends Controller {
         ]);
     }
 
-    public function actionExport($c_id) {
+    private function exportData($c_id) {
         $cemetery = \app\models\Cemetery::find()->andWhere(['id' => $c_id])->one();
+
         if (isset($_GET['pager'])) {
             unset($_GET['pager']);
         }
+
         $this->searchLimit = 10000;
         $data = $this->searchCemetery($cemetery->id);
-
-        //print_r($data);
-        //exit;
-        //header('Content-type: application/octet-stream');
-        //header('Content-Disposition: attachment; filename="search.csv"');
-
-        $csv = new \ParseCsv\Csv();
-        $csv->linefeed = "\n";
-
+    
         $header = [
             'Номер записи',
             'ФИО',
@@ -449,44 +444,38 @@ class SearchController extends Controller {
             $one[] = $elem['_source']['relative'] ?? '';
 
             $dopInfo = "св. {$elem['_source']['svazka_num']}, кн. {$elem['_source']['book_num']}, стр. {$elem['_source']['page_num']}, п/п: {$elem['_source']['page_punkt']}";
-            //if ($elem['record']['comment'])
-            //    $dopInfo .= "\n " . $elem['record']['comment'];
+
             if ($elem['_source']['comment'])
                 $dopInfo .= "\n " . $elem['_source']['comment'];
 
             $one[] = $dopInfo;
             $data_all[] = $one;
         }
-        //$csv->save("./temp/search.csv", $data_all, $header, ';');
-        @unlink("./temp/search.csv");
-        @unlink("./temp/search.xlsx");
+
+        return [$data_all, $header];
+    }
+
+    public function actionExport($c_id) {
+        $data = $this->exportData($c_id);
+
         if (isset($_GET['csv'])) {
-            $out = $csv->output("search.csv", $data_all, $header, ';');
-            exit;
-        }
-        $out = $csv->unparse($data_all, $header, null, null, ';');
+            $csv = new \ParseCsv\Csv();
+            $csv->linefeed = "\n";
 
-        $user = \app\models\User::findIdentity(Yii::$app->user->id);
-        $userId = $user->id;
-        file_put_contents("./temp/search.csv", $out);
-        if (file_exists("C:/python311/python.exe")) {
-            //@exec("python3 ./temp/to_excel.py");   
-            //phpinfo();
-            //exit;
-            exec("C:/python311/python -u ./temp/to_excel.py");
-            exit;
-        } else {
-            //echo '!';
-            exec("python3 -u ./temp/to_excel.py 2>&1", $r);
-            //print_r($r);
-            //exit;
+            $out = $csv->output("search.csv", $data[0], $data[1], ';');
+        }
+        else {
+            $excel = Excel::create();
+            $sheet = $excel->sheet();
+            
+            $sheet->writeRow($data[1]);
+            $sheet->writeArrayTo('A2', $data[0]);
+
+            Yii::$app->response->clearOutputBuffers();
+            $excel->download("search.xlsx");
         }
 
-        header("Location: /web/temp/search.xlsx");
-
-        exit;
-        //$csv->save($dopInfo);
-        //exit;
+        exit();
     }
 
     public function actionVopros($record_id) {

@@ -421,7 +421,6 @@ class RecordController extends Controller {
     }
 
     public function actionExportCsv($id) {
-
         header('Content-type: application/octet-stream');
         header('Content-Disposition: attachment; filename="book_' . $id . '.csv"');
 
@@ -442,9 +441,7 @@ class RecordController extends Controller {
         $sheet->writeRow($data[1]);
         $sheet->writeArrayTo('A2', $data[0]);
 
-        if (ob_get_contents()) {
-            ob_end_clean();
-        }
+        Yii::$app->response->clearOutputBuffers();
 
         $excel->download('book_' . $id . '.xlsx');
         exit();
