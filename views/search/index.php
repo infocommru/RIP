@@ -451,7 +451,6 @@ function echo_select_fuzziness($name) {
                             variable: variableName
                         },
                         success: function (data) {
-                            console.log(data);
                             response(data);
                         }
                     });

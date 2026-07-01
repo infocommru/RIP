@@ -45,7 +45,7 @@ if ($params)
 <div class="print-view">
 
     <h5><?= Html::encode($this->title) ?></h5>
-    <form method="get" action="/web/print/forma-pdf">
+    <form method="get" action="/web/print/forma">
         <div class="container">
 
             <div class="row">

@@ -28,7 +28,6 @@ services:
       - mysql
       - redis
       - opensearch-node
-      - chromium
 
   redis:
     image: redis
@@ -119,11 +118,6 @@ services:
         hard: 65536
     volumes:
       - opensearch-data:/usr/share/opensearch/data
-
-  chromium:
-    restart: unless-stopped
-    image: ghcr.io/browserless/chromium:latest
-    shm_size: '4gb'
       
 volumes:
   opensearch-data:

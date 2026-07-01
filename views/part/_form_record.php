@@ -21,9 +21,6 @@ use app\models\HelperLevoshkin;
 
             </div>
             <?php if (!$is_create): ?>
-                <div class="col-sm-2">    
-                    <a style='float:right;' id="open_img" href="lotus://<?= $model->id ?>" ><img   src="/img/view.png" /></a>
-                </div>
                 <div class="col-sm-2"  >
                     <?php Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
                 </div>           

@@ -6,7 +6,7 @@ RUN apt -y install software-properties-common curl gnupg --no-install-recommends
 RUN add-apt-repository -y ppa:ondrej/php
 
 RUN apt-get install -y locales apache2 libapache2-mod-php7.4 php7.4 php7.4-mbstring \
-	php7.4-xml php7.4-gd php7.4-mysqli php7.4-curl php7.4-zip \
+	php7.4-xml php7.4-gd php7.4-mysqli php7.4-curl php7.4-zip php7.4-imagick ghostscript \
 	python3 python3-pip python3-venv poppler-utils unzip --no-install-recommends \
 	&& apt-get clean
 RUN locale-gen ru_RU.UTF-8 && update-locale LANG=ru_RU.UTF-8

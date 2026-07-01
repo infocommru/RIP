@@ -9,10 +9,7 @@ use app\models\HelperLevoshkin;
 $model = $record;
 $title = $part->cemetery->name . ', партия #' . $part->id;
 
-$this->title = $title; //$model->book->name . ", запись #" . $model->id; //'Обновить запись: ' . $model->id;
-//$this->params['breadcrumbs'][] = ['label' => 'Записи', 'url' => "/web/record/index?book=" . $model->book_id];
-//$this->params['breadcrumbs'][] = ['label' => '#' . $model->id, 'url' => ['view', 'id' => $model->id]];
-//$this->params['breadcrumbs'][] = 'Обновить';
+$this->title = $title;
 ?>
 <div class="part-update">
 
@@ -40,13 +37,9 @@ $this->title = $title; //$model->book->name . ", запись #" . $model->id; /
 
     </h5>
     <?php
-//$im_url = "/upload/rip2/Южное кладбище/Св. 49/Кн. 284/0098.jpg";
     $im_url = "/upload/rip2/" . $model->filename;
-//$im_url = "/upload/rip3/0098.jpg";
-//$im_url = str_replace(" ", "%20", $im_url);
 
     $items = HelperImg::getImages($model->filename);
-//print_r(HelperImg::getImages($model->filename));
     ?>
 
     <script>
@@ -67,21 +60,14 @@ foreach ($items as $item) {
 ?>
 
         window.onload = () => {
-            var asrc = "lotus://" + model_id;
-            jQuery("#open_img").attr("href", asrc);
             open_image_bottom(pnum);
             jQuery(".gallery-item").eq(current_img_index).addClass('current_gallery_elem');
             jQuery(".img_gal").eq(current_img_index).addClass('current_gallery_elem');
-
-
-
-
         }
 
         function open_image_bottom(num) {
             for (var i = 1; i <= 5; i++) {
                 jQuery('#image_bottom').removeClass('bottom_img_offet' + i);
-
             }
 
             jQuery('#image_bottom').addClass('bottom_img_offet' + num);
@@ -144,25 +130,19 @@ foreach ($items as $item) {
 
 
         function click_image(index) {
-            //alert(num);
             jQuery('.img_gal').removeClass('current_gallery_elem');
             jQuery('.img_gal' + index).addClass('current_gallery_elem');
             jQuery("#record-filename").val(images_files[index]);
-            var asrc = "lotus://" + model_id + "," + images_files_short[index];
-            jQuery("#open_img").attr("href", asrc);
             jQuery("#image_bottom").attr("src", images_files_urls[index]);
 
         }
     </script>
     <?php
-//print_r($items);
     for ($i = 0; $i < sizeof($items); $i++) {
         $item = $items[$i];
         $num = $i + 1;
 
         echo "<a class='img_gal img_gal$i ' href='javascript:click_image($i)'><img src='$item[src]' /></a>";
-
-        //print_r($item);
     }
     ?>
 

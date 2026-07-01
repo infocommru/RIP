@@ -16,16 +16,12 @@ $this->params['breadcrumbs'][] = $this->title;
 $page_num = 1;
 $fname = strtr($record->filename, ["\\" => '/']);
 if (preg_match("#.*?/([^/]*?)\.jp.*?$#", $fname, $pmatch)) {
-    //echo $record->filename;
-    //print_r($pmatch);
     $page_num = $pmatch[1];
-    //exit;
 }
 
 $grob = Record::ripStyleTypes()[$record->rip_style];
 if ($model->book->rip_style) {
     $grob = Book::ripStyleTypes()[$model->book->rip_style];
-    //echo $grob;exit;
 }
 
 
@@ -47,7 +43,7 @@ $zahoronen = strtr($zahoronen, ['"' => "&quot;"]);
 <div class="print-view">
 
     <h5><?= Html::encode($this->title) ?></h5>
-    <form method="get" action="/web/print/forma-pdf">
+    <form method="get" action="/web/print/forma">
         <div class="container">
 
             <div class="row">
@@ -237,13 +233,13 @@ $zahoronen = strtr($zahoronen, ['"' => "&quot;"]);
 
     var author2 = '<?= $record->relative_fio ?>';
     var author2_short = '<?php
-//$record->relative_fio = strtr($record->relative_fio, [',' => '.']);
-$pos = strpos($record->relative_fio, ',');
-if ($pos > 0) {
-    echo substr($record->relative_fio, 0, $pos);
-} else
-    echo $record->relative_fio;
-?>';
+
+    $pos = strpos($record->relative_fio, ',');
+    if ($pos > 0) {
+        echo substr($record->relative_fio, 0, $pos);
+    } else
+        echo $record->relative_fio;
+    ?>';
 
 
 

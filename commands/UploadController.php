@@ -82,7 +82,6 @@ class UploadController extends Controller {
 
         $result['records'] = substr_count($data, "\n") - 1;
 
-        //print_r($result);exit;
         return $result;
     }
 
@@ -91,7 +90,6 @@ class UploadController extends Controller {
         chdir("./web/upload/book");
         exec("rm -rf  " . $upload->id);
         echo "unzip me!\n";
-        #sleep(60);
         exec("unzip " . $upload->id . ".zip -d $upload->id");
         echo "unzipped\n";
         exec('python3 ../../temp/upload.py ' . $upload->id);
@@ -114,8 +112,6 @@ class UploadController extends Controller {
             $book->svazka = $bookData['svazka'];
             $book->records = $bookData['records'] . '';
 
-            //$book->year1 = "";
-            //$book->year2 = "";
             $book->save();
 
             $statInfo = HelperCsv::processBookCsv($book->id, $upload->id . "/$index.csv");
@@ -124,18 +120,11 @@ class UploadController extends Controller {
             $book->year2 = $statInfo['year2'] . '';
             $book->records = $statInfo['records'] . '';
             $book->per_page = $statInfo['per_page'];
-//print_r($statInfo);exit;
 
             $book->save();
             if ($upload->part_flag)
                 HelperLevoshkin::setBookPart($book);
-            //print_r($book);
-            //exit;
         }
-        //echo $bookline;
-        //exit;
-        //$files = $this->getFiles($upload->id.'');
-        //print_r($files);
 
         chdir($cwd);
     }
@@ -148,7 +137,6 @@ class UploadController extends Controller {
             $this->processUpload($upload);
             $upload->status = 2;
             $upload->save();
-            //print_r($upload);
         }
 
         HelperLevoshkin::setPartRecords();

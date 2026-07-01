@@ -11,6 +11,9 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use Yii;
+
+require_once __DIR__ . '/../vendor/autoload.php';
 
 class PrintController extends Controller {
 
@@ -20,27 +23,27 @@ class PrintController extends Controller {
 
     public function actionIndex($record_id) {
         $record = Record::find()
-                ->andWhere(['id' => $record_id])
-                ->one();
+            ->andWhere(['id' => $record_id])
+            ->one();
 
         $book = Book::find()
-                ->andWhere(['id' => $record->book_id])
-                ->one();
+            ->andWhere(['id' => $record->book_id])
+            ->one();
 
         $cemetery = Cemetery::find()
-                ->andWhere(['id' => $book->cemetery_id])
-                ->one();
+            ->andWhere(['id' => $book->cemetery_id])
+            ->one();
 
         $sdata = CacheRecords::find()->query(['term' => ['record_id' => $record_id]])->one();
         $user = \app\models\User::findIdentity(\Yii::$app->user->id);
         return $this->render('index',
-                        [
-                            'record' => $record,
-                            'book' => $book,
-                            'sdata' => $sdata,
-                            'user' => $user,
-                            'cemetery' => $cemetery
-                        ]
+            [
+                'record' => $record,
+                'book' => $book,
+                'sdata' => $sdata,
+                'user' => $user,
+                'cemetery' => $cemetery
+            ]
         );
     }
 
@@ -49,79 +52,107 @@ class PrintController extends Controller {
 
         $params = [];
         if (isset($_GET['params'])) {
-            //echo base64_decode($_GET['params']);
-            //exit;
             $params = @unserialize(base64_decode($_GET['params']));
         }
 
         return $this->render('notfoundf2',
-                        [
-                            'user' => $user,
-                            'params' => $params
-                        ]
+            [
+                'user' => $user,
+                'params' => $params
+            ]
         );
     }
 
     public function actionForma() {
-        $this->layout = false;
-        if ($_GET['spravka'] == '1') {
-            return $this->render('form11',);
-        } else {
-            return $this->render('form2',);
-        }
-    }
-
-    public function actionFormaPdf() {
-        (exec("python3 -u ./temp/printer.py \"" . $_SERVER['REQUEST_URI'] . "\""));
-        (exec("python3 -u ./temp/pdfjpeg.py  "));
-
         $fname = "forma_f" . $_GET['spravka'] . '_N_' . $_GET['nn'] . date("_d_m_Y");
+
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+
+        $pdf = new \Mpdf\Mpdf([
+            'fontDir' => array_merge($fontDirs, [
+                __DIR__ . '/../assets/fonts',
+            ]),
+            'fontdata' => array_merge($fontData, [ // lowercase letters only in font key
+                'verdana' => [
+                    'R' => 'Verdana.ttf',
+                    'I' => 'Verdana-Italic.ttf',
+                    'B' => 'Verdana-Bold.ttf',
+                    'BI' => 'Verdana-BoldItalic.ttf',
+                ],
+            ]),
+            'mode' => 'utf-8', 'format' => 'A5',
+            'margin_top' => 0,
+            'margin_left' => 0,
+            'margin_right' => 0,
+            'margin_bottom' => 0,
+            'PDFA' => true, 'PDFAauto' => true
+        ]);
+
+        $pdf->shrink_tables_to_fit = 1;
+
+        $htmlRender = '';
+        $this->layout = false;
+        
+        if ($_GET['spravka'] == '1') {
+            $htmlRender = $this->render('form1',);
+        } else {
+            $htmlRender = $this->render('form2',);
+        }
+
+        $pdf->WriteHTML($htmlRender);
 
         switch ($_GET['saveas']) {
             case '1':
-                header('Location: /web/temp/pdf_form.pdf');
+                $pdf->Output('form.pdf', \Mpdf\Output\Destination::INLINE);
                 exit;
             case '2':
-                header('Location: /web/temp/pdf.jpg');
-                exit;
-            case '4':
-                $fileName = $fname . '.jpg';
-                header('Content-Type: application/jpeg');
-                header('Content-Disposition: attachment; filename="' . $fileName . '"');
-                header('Content-Transfer-Encoding: binary');
-                $dat = file_get_contents('./temp/pdf.jpg');
-                echo $dat;
+                $imagick = new \Imagick();
+                $result = $pdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
+                
+                $imagick->setAntiAlias(true);
+                $imagick->setOption('pdf:text-antialiasing', '4');
+                $imagick->setOption('pdf:graphics-antialiasing', '4');
+                $imagick->setResolution(400, 400);
+                $imagick->readImageBlob($result . '[0]');
+                $imagick = $imagick->mergeImageLayers(\Imagick::LAYERMETHOD_FLATTEN);
+                $imagick->setImageFormat('jpeg');
+                $imagick->scaleImage(1167, 0);
+
+                header('Content-Type: image/jpeg');
+                header('Content-Length: ' . strlen($imagick->getImageBlob()));
+                echo $imagick->getImageBlob();
+                
+                $imagick->clear();
+                $imagick->destroy();
                 exit;
             case '3':
-                $fileName = $fname . '.pdf';
-                header('Content-Type: application/pdf');
-                header('Content-Disposition: attachment; filename="' . $fileName . '"');
-                header('Content-Transfer-Encoding: binary');
-                $dat = file_get_contents('./temp/pdf_form.pdf');
-                echo $dat;
+                $pdf->Output('form.pdf', \Mpdf\Output\Destination::DOWNLOAD);
+                exit;
+            case '4':
+                $imagick = new \Imagick();
+                $result = $pdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
+                
+                $imagick->setAntiAlias(true);
+                $imagick->setOption('pdf:text-antialiasing', '4');
+                $imagick->setOption('pdf:graphics-antialiasing', '4');
+                $imagick->setResolution(400, 400);
+                $imagick->readImageBlob($result . '[0]');
+                $imagick = $imagick->mergeImageLayers(\Imagick::LAYERMETHOD_FLATTEN);
+                $imagick->setImageFormat('jpeg');
+                $imagick->scaleImage(1167, 0);
+
+                header('Content-Type: image/jpeg');
+                header('Content-Length: ' . strlen($imagick->getImageBlob()));
+                header('Content-Disposition: attachment; filename="form.jpg"');
+                echo $imagick->getImageBlob();
+                
+                $imagick->clear();
+                $imagick->destroy();
                 exit;
         }
-    }
-
-    public function actionF1($record_id) {
-        $record = Record::find()
-                ->andWhere(['id' => $record_id])
-                ->one();
-
-        $book = Book::find()
-                ->andWhere(['id' => $record->book_id])
-                ->one();
-
-        $cemetery = Cemetery::find()
-                ->andWhere(['id' => $book->cemetery_id])
-                ->one();
-
-        return $this->render('f1',
-                        [
-                            'record' => $record,
-                            'book' => $book,
-                            'cemetery' => $cemetery
-                        ]
-        );
     }
 }

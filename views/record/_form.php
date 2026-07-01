@@ -58,9 +58,6 @@ if ($model->filename) {
                 </select>
             </div>
             <?php if (!$is_create): ?>
-                <div  class="col-sm-2">    
-                    <a style='float:right;display:none;' id="open_img" href="lotus://<?= $model->id ?>" ><img style=''  src="/img/view.png" /></a>
-                </div>
                 <div class="col-sm-2"  >
                     <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
                 </div>           

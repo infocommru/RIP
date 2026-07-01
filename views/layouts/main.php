@@ -26,10 +26,8 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         <title><?= Html::encode($this->title) ?></title>
         <?php $this->head() ?>
         <link rel="stylesheet" href="/css/galereya.css" />
-        <link rel="stylesheet" href="/css/cloudzoom.css" />
         <script src="/js/hotkeys.js"></script>
 
-        <link rel="stylesheet" href="/css/jqueryui.css">
 
     </head>
     <body class="d-flex flex-column h-100">
@@ -162,8 +160,6 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         </footer>
 
         <?php $this->endBody() ?>
-        <script src='/js/cloudzoom.js'></script>
-        <script src="/js/jqueryui.js"></script>
 
     </body>
 </html>

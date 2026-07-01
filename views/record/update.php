@@ -64,31 +64,9 @@ foreach ($items as $item) {
 ?>
 
         window.onload = () => {
-            var asrc = "lotus://" + model_id;
-            jQuery("#open_img").attr("href", asrc);
             open_image_bottom(pnum);
             jQuery(".gallery-item").eq(current_img_index).addClass('current_gallery_elem');
             jQuery(".img_gal").eq(current_img_index).addClass('current_gallery_elem');
-
-<?php if ($model->fio): ?>
-                jQuery.get("/web/api/spell", {txt: "<?= $model->fio ?>"}, function (dat) {
-                    dat = jQuery.trim(dat);
-                    jQuery('.fio_label').html(dat);
-                    jQuery('.fio_label').show();
-                    //console.log(dat)
-
-                });
-<?php endif; ?>
-
-<?php if ($model->relative_fio): ?>
-                jQuery.get("/web/api/spell", {txt: "<?= $model->relative_fio ?>"}, function (dat) {
-                    dat = jQuery.trim(dat);
-                    jQuery('.relative_fio_label').html(dat);
-                    jQuery('.relative_fio_label').show();
-                    //console.log(dat)
-
-                });
-<?php endif; ?>
         }
 
         function open_image_bottom(num) {
@@ -161,8 +139,6 @@ foreach ($items as $item) {
             jQuery('.img_gal').removeClass('current_gallery_elem');
             jQuery('.img_gal' + index).addClass('current_gallery_elem');
             jQuery("#record-filename").val(images_files[index]);
-            var asrc = "lotus://" + model_id + "," + images_files_short[index];
-            jQuery("#open_img").attr("href", asrc);
             jQuery("#image_bottom").attr("src", images_files_urls[index]);
 
         }
@@ -197,8 +173,6 @@ foreach ($items as $item) {
             jQuery("#record-filename").val(images_files[index]);
             jQuery(".current_gallery_elem").removeClass("current_gallery_elem");
             $(".gallery-item").eq(current_img_index).addClass("current_gallery_elem");
-            var asrc = "lotus://"+model_id+","+images_files_short[index];
-            jQuery("#open_img").attr("href",asrc);
             jQuery("#image_bottom").attr("src",images_files_urls[index]);
         }',
         //'onopen' => 'function(this) {console.log(this);}'

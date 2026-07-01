@@ -1,114 +1,87 @@
-#wrap{
-    margin: 0 auto;
-    font-family: "Times New Roman", Times, Arial;
-    font-size: 16px;
+body {
+    font-family: verdana ,Verdana, sans-serif;
+    color:#212529;
 }
-
-#verh_block{
-    float: right;
-    width: 400px;
-    min-height: 600px;
-    margin-right: 30px;
+table {
+    width: 100%; 
+    border-collapse: collapse;
 }
-
-.div_under{
-    width: 58%;
-    height: auto;
-    border-bottom: 1px solid #808080;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-.div_under_small{
-    width: 58%;
-    height: auto;
-    border-bottom: 1px solid #808080;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-.div_in_verh{
-
-}
-
-.div_in_verh_spravka{
-font-size: 18px;
-}
-
-#center_block{
-    width: 900px;
-    margin: 0 auto;
-    padding-top: 400px;
-}
-
-.text_paragraph{
-    word-spacing: 40px;
-}
-
-.text-bigspace{
-    word-spacing: 40px;
-    font-size: 14px;
-}
-
-.text-nospace{
-    font-size: 14px;
-}
-
-.undertext{
-    font-size: 14px;
-    white-space:nowrap;
-    overflow:hidden;
-    /* text-decoration: underline;*/
-}
-
-.undertext_real{
-    font-size: 14px;
-    border-bottom: 1px solid black;
-    width: 100%;
-}
-
-.hinttext{
-    font-size: 10px;
-    padding-left: 100px;
-}
-
-
-.logo_line{
-    text-align: center;
-    font-size: 10px;
-}
-
-.logo_line_small{
-    text-align: center;
-    font-size: 10px;
-}
-
-.logo_line_upper{
+.upper_text {
     text-transform: uppercase;
 }
-
-.logo_line_bold{
+.bold {
     font-weight: bold;
 }
-
-.comment_ips{
-    font-size: 12px;
+.number_ubderline {
+    border-bottom: 0.6pt solid #000000;
+}
+.information_underline {
+    border-bottom: 0.6pt solid #000000;
+    padding-top: 1pt;
+}
+.title {
+    white-space: nowrap;
+    width: 70%;
+    padding-right: 5pt;
+    padding-left: 0pt !important; 
+    vertical-align: bottom;
+    text-align: center;
+    line-height: 1.5;
+    font-size: 5pt;
+}
+.number {
+    text-align: center;
+    line-height: 1.5;
+    font-size: 5pt;
+}
+.citizen{
+    margin-top: 15pt;
+    margin-right: 7pt;
+}
+.citizen_underline {
+    white-space: nowrap;
+    vertical-align: bottom;
+    font-size: 8pt;
+    border-bottom: 0.6pt solid #808080;
+    line-height: 1.5;
+}
+.information {
+    margin-left: 6pt;
+    font-size: 7pt;
+}
+.undertext_real {
+    width: 60%;
+    border-collapse: collapse;
+    font-size: 7pt;
+}
+.hinttext {
+    font-size: 5pt;
+    text-align: left;
+    margin-left: 50pt;
+}
+.table_label {
+    padding-top: 1pt;
+    white-space: nowrap;
+    width: max-content;
+    padding-right: 5pt;
+    padding-left: 0px !important; 
+    vertical-align: bottom; 
+    font-size: 7pt;
+}
+.table_data {
+    padding-top: 1pt;
+    padding-left: 0px !important; 
+    white-space: nowrap;
+    border-bottom: 0.6pt solid #000000; 
+    vertical-align: bottom; 
+    font-size: 7pt;
+}
+.comment_ips {
+    padding-top: 2pt;
+    font-size: 6pt;
     color:#444;
     font-style: italic;
 }
-
-print {
-    html, body {
-        width: 10mm;
-    }
-    
-    @page {
-        margin: 0;
-    }
-
-    
-}
-
-@page {
-        margin: 0;
+.worker {
+    padding-top: 2pt;
 }
