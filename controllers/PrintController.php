@@ -88,14 +88,15 @@ class PrintController extends Controller {
             'margin_top' => 0,
             'margin_left' => 0,
             'margin_right' => 0,
-            'margin_bottom' => 0,
-            'PDFA' => true, 'PDFAauto' => true
+            'margin_bottom' => 0
         ]);
 
         $pdf->shrink_tables_to_fit = 1;
+	    $pdf->SetDisplayMode('default');
 
         $htmlRender = '';
         $this->layout = false;
+        $fname = "forma_f" . $_GET['spravka'] . '_N_' . $_GET['nn'] . date("_d_m_Y");
         
         if ($_GET['spravka'] == '1') {
             $htmlRender = $this->render('form1',);
@@ -107,7 +108,7 @@ class PrintController extends Controller {
 
         switch ($_GET['saveas']) {
             case '1':
-                $pdf->Output('form.pdf', \Mpdf\Output\Destination::INLINE);
+                $pdf->Output($fname . '.pdf', \Mpdf\Output\Destination::INLINE);
                 exit;
             case '2':
                 $imagick = new \Imagick();
@@ -130,7 +131,7 @@ class PrintController extends Controller {
                 $imagick->destroy();
                 exit;
             case '3':
-                $pdf->Output('form.pdf', \Mpdf\Output\Destination::DOWNLOAD);
+                $pdf->Output($fname . '.pdf', \Mpdf\Output\Destination::DOWNLOAD);
                 exit;
             case '4':
                 $imagick = new \Imagick();
@@ -147,7 +148,7 @@ class PrintController extends Controller {
 
                 header('Content-Type: image/jpeg');
                 header('Content-Length: ' . strlen($imagick->getImageBlob()));
-                header('Content-Disposition: attachment; filename="form.jpg"');
+                header('Content-Disposition: attachment; filename=' . $fname . '.jpg');
                 echo $imagick->getImageBlob();
                 
                 $imagick->clear();
