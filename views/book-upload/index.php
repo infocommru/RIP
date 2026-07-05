@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         case 2:
                             return "обработано";
                         case 3:
-                            return "обработано";
+                            return "кладбище удалено, обработка невозможна";
                     }
                 }
             ],

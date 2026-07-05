@@ -104,6 +104,7 @@ class UploadController extends Controller {
             $bookLast = Book::find()
                 ->andWhere(['cemetery_id'=>$upload->cemetery_id])
                 ->andWhere(['name'=>$bookData['name']])
+                ->andWhere(['deleted'=>0])
                 ->one();
 
             if($bookLast)$book = $bookLast;
@@ -132,6 +133,12 @@ class UploadController extends Controller {
     public function actionIndex() {
         $uploads = BookUpload::find()->andWhere(['status' => 0])->all();
         foreach ($uploads as $upload) {
+            if(Cemetery::find()->andWhere(['id'=>$upload->cemetery_id])->andWhere(['deleted'=>0])->one() == null){
+                $upload->status = 3;
+                $upload->save();
+                continue;
+            }
+
             $upload->status = 1;
             $upload->save();
             $this->processUpload($upload);

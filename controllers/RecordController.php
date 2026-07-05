@@ -390,7 +390,7 @@ class RecordController extends Controller {
 
         $data_all = [];
         $data_all[] = $header2;
-        $list = Record::find()->andWhere(['book_id' => $id])->all();
+        $list = Record::find()->andWhere(['book_id' => $id])->andWhere(['deleted' => 0])->all();
 
         foreach ($list as $elem) {
             $one = [];
