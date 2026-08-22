@@ -8,6 +8,7 @@ use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 /**
  * RecordHistoryController implements the CRUD actions for RecordHistory model.
@@ -19,22 +20,32 @@ class RecordHistoryController extends Controller {
      */
     public function behaviors() {
         return array_merge(
-                parent::behaviors(),
-                [
-                    'verbs' => [
-                        'class' => VerbFilter::className(),
-                        'actions' => [
-                            'delete' => ['POST'],
+            parent::behaviors(),
+            [
+                'verbs' => [
+                    'class' => VerbFilter::className(),
+                    'actions' => [
+                        'delete' => ['POST'],
+                    ],
+                ],
+                'access' => [
+                    'class' => AccessControl::className(),
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
                         ],
                     ],
-                ]
+                ],
+            ]
         );
     }
 
     /**
      * Lists all RecordHistory models.
      *
-     * @return string
+     * @return string|\yii\web\Response
+     * @param int $record_id
      */
     public function actionIndex($record_id = 0) {
         if (!$record_id) {
@@ -42,28 +53,19 @@ class RecordHistoryController extends Controller {
         }
         $dataProvider = new ActiveDataProvider([
             'query' => RecordHistory::find()
-                    ->andWhere(['record_id' => $record_id]),
-                /*
-                  'pagination' => [
-                  'pageSize' => 50
-                  ],
-                  'sort' => [
-                  'defaultOrder' => [
-                  'id' => SORT_DESC,
-                  ]
-                  ],
-                 */
+                ->andWhere(['record_id' => $record_id]),
         ]);
 
         $record = Record::find()->andWhere(['id' => $record_id])->one();
         $history = RecordHistory::find()
-                ->andWhere(['record_id' => $record_id])
-                ->orderBy("id desc")
-                ->all();
+            ->andWhere(['record_id' => $record_id])
+            ->orderBy("id desc")
+            ->all();
+
         return $this->render('index', [
-                    'dataProvider' => $dataProvider,
-                    'model' => $record,
-                    'history' => $history
+            'dataProvider' => $dataProvider,
+            'model' => $record,
+            'history' => $history
         ]);
     }
 
@@ -75,7 +77,7 @@ class RecordHistoryController extends Controller {
      */
     public function actionView($id) {
         return $this->render('view', [
-                    'model' => $this->findModel($id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -96,7 +98,7 @@ class RecordHistoryController extends Controller {
         }
 
         return $this->render('create', [
-                    'model' => $model,
+            'model' => $model,
         ]);
     }
 
@@ -115,7 +117,7 @@ class RecordHistoryController extends Controller {
         }
 
         return $this->render('update', [
-                    'model' => $model,
+            'model' => $model,
         ]);
     }
 

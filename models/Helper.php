@@ -4,6 +4,9 @@ namespace app\models;
 
 class Helper {
 
+    /**
+     * @return array<int, string>
+     */
     public static function getCemeteryList() {
         $list = Cemetery::find()->all();
         $result = [];
@@ -13,6 +16,11 @@ class Helper {
 
         return $result;
     }
+
+    /**
+     * @return array<int, string>
+     * @param int $cemetery_id
+     */
 
     public static function getBookList($cemetery_id) {
         $list = Book::find()->andWhere(['cemetery_id' => $cemetery_id])->all();
@@ -24,6 +32,10 @@ class Helper {
         return $result;
     }
 
+    /**
+     * @return array<string>
+     * @param string $filename
+     */
     public static function readFileToList($filename) {
         $result = [];
         $fp = fopen($filename, 'r');
@@ -33,19 +45,22 @@ class Helper {
                 $result[] = $line;
         }
 
-
         return $result;
     }
 
+    /**
+     * @return array<string>
+     */
     public static function regions() {
         $filepath = "../data/spb_region.txt";
-        if (!file_exists($filepath))
-            $filepath = "./data/spb_region.txt";
-
         $lines = self::readFileToList($filepath);
         return $lines;
     }
 
+    /**
+     * @return string
+     * @param int $num
+     */
     public static function regionToText($num) {
         if ($num < 0)
             return '-';
@@ -56,8 +71,12 @@ class Helper {
         return $GLOBALS['regions'][$num];
     }
 
+    /**
+     * @return string
+     * @param string|null $date
+     */
     public static function formatDate($date) {
-        $date = strtr($date, ['00:00:00' => '']);
+        $date = strtr($date ?? '', ['00:00:00' => '']);
         $date = trim($date);
 
         if (preg_match("#(\d\d)\D(\d\d)\D(\d\d\d\d)#", $date, $m)) {
@@ -71,15 +90,23 @@ class Helper {
         return $date;
     }
 
-    public static function truncateToWidth($text, $fontFile, $fontSize, $width, $sliceInSpace = false) {
-        $getStringWidthInPixels = function($text, $fontFile, $fontSize) {
-            $box = imagettfbbox($fontSize, 0, $fontFile, $text);
-            // abs($box[4] - $box[0]) — классический расчет ширины
-            return abs($box[4] - $box[0]);
+    /**
+     * @return string
+     * @param string $text
+     * @param string $fontFile
+     * @param int $fontSize
+     * @param int $width
+     * @param \Mpdf\Mpdf $mpdf
+     * @param bool $sliceInSpace
+     */
+    public static function truncateToWidth($text, $fontFile, $fontSize, $width, $mpdf = null, $sliceInSpace = false) {
+        $getStringWidthInPixels = function($text, $fontFile, $fontSize, $mpdf) {
+            $mpdf->SetFont($fontFile, '', $fontSize);
+            return $mpdf->GetStringWidth($text) * $mpdf->dpi / 25.4;
         };
 
         // Если текст изначально влезает, ничего делать не нужно
-        if ($getStringWidthInPixels($text, $fontFile, $fontSize) <= $width) {
+        if ($getStringWidthInPixels($text, $fontFile, $fontSize, $mpdf) <= $width) {
             return $text;
         }
 
@@ -91,7 +118,7 @@ class Helper {
         while ($low <= $high) {
             $mid = intval(($low + $high) / 2);
             $subText = mb_substr($text, 0, $mid);
-            $currentWidth = $getStringWidthInPixels($subText, $fontFile, $fontSize);
+            $currentWidth = $getStringWidthInPixels($subText, $fontFile, $fontSize, $mpdf);
 
             if ($currentWidth <= $width) {
                 $truncatedText = $subText; // Запоминаем последний удачный вариант
@@ -114,7 +141,18 @@ class Helper {
         return $truncatedText;
     }
 
-    public static function tablePrint($labelText, $data, $firstSize, $fullSize, $fontSize, $fontFile, $spaceRepeat = 20) {
+    /**
+     * @return void
+     * @param string $labelText
+     * @param string $data
+     * @param int $firstSize
+     * @param int $fullSize
+     * @param int $fontSize
+     * @param string $fontFile
+     * @param \Mpdf\Mpdf $mpdf
+     * @param int $spaceRepeat
+     */
+    public static function tablePrint($labelText, $data, $firstSize, $fullSize, $fontSize, $fontFile, $mpdf, $spaceRepeat = 20) {
         echo "<table><tr>";
 
         if($labelText !== ''){
@@ -126,12 +164,12 @@ class Helper {
 
         while ($string !== ''){                      
             if ($first){
-                $temp_str = self::truncateToWidth($string, $fontFile, $fontSize, $firstSize, true);
+                $temp_str = self::truncateToWidth($string, $fontFile, $fontSize, $firstSize, $mpdf, true);
                 $string = mb_substr($string, mb_strlen($temp_str));
                 echo '<td class="table_data">' . $temp_str . '</td></tr>';
             }
             else {
-                $temp_str = self::truncateToWidth($string, $fontFile, $fontSize, $fullSize, true);
+                $temp_str = self::truncateToWidth($string, $fontFile, $fontSize, $fullSize, $mpdf, true);
                 $string = mb_substr($string, mb_strlen($temp_str));
                 $colspan = ($labelText !== '') ? ' colspan="2"' : '';
                 echo '<tr><td' . $colspan . ' class="table_data">' . $temp_str . '</td></tr>';

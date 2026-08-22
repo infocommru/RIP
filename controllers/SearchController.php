@@ -3,12 +3,14 @@
 namespace app\controllers;
 
 use app\models\Record;
+use app\models\Book;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use \avadim\FastExcelWriter\Excel;
+use app\models\HelperImg;
 use Yii;
 
 /**
@@ -16,6 +18,10 @@ use Yii;
  */
 class SearchController extends Controller {
 
+    /**
+     *
+     * @var integer $searchLimit
+     */
     public $searchLimit = 100;
 
     /**
@@ -48,6 +54,12 @@ class SearchController extends Controller {
         );
     }
 
+    /**
+     *
+     * @param string $q
+     * @param string $variable
+     * @return string
+     */
     public function actionSearchSuggest($q, $variable)
     {
         $query = \app\models\CacheRecords::find();
@@ -72,6 +84,13 @@ class SearchController extends Controller {
 
         return json_encode($response);
     }
+
+    /**
+     *
+     * @param string $search_string
+     * @param string $name_var
+     * @return array<string, mixed>
+     */
     protected function searchTermConditions($search_string, $name_var) {
         $condition = ['bool' => ['should' => [
             [
@@ -93,6 +112,13 @@ class SearchController extends Controller {
 
         return $condition;
     }
+
+    /**
+     *
+     * @param string $search_string
+     * @param string $name_var
+     * @return array<string, mixed>
+     */
     protected function searchStartFromConditions($search_string, $name_var) {
         $condition = [
             'prefix' => [
@@ -102,6 +128,13 @@ class SearchController extends Controller {
 
         return $condition;
     }
+
+    /**
+     *
+     * @param string $search_string
+     * @param string $name_var
+     * @return array<string, mixed>
+     */
     protected function searchEndFromConditions($search_string, $name_var) {
         $condition = [
             'wildcard' => [
@@ -113,6 +146,13 @@ class SearchController extends Controller {
 
         return $condition;
     }
+
+    /**
+     *
+     * @param string $search_string
+     * @param string $name_var
+     * @return array<string, mixed>
+     */
     protected function searchFuzzinessConditions($search_string, $name_var) {
         $condition = ['bool' => ['should' => [
             [
@@ -157,6 +197,13 @@ class SearchController extends Controller {
         return $condition;
     }
 
+    /**
+     *
+     * @param int $switch
+     * @param string $search_string
+     * @param string $name_var
+     * @return array<string, mixed>
+     */
     protected function searchValue($switch ,$search_string, $name_var){
         switch ($switch) {
             case 1:
@@ -171,13 +218,20 @@ class SearchController extends Controller {
             case 4:
                 $condition = self::searchEndFromConditions($search_string, $name_var);
                 break;
+            default:
+                $condition = [];
+                break;
         }
 
         return $condition;
     }
     
+    /**
+     *
+     * @param int $c_id
+     * @return false|array{0: array<int, mixed>, 1: int}
+     */
     protected function searchCemetery($c_id) {
-
         if (empty($_GET)) {
             return false;
         }
@@ -338,10 +392,7 @@ class SearchController extends Controller {
             }
         }
 
-		if (!empty($elasticQuery['bool']['must'])) {
-    		$query->query($elasticQuery);
-		}
-		
+    	$query->query($elasticQuery);
         $count = $query->count();
 
         $curpage = 1;
@@ -363,17 +414,20 @@ class SearchController extends Controller {
 			->asArray()
 			->all();
 			
-        //print_r($result);
         return [$result, $count];
     }
 
+    /**
+     *
+     * @return string
+     */
     public function actionIndex() {
-
         $search_data = false;
+
         if (isset($_GET['fam'])) {
             $search_data = [];
             $cemeteries = \app\models\Cemetery::find()
-                    ->orderBy("name");
+                ->orderBy("name");
 
             if ($_GET['cemetery'] != '0') {
                 $cemeteries->andWhere(['id' => $_GET['cemetery']]);
@@ -385,9 +439,14 @@ class SearchController extends Controller {
                 $data = $this->searchCemetery($cemetery->id);
                 $counter = $data[1];
                 $data = $data[0];
+                
                 if ($data) {
-                    $key = $cemetery->id . ',' . $cemetery->name . ',' . $counter;
-                    $search_data[$key] = $data;
+                    $search_data[] = [
+                        'id' => $cemetery->id,
+                        'name' => $cemetery->name,
+                        'counter' => $counter,
+                        'data' => $data
+                    ];
                 }
             }
         }
@@ -397,7 +456,12 @@ class SearchController extends Controller {
         ]);
     }
 
-    private function exportData($c_id) {
+    /**
+     *
+     * @param int $c_id
+     * @return array{0: array<int, array<int, mixed>>, 1: array<int, string>}
+     */
+    private function exportData(int $c_id): array {
         $cemetery = \app\models\Cemetery::find()->andWhere(['id' => $c_id])->one();
 
         if (isset($_GET['pager'])) {
@@ -416,7 +480,6 @@ class SearchController extends Controller {
             'Документ',
             'ЗАГС',
             'Захоронение',
-            //'Землекоп',
             'Номер участка',
             'Номер ряда',
             'Номер могилы',
@@ -437,7 +500,6 @@ class SearchController extends Controller {
             $one[] = $elem['_source']['docnum'];
             $one[] = $elem['_source']['zags'];
             $one[] = $elem['_source']['rip_style'] == 1 ? "Гроб" : "Урна";
-            //$one[] = $elem->riper;
             $one[] = $elem['_source']['areanum'] ?? '';
             $one[] = $elem['_source']['rownum'] ?? '';
             $one[] = $elem['_source']['ripnum'] ?? '';
@@ -455,29 +517,31 @@ class SearchController extends Controller {
         return [$data_all, $header];
     }
 
-    public function actionExport($c_id) {
+    /**
+     *
+     * @param int $c_id
+     * @return void
+     */
+    public function actionExport(int $c_id): void {
         $data = $this->exportData($c_id);
 
-        if (isset($_GET['csv'])) {
-            $csv = new \ParseCsv\Csv();
-            $csv->linefeed = "\n";
+        $excel = Excel::create();
+        $sheet = $excel->sheet();
+        
+        $sheet->writeRow($data[1]);
+        $sheet->writeArrayTo('A2', $data[0]);
 
-            $out = $csv->output("search.csv", $data[0], $data[1], ';');
-        }
-        else {
-            $excel = Excel::create();
-            $sheet = $excel->sheet();
-            
-            $sheet->writeRow($data[1]);
-            $sheet->writeArrayTo('A2', $data[0]);
-
-            Yii::$app->response->clearOutputBuffers();
-            $excel->download("search.xlsx");
-        }
+        Yii::$app->response->clearOutputBuffers();
+        $excel->download("search.xlsx");
 
         exit();
     }
 
+    /**
+     *
+     * @param int $record_id
+     * @return void
+     */
     public function actionVopros($record_id) {
         $record = Record::find()->andWhere(['id' => $record_id])->one();
         $record->vopros = 1;
@@ -485,19 +549,20 @@ class SearchController extends Controller {
         echo $record->fio;
     }
 
-    public function actionBookCover($record_id) {
-        $record1 = Record::find()->andWhere(['id' => $record_id])->orderBy('id')->one();
-        $filepath = str_replace("\\", "/", $record1->filename);
-        $index_last = strrpos($filepath, "/");
-        $folderpath = substr($filepath, 0, $index_last);
-        $fname = substr($filepath, $index_last + 1);
-
-        $fullpath = "../upload/rip2/$folderpath";
-
-        $files = glob($fullpath . "/*.*");
-
-        $file0 = strtr($files[0], ["../upload" => "/upload"]);
-        header("Location: $file0");
-        exit;
+    /**
+     *
+     * @param int $book_id
+     * @return void
+     */
+    public function actionBookCover($book_id) {
+        $book = Book::find()->andWhere(['id' => $book_id])->one();
+        $titleBook = HelperImg::getTitleImage($book);
+        
+        if($titleBook){
+            header("Location: $titleBook");
+            exit;
+        }
+        else
+            throw new NotFoundHttpException('Страница не найдена.');
     }
 }

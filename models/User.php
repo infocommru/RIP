@@ -14,10 +14,9 @@ use Yii;
  * @property string $password
  * @property string $firstname
  * @property string $lastname
- * @property string $middlename
- * @property string $position
+ * @property string|null $middlename
+ * @property string|null $position
  * @property int $role
- * @property Cemetery $cemetery
  */
 class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface {
 
@@ -79,6 +78,7 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface {
 
     /**
      * {@inheritdoc}
+     * @return User|null
      */
     public static function findIdentity($id) {
         $user = self::find()->andWhere(['id' => $id])->one();
@@ -89,7 +89,7 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface {
      * Finds user by username
      *
      * @param string $username
-     * @return static|null
+     * @return User|null
      */
     public static function findByUsername($username) {
         $user = self::find()->andWhere(['username' => $username])->one();
@@ -135,6 +135,10 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface {
         return $this->password === $password;
     }
 
+    /**
+     *
+     * @return array<int, string>
+     */
     public static function roleList() {
         $roles = [
             1 => "Админ",

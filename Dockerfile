@@ -1,42 +1,66 @@
 # syntax=docker/dockerfile:1
-FROM ubuntu:24.04
+# Используем официальный образ PHP 8.3 с предустановленным Apache
+FROM php:8.3-apache
 
-RUN apt update && apt upgrade -y
-RUN apt -y install software-properties-common curl gnupg --no-install-recommends
-RUN add-apt-repository -y ppa:ondrej/php
+# Устанавливаем системные зависимости для расширений и локали
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    locales \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    libmagickwand-dev \
+    ghostscript \
+    unzip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get install -y locales apache2 libapache2-mod-php7.4 php7.4 php7.4-mbstring \
-	php7.4-xml php7.4-gd php7.4-mysqli php7.4-curl php7.4-zip php7.4-imagick ghostscript \
-	python3 python3-pip python3-venv poppler-utils unzip --no-install-recommends \
-	&& apt-get clean
-RUN locale-gen ru_RU.UTF-8 && update-locale LANG=ru_RU.UTF-8
+# Настраиваем и устанавливаем расширения PHP через официальные утилиты
+# mbstring, xml, mysqli, curl уже встроены или ставятся автоматически, если нужны
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd mysqli zip pdo_mysql
+
+# Установка imagick и xdebug через PECL (так как это стороннее расширение)
+RUN pecl install imagick xdebug && docker-php-ext-enable imagick xdebug
+
+# Настройка русской локали
+RUN sed -i -e 's/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
 ENV LANG=ru_RU.UTF-8
 ENV LC_ALL=ru_RU.UTF-8
 
-RUN rm /var/www/html/* && rm /etc/apache2/sites-enabled/*
+# Настройка конфигурации Apache
+RUN rm /var/www/html/* || true && rm /etc/apache2/sites-enabled/* || true
 COPY rip.conf /etc/apache2/sites-available/rip.conf
-RUN ln -s /etc/apache2/sites-available/rip.conf /etc/apache2/sites-enabled/rip.conf && a2enmod rewrite \
-	&& chown www-data:www-data /var/www/html
+COPY php.ini $PHP_INI_DIR/conf.d/unlimited-php.ini
+RUN ln -s /etc/apache2/sites-available/rip.conf /etc/apache2/sites-enabled/rip.conf \
+    && a2enmod rewrite \
+    && chown www-data:www-data /var/www/html
 
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-php -r "if (hash_file('sha384', 'composer-setup.php') === 'c8b085408188070d5f52bcfe4ecfbee5f727afa458b2573b8eaaf77b3419b0bf2768dc67c86944da1544f06fa544fd47') { echo 'Installer verified'.PHP_EOL; } else { echo 'Installer corrupt'.PHP_EOL; unlink('composer-setup.php'); exit(1); }" && \
-php composer-setup.php --install-dir=/usr/local/bin && \
-php -r "unlink('composer-setup.php');"
+# Официальный и элегантный способ подтянуть Composer прямо из его докер-образа
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /var/www/html
 
+# Переключаемся на www-data для безопасной сборки зависимостей
 USER www-data
-RUN python3 -m venv .venv
-ENV PATH="/var/www/html/.venv/bin:$PATH"
-RUN --mount=type=cache,target=/tmp/.cache/pip .venv/bin/pip3 install --no-cache-dir --upgrade pip \
-	&& .venv/bin/pip3 install --no-cache-dir pandas numpy openpyxl XlsxWriter reportlab pdf2image pyaspeller pyppeteer tqdm
 
 COPY --chown=www-data:www-data composer.json composer.lock ./
 ENV COMPOSER_CACHE_DIR=/tmp/.cache/composer
-RUN --mount=type=cache,target=/tmp/.cache/composer php /usr/local/bin/composer.phar install --no-interaction --prefer-dist --optimize-autoloader
+
+# Ставим зависимости с использованием вашего кэш-маунта
+RUN --mount=type=cache,target=/tmp/.cache/composer php /usr/local/bin/composer install --no-interaction --prefer-dist --optimize-autoloader
+
+# Копируем остальной код
 COPY --chown=www-data:www-data . .
-RUN rm rip.conf && mkdir web/assets && chown www-data:www-data web/assets && mkdir web/upload && chown www-data:www-data web/upload
+
+# Чистим конфиг и создаем нужные Yii2 папки (сразу с правильными правами)
+RUN rm -f rip.conf php.ini \
+    && mkdir -p web/assets web/upload runtime
+
+# Возвращаемся на root, так как Apache на 80 порту должен стартовать от суперпользователя
 USER root
 
 EXPOSE 80
-CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+
+# В официальном образе дефолтная CMD уже настроена на запуск Apache, 
+# но мы дублируем её для явного контроля
+CMD ["apache2-foreground"]

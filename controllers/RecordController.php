@@ -23,28 +23,28 @@ class RecordController extends Controller {
      */
     public function behaviors() {
         return array_merge(
-                parent::behaviors(),
-                [
-                    'verbs' => [
-                        'class' => VerbFilter::className(),
-                        'actions' => [
-                            'delete' => ['POST'],
+            parent::behaviors(),
+            [
+                'verbs' => [
+                    'class' => VerbFilter::className(),
+                    'actions' => [
+                        'delete' => ['POST'],
+                    ],
+                ],
+                'access' => [
+                    'class' => AccessControl::className(),
+                    'rules' => [
+                        [
+                            'allow' => false,
+                            'roles' => ['?'],
+                        ],
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
                         ],
                     ],
-                    'access' => [
-                        'class' => AccessControl::className(),
-                        'rules' => [
-                            [
-                                'allow' => false,
-                                'roles' => ['?'],
-                            ],
-                            [
-                                'allow' => true,
-                                'roles' => ['@'],
-                            ],
-                        ],
-                    ],
-                ]
+                ],
+            ]
         );
     }
 
@@ -66,27 +66,22 @@ class RecordController extends Controller {
                 ->andWhere(['book_id' => $bookId])
                 ->andWhere(['deleted' => 0]);
         if ($record->age) {
-            //$query->andWhere("age like '%" . $record->age . "%'");
             $query->andWhere(["like", "age", $record->age]);
         }
 
         if ($record->fio) {
-            //$query->andWhere("fio like '%" . $record->fio . "%'");
             $query->andWhere(["like", "fio", $record->fio]);
         }
 
         if ($record->numReg) {
-            //$query->andWhere("numReg like '%" . $record->numReg . "%'");
             $query->andWhere(["like", "numReg", $record->numReg]);
         }
 
         if ($record->death_date) {
-            //$query->andWhere("death_date like '%" . $record->death_date . "%'");
             $query->andWhere(["like", "death_date", $record->death_date]);
         }
 
         if ($record->rip_date) {
-            //$query->andWhere("rip_date like '%" . $record->rip_date . "%'");
             $query->andWhere(["like", "rip_date", $record->rip_date]);
         }
 
@@ -103,46 +98,41 @@ class RecordController extends Controller {
         ]);
 
         return $this->render('index', [
-                    'dataProvider' => $dataProvider,
-                    'user' => $user,
-                    'model' => new Record(),
-                    'book_id' => $bookId,
-                    'book' => $book
+            'dataProvider' => $dataProvider,
+            'user' => $user,
+            'model' => new Record(),
+            'book_id' => $bookId,
+            'book' => $book
         ]);
     }
 
+    /**
+     * @return string
+     */
     public function actionVopros() {
         $user = \app\models\User::findIdentity(Yii::$app->user->id);
-
-        //$bookId = intval($_GET['book']);
-        //$book = \app\models\Book::find()->andWhere(["vopros" => 1])->one();
 
         $record = new Record();
         $record->load($this->request->get());
 
         $query = Record::find()->andWhere(['vopros' => 1]);
         if ($record->age) {
-            //$query->andWhere("age like '%" . $record->age . "%'");
             $query->andWhere(["like", "age", $record->age]);
         }
 
         if ($record->fio) {
-            //$query->andWhere("fio like '%" . $record->fio . "%'");
             $query->andWhere(["like", "fio", $record->fio]);
         }
 
         if ($record->numReg) {
-            //$query->andWhere("numReg like '%" . $record->numReg . "%'");
             $query->andWhere(["like", "numReg", $record->numReg]);
         }
 
         if ($record->death_date) {
-            //$query->andWhere("death_date like '%" . $record->death_date . "%'");
             $query->andWhere(["like", "death_date", $record->death_date]);
         }
 
         if ($record->rip_date) {
-            //$query->andWhere("rip_date like '%" . $record->rip_date . "%'");
             $query->andWhere(["like", "rip_date", $record->rip_date]);
         }
 
@@ -159,19 +149,17 @@ class RecordController extends Controller {
         ]);
 
         return $this->render('vopros', [
-                    'dataProvider' => $dataProvider,
-                    'user' => $user,
-                    'model' => new Record(),
-                        //'book_id' => $bookId,
-                        // 'book' => $book
+            'dataProvider' => $dataProvider,
+            'user' => $user,
+            'model' => new Record(),
         ]);
     }
 
+    /**
+     * @return string
+     */
     public function actionDeleted() {
         $user = \app\models\User::findIdentity(Yii::$app->user->id);
-
-        //$bookId = intval($_GET['book']);
-        //$book = \app\models\Book::find()->andWhere(["vopros" => 1])->one();
 
         $flash = '';
         if (isset($_GET['a'])) {
@@ -197,27 +185,22 @@ class RecordController extends Controller {
 
         $query = Record::find()->andWhere(['deleted' => 1]);
         if ($record->age) {
-            //$query->andWhere("age like '%" . $record->age . "%'");
             $query->andWhere(["like", "age", $record->age]);
         }
 
         if ($record->fio) {
-            //$query->andWhere("fio like '%" . $record->fio . "%'");
             $query->andWhere(["like", "fio", $record->fio]);
         }
 
         if ($record->numReg) {
-            //$query->andWhere("numReg like '%" . $record->numReg . "%'");
             $query->andWhere(["like", "numReg", $record->numReg]);
         }
 
         if ($record->death_date) {
-            //$query->andWhere("death_date like '%" . $record->death_date . "%'");
             $query->andWhere(["like", "death_date", $record->death_date]);
         }
 
         if ($record->rip_date) {
-            //$query->andWhere("rip_date like '%" . $record->rip_date . "%'");
             $query->andWhere(["like", "rip_date", $record->rip_date]);
         }
 
@@ -234,12 +217,10 @@ class RecordController extends Controller {
         ]);
 
         return $this->render('deleted', [
-                    'dataProvider' => $dataProvider,
-                    'user' => $user,
-                    'model' => new Record(),
-                    'flash' => $flash
-                        //'book_id' => $bookId,
-                        // 'book' => $book
+            'dataProvider' => $dataProvider,
+            'user' => $user,
+            'model' => new Record(),
+            'flash' => $flash
         ]);
     }
 
@@ -251,7 +232,7 @@ class RecordController extends Controller {
      */
     public function actionView($id) {
         return $this->render('view', [
-                    'model' => $this->findModel($id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -259,10 +240,10 @@ class RecordController extends Controller {
      * Creates a new Record model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
+     * @param int $book_id
      */
     public function actionCreate($book_id) {
         $book = \app\models\Book::find()->andWhere(["id" => $book_id])->one();
-        //print_r($book);exit;
         $model = new Record();
 
         if ($this->request->isPost) {
@@ -270,15 +251,14 @@ class RecordController extends Controller {
                 $model->book_id = $book_id;
                 $model->user_id = Yii::$app->user->id;
                 $model->updated_at = time();
+                $model->filename = str_replace('/', '\\', (string)$model->filename);
 
                 if ($model->save()) {
                     \app\models\HelperLevoshkin::update_unknown($book);
                     $model->refresh();
+                    
                     \app\models\HelperLevoshkin::updateSearchRecord($model);
                     return $this->redirect(['view', 'id' => $model->id]);
-                } else {
-                    print_r($model);
-                    exit;
                 }
             }
         } else {
@@ -286,8 +266,8 @@ class RecordController extends Controller {
         }
 
         return $this->render('create', [
-                    'model' => $model,
-                    'book' => $book
+            'model' => $model,
+            'book' => $book
         ]);
     }
 
@@ -336,22 +316,23 @@ class RecordController extends Controller {
                 if (($next) && ($model->filename == $next->filename)) {
                     $pnum = $_POST['pageNum'];
                 }
-
-                //return $this->redirect(['vopros']);
-                //return $this->redirect(['update', 'id' => $id_next, "pnum" => $pnum]);
             }
         }
 
         return $this->render('update', [
-                    'model' => $model,
-                    'next' => $next,
-                    'first' => $first,
-                    'prev' => $prev,
-                    'user' => $user
+            'model' => $model,
+            'next' => $next,
+            'first' => $first,
+            'prev' => $prev,
+            'user' => $user
         ]);
     }
 
-    private function exportData($id) {
+    /**
+     * @param int $id
+     * @return array<int, list<list<int|string|null>|string>>
+     */
+    private function exportData(int $id): array {
         $header = [
             'Номер записи',
             'ФИО',
@@ -360,7 +341,6 @@ class RecordController extends Controller {
             'Дата захоронения',
             'Номер документа ЗАГС',
             'ЗАГС',
-            //'Землекоп',
             'Номер участка',
             'Номер ряда',
             'Номер могилы',
@@ -378,7 +358,6 @@ class RecordController extends Controller {
             'RIP_Date',
             'DocNum',
             'ZAGS',
-            //'Землекоп',
             'Area_Num',
             'Row_Num',
             'RIP_Num',
@@ -406,7 +385,6 @@ class RecordController extends Controller {
             $one[] = $elem->rip_date;
             $one[] = $elem->docnum;
             $one[] = $elem->zags;
-            //$one[] = $elem->riper;
             $one[] = $elem->area_num;
             $one[] = $elem->row_num;
             $one[] = $elem->rip_num;
@@ -420,19 +398,10 @@ class RecordController extends Controller {
         return [$data_all, $header];
     }
 
-    public function actionExportCsv($id) {
-        header('Content-type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="book_' . $id . '.csv"');
-
-        $csv = new \ParseCsv\Csv();
-
-        $csv->linefeed = "\n";
-        $data = $this->exportData($id);
-
-        $csv->output("book_$id.csv", $data[0], $data[1], ';');
-        exit();
-    }
-
+    /**
+     * @return void
+     * @param int $id
+     */
     public function actionExportExcel($id) {
         $data = $this->exportData($id);
         $excel = Excel::create();

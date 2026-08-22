@@ -1,0 +1,21 @@
+parameters:
+    level: 6
+
+    paths:
+        - controllers
+        - jobs
+        - models
+        - views
+        - assets
+
+    tmpDir: %currentWorkingDirectory%/runtime
+
+    bootstrapFiles:
+        - %currentWorkingDirectory%/vendor/yiisoft/yii2/Yii.php
+        - %currentWorkingDirectory%/vendor/autoload.php
+
+    yii2:
+        config_path: config/web.php
+        component_generics:
+            user: identityClass      # Built-in (already configured)
+            repository: modelClass   # Custom generic component

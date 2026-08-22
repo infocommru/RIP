@@ -7,8 +7,11 @@ use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\widgets\DetailView;
 
-/** @var yii\web\View $this */
-/** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var yii\web\View $this
+ * @var yii\data\ActiveDataProvider $dataProvider
+ * @var \app\models\Record $model
+ * @var array<\app\models\RecordHistory>|null $history
+*/
 $this->title = $model->book->name . ', запись №' . $model->numReg;
 
 $user = \app\models\User::findIdentity(\Yii::$app->user->id);
@@ -17,10 +20,16 @@ if ($user->role == 1) {
     $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['/record/update', 'id' => $model->id]];
     $this->params['breadcrumbs'][] = "История изменений";
 } else {
-    //$this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['/record/update', 'id' => $model->id]];
     $this->params['breadcrumbs'][] = $this->title;
 }
 
+/**
+ *
+ * @param string $data
+ * @param string $pole1
+ * @param string $pole2
+ * @return string
+ */
 function td_table($data, $pole1, $pole2) {
     if ($pole1 == $pole2) {
         return "<td>$data</td>";
@@ -33,10 +42,6 @@ function td_table($data, $pole1, $pole2) {
 
     <h3><?= Html::encode($this->title) ?></h3>
     <hr />
-    <?php
-    //print_r(unserialize($history[0]->info));
-    //exit;
-    ?>
 
     <?=
     DetailView::widget([
@@ -65,7 +70,6 @@ function td_table($data, $pole1, $pole2) {
             'rip_date',
             'docnum',
             'zags',
-            'riper',
             'area_num',
             'row_num',
             'rip_num',
@@ -112,10 +116,10 @@ function td_table($data, $pole1, $pole2) {
                 for ($i = 0; $i < sizeof($history_list); $i++) {
                     $one = $history_list[$i];
                     $history_last = $model->attributes;
+
                     if (isset($history[$i + 1]))
                         $history_last = unserialize($history[$i + 1]->info);
-                    //print_r($history_last);
-                    //exit;
+
                     $info = unserialize($one->info);
                     $history = $info;
                     $num = $i + 1;
@@ -147,19 +151,6 @@ function td_table($data, $pole1, $pole2) {
                     echo td_table($info['filename'], $history_last['filename'], $history['filename']);
                     echo td_table($info['comment'], $history_last['comment'], $history['comment']);
                     echo td_table($ripStyle, $history_last['rip_style'], $history['rip_style']);
-
-                    //echo "<td>$info[fio]</td>";
-                    //echo "<td>$info[age]</td>";
-                    //echo "<td>$info[death_date]</td>";
-                    //echo "<td>$info[rip_date]</td>";
-                    //echo "<td>$info[zags]</td>";
-                    //echo "<td>$info[area_num]</td>";
-            //echo "<td>$info[row_num]</td>";
-                    //echo "<td>$info[rip_num]</td>";
-                    //echo "<td>$info[relative_fio]</td>";
-                    //echo "<td>$info[filename]</td>";
-                    //echo "<td>$info[comment]</td>";
-                    //echo "<td>$ripStyle</td>";
                     echo "</tr>";
                 }
                 ?>

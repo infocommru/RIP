@@ -5,7 +5,9 @@ logs
 .git
 .gitignore
 .dockerignore
+.vscode/
 docker-compose.yml
+docker-compose.override.yml
 Dockerfile
 Dockerfile.opensearch
 *.sql

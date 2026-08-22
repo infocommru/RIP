@@ -26,12 +26,6 @@ use app\models\User;
 <?= $form->field($model, 'position')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'role')->dropDownList(User::roleList()) ?>
-<?php if (0):?>
-    <?= $form->field($model, 'cemetery_id')->dropDownList(app\models\Helper::getCemeteryList()) ?>
-    <?php if($model->cemetery_id):?>
-<?= $form->field($model, 'book_id')->dropDownList(app\models\Helper::getBookList($model->cemetery_id)) ?>
-<?php endif;?>
-    <?php endif;?>
 
     <div class="form-group">
         <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>

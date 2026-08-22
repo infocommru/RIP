@@ -6,21 +6,17 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 
-/** @var yii\web\View $this */
-/** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var yii\web\View $this
+ * @var yii\data\ActiveDataProvider $dataProvider
+ * @var int $book_id
+ * @var app\models\Record $model
+*/
 $this->title = "Записи, требующие уточнения";
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="record-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if (0): ?>
-        <p>
-            <?= Html::a('Добавить запись', ['create', 'book_id' => $book_id], ['class' => 'btn btn-success']) ?>
-            <?= Html::a('Экспорт CSV', "/web/record/export-csv?id=" . $book_id, ['class' => 'btn btn-warning']) ?>
-            <?= Html::a('Сбросить фильтры', "/web/record/index?book=" . $book_id, ['class' => 'btn btn-info']) ?>
-        </p>
-        `<?php endif; ?>
 
     <?=
     GridView::widget([

@@ -55,7 +55,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'rip_date',
             'docnum',
             'zags',
-            'riper',
             'area_num',
             'row_num',
             'rip_num',

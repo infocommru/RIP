@@ -2,6 +2,11 @@
 
 use \app\models\Record;
 use \app\models\Helper;
+use yii\helpers\FileHelper;
+
+/**
+ * @var \Mpdf\Mpdf $mpdfObject
+ */
 
 $docnum = $_GET['docnum'];
 $svid = "";
@@ -21,8 +26,7 @@ $vd = explode(" ", $vidano);
 $vd_len = mb_strlen($vidano, 'utf8');
 
 $record = Record::find()->andWhere(['id' => $_GET['record_id']])->one();
-
-$normal = \Yii::getAlias('@app') . '/assets/fonts/Verdana.ttf';
+$normal = 'verdana';
 ?>
 
 <!doctype html>
@@ -72,10 +76,10 @@ $normal = \Yii::getAlias('@app') . '/assets/fonts/Verdana.ttf';
                     <table class="citizen">
                         <?php
                             if ((sizeof($vd) > 1) && (( mb_strlen($vd[1], 'utf8') <= 2) || (substr_count($vidano, '.')))) {
-                                $string = 'Гр.' . Helper::truncateToWidth($vidano, $normal, 8, 135);
+                                $string = 'Гр.' . Helper::truncateToWidth($vidano, $normal, 8, 135, $mpdfObject);
                             } 
                             else {
-                                $string = 'Гр.' . Helper::truncateToWidth($vd[0], $normal, 8, 135);
+                                $string = 'Гр.' . Helper::truncateToWidth($vd[0], $normal, 8, 135, $mpdfObject);
                             }
 
                             echo '<tr><td class="citizen_underline">' .$string . "</td></tr>";
@@ -84,7 +88,7 @@ $normal = \Yii::getAlias('@app') . '/assets/fonts/Verdana.ttf';
 
                             if ((sizeof($vd) > 1) && ( mb_strlen($vd[1], 'utf8') > 2) && (!substr_count($vidano, '.'))) {
                                 for ($i = 1; $i < sizeof($vd); $i++) {
-                                    $string = Helper::truncateToWidth($tmp_rep . $vd[$i], $normal, 8, 150);
+                                    $string = Helper::truncateToWidth($tmp_rep . $vd[$i], $normal, 8, 150, $mpdfObject);
                                     echo '<tr><td class="citizen_underline">' . $string . "</td></tr>";
                                 }
                             } else {
@@ -109,21 +113,18 @@ $normal = \Yii::getAlias('@app') . '/assets/fonts/Verdana.ttf';
                     str_repeat("\u{00A0}", 9) . "умерший(ая) ";
                 ?>
             </div>
-            <div class="information_underline">
-                <?php
-                    $string = str_repeat("\u{00A0}", 21) . $_GET['fio'] . str_repeat("\u{00A0}", 12);
-                    if ($_GET['age']){
-                        $string .= ', ' . $_GET['age'];
+            <?php
+                $string = $_GET['fio'] . str_repeat("\u{00A0}", 12);
+                if ($_GET['age']){
+                    $string .= ', ' . $_GET['age'];
 
-                        if(intval($_GET['age']) . '' == $_GET['age']){
-                            $string .= 'лет';
-                        }
+                    if(intval($_GET['age']) . '' == $_GET['age']){
+                        $string .= 'лет';
                     }
+                }
 
-                    echo Helper::truncateToWidth($string, $normal, 7, 550); 
-                ?>
-
-            </div>
+                Helper::tablePrint('', $string, 545, 545, 7, $normal, $mpdfObject, 21);
+            ?>
             <div class="hinttext">
                 (фамилия, имя, отчество полностью)
             </div>
@@ -131,9 +132,9 @@ $normal = \Yii::getAlias('@app') . '/assets/fonts/Verdana.ttf';
                 <div>
                     захоронен(а)
                 </div>
-                <div class="information_underline">
-                    <?php echo Helper::truncateToWidth(str_repeat("\u{00A0}", 4) . $_GET['zahr'], $normal, 7, 540); ?>
-                </div>
+                <?php 
+                    Helper::tablePrint('', $_GET['zahr'], 545, 545, 7, $normal, $mpdfObject, 4);
+                ?>
             </div> 
             <div class="hinttext">
                 (название кладбища, участок, ряд, место)
@@ -147,7 +148,7 @@ $normal = \Yii::getAlias('@app') . '/assets/fonts/Verdana.ttf';
                         <?php
                             $string = $_GET['rip_date'] . (((isset($_GET['print_date'])) && ($_GET['death_date'])) ?
                                     ', дата смерти - ' . $_GET['death_date'] : '');
-                            echo Helper::truncateToWidth(str_repeat("\u{00A0}", 20) . $string, $normal, 7, 445);
+                            echo Helper::truncateToWidth(str_repeat("\u{00A0}", 20) . $string, $normal, 7, 450, $mpdfObject);
                         ?>
                     </td>
                 </tr>
@@ -159,10 +160,10 @@ $normal = \Yii::getAlias('@app') . '/assets/fonts/Verdana.ttf';
                 по свидетельству о смерти <span class='information_underline'><?= $svid ?></span> № <span class='information_underline'><?= $number ?></span>                    
             </div>
             <?php
-                Helper::tablePrint('место государственной регистрации смерти', $_GET['zags'], 325, 545, 7, $normal);
+                Helper::tablePrint('место государственной регистрации смерти', $_GET['zags'], 330, 545, 7, $normal, $mpdfObject);
             ?>
             <?php
-                Helper::tablePrint('ответственное лицо', $_GET['author2'], 440, 545, 7, $normal);
+                Helper::tablePrint('ответственное лицо', $_GET['author2'], 445, 545, 7, $normal, $mpdfObject);
             ?>
             <div class="hinttext">
                 (фамилия, имя, отчество)
@@ -172,7 +173,7 @@ $normal = \Yii::getAlias('@app') . '/assets/fonts/Verdana.ttf';
                 книга <span class="information_underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $_GET['book_num'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> , стр. <span class="information_underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $_GET['page_num'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> , п/п <span class="information_underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $_GET['pp'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
             </div> 
             <?php
-                Helper::tablePrint('', trim($_GET['comment']), 545, 545, 7, $normal, 10);
+                Helper::tablePrint('', trim($_GET['comment']), 545, 545, 7, $normal, $mpdfObject, 10);
             ?>
             <?php if (isset($_GET['print_comment'])): ?>
                 <div class="comment_ips"> 
@@ -186,7 +187,7 @@ $normal = \Yii::getAlias('@app') . '/assets/fonts/Verdana.ttf';
                 </span> 
                 &nbsp;&nbsp;&nbsp;(
                 <span class="information_underline">
-                    <?php echo Helper::truncateToWidth(str_repeat("\u{00A0}", 3) . $_GET['author'] . str_repeat("\u{00A0}", 4), $normal, 7, 250); ?>
+                    <?php echo Helper::truncateToWidth(str_repeat("\u{00A0}", 3) . $_GET['author'] . str_repeat("\u{00A0}", 4), $normal, 7, 250, $mpdfObject); ?>
                 </span>
                 )
             </div>

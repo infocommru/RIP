@@ -20,12 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php if($model->book_id):?>
         <?=
         Html::a('Снять назначенную книгу', ['view', 'id' => $model->id, "delbook" => '1'], [
-            'class' => 'btn btn-warning',
-        /* 'data' => [
-          'confirm' => 'Удаляем?',
-          'method' => 'post',
-          ],
-         */        ])
+            'class' => 'btn btn-warning',])
         ?>
     <?php endif;?>
         <?=
@@ -56,27 +51,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     return User::roleList()[$model->role];
                 }
             ],
-            /*
-            [
-                'label' => 'Кладбище',
-                'value' => function ($model) {
-                    if (!$model->cemetery)
-                        return false;
-                    return $model->cemetery->name;
-                }
-            ],
-            [
-                'label' => 'Книга',
-                'attribute' => 'html',
-                'value' => function ($model) {
-                    if (!$model->book)
-                        return false;
-                    $result = $model->book->name;
-                    //$result .= "<a href='/' class='btn btn-danger'>снять книгу</a>";
-                    return $result;
-                }
-            ],
-            */
         ],
     ])
     ?>

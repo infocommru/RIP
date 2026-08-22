@@ -3,6 +3,9 @@ vendor/
 vagrant/
 runtime/
 upload/
+.vscode/
+
+docker-compose.override.yml
 
 # Windows thumbnail cache files
 Thumbs.db

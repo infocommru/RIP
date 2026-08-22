@@ -7,6 +7,12 @@ use app\models\Record;
 use app\models\Cemetery;
 use app\models\Helper;
 
+/**
+ * @var yii\web\View $this
+ * @var \app\models\User $user
+ * @var array<string, string> $params
+ */
+
 $this->title = "Форма Ф2";
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -17,9 +23,6 @@ if ($user->middlename) {
 }
 
 $otv_lico = '';
-
-//print_r($params);
-//exit;
 
 $fio = '';
 if ($params)
@@ -34,9 +37,6 @@ if ($params) {
         $cemetery_name = $cemetery->name;
     }
 }
-
-//print_r($params);
-//exit;
 
 $rip_year = '';
 if ($params)

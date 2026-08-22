@@ -4,6 +4,8 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 use app\models\Book;
 use app\models\Record;
+use app\models\HelperImg;
+use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
 /** @var app\models\Book $model */
@@ -15,39 +17,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Книги', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 
-$record1 = Record::find()->andWhere(['book_id' => $model->id])->orderBy('id')->one();
-$obloshka = '';
-
-if ($record1) {
-    $filepath = str_replace("\\", "/", $record1->filename);
-    $index_last = strrpos($filepath, "/");
-    $folderpath = substr($filepath, 0, $index_last);
-    //$fname = substr($filepath, $index_last + 1);
-
-    $fullpath = "../upload/rip2/$folderpath";
-
-    $files = glob($fullpath . "/*.*");
-    $file0 = '';
-    if ($files)
-        $file0 = strtr($files[0], ["../upload" => "/upload"]);
-
-    //print_r($files);exit;
-
-
-    /*$fname = strtr($record1->filename, [
-        '002.' => "001.",
-        '003.' => "001.",
-        '004.' => "001.",
-        '005.' => "001.",
-        '006.' => "001.",
-        '007.' => "001.",
-        '008.' => "001.",
-        '009.' => "009.",
-            ]);*/
-
-    $obloshka = "$file0";
-}
-
+$obloshka = \app\models\HelperImg::getTitleImage($model);
 ?>
 <div class="book-view">
 
@@ -61,6 +31,7 @@ if ($record1) {
         <?php endif; ?>
         <?php
         if ($is_admin) {
+            echo Html::a('Загрузить сканы', ['upload-images', 'id' => $model->id], ['class' => 'btn btn-primary me-1']);
             echo Html::a('Удалить', ['delete', 'id' => $model->id], [
                 'class' => 'btn btn-danger',
                 'data' => [
@@ -77,7 +48,6 @@ if ($record1) {
         'model' => $model,
         'attributes' => [
             'id',
-            //'cemetery_id',
             [
                 'label' => 'Кладбише',
                 'value' => function ($model) {
@@ -110,16 +80,18 @@ if ($record1) {
     <?php if ($is_admin): ?>
         <div>
             <h4>Вгрузить записи</h4>
-            <form enctype="multipart/form-data" method="post">
-                <input name="csv" type="file"> 
-                <input type="hidden" name="_csrf" value="<?= Yii::$app->request->getCsrfToken() ?>" />
-                <input type="checkbox" id="create_part" name="create_part" >
-                <label for="create_part">Партия на проверку</label>
-                <input type="submit" value="отправить">
+            <?php
+                 ActiveForm::begin([
+                    'method' => 'post',
+                    'options' => ['enctype' => 'multipart/form-data']
+                ]);
 
+                echo Html::fileInput('excel', null, 
+                    ['class' => 'form-control', 'accept' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
+                echo Html::submitButton('Отправить', ['class' => 'btn btn-primary mt-2']);
 
-            </form>
-
+                ActiveForm::end();
+            ?>
         </div>
     <?php endif; ?>
 </div>

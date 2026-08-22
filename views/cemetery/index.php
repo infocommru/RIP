@@ -6,8 +6,10 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 
-/** @var yii\web\View $this */
-/** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var yii\web\View $this
+ * @var yii\data\ActiveDataProvider $dataProvider
+ * @var Cemetery $model
+*/
 $this->title = 'Кладбища';
 $this->params['breadcrumbs'][] = "Кладбища";
 ?>

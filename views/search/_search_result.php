@@ -1,27 +1,27 @@
 <?php
 
 use app\models\Helper;
+use app\models\User;
+use app\models\Record;
+use yii\helpers\Url;
 
-function dat_format($date) {
-    $date = strtr($date, ['00:00:00' => '']);
-    $date = trim($date);
-
-    return $date;
-}
-
+/**
+ * @param int $cemetery_id
+ * @return int
+ */
 function get_page($cemetery_id) {
     $pages = explode(';', $_GET['pager']);
     $curpage = 1;
     foreach ($pages as $p) {
         $pp = explode(",", $p);
-        if ($pp[0] == $cemetery_id)
+        if ($pp[0] == (string)$cemetery_id)
             $curpage = $pp[1];
     }
 
-    return $curpage;
+    return intval($curpage);
 }
 
-$user = \app\models\User::findIdentity(Yii::$app->user->id);
+$user = app\models\User::findIdentity(Yii::$app->user->id);
 
 $url_export = $_SERVER['REQUEST_URI'];
 $url_export = strtr($url_export, ['/search' => '/search/export']);
@@ -30,30 +30,27 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
         <div id="tabs">
             <ul>
                 <?php
-                foreach ($data as $key => $list):
-                    $kk = explode(",", $key);
+                /** @var false|array<string, mixed> $data */
+                foreach ($data as $list):
                     ?>
-                    <li><a href="#tabs-<?= $kk[0] ?>"><?= $kk[1] ?></a></li>
+                    <li><a href="#tabs-<?= $list['id'] ?>"><?= $list['name'] ?></a></li>
                 <?php endforeach; ?>
             </ul>
 
             <?php
-            foreach ($data as $key => $list):
+            /** @var false|array<string, mixed> $data */
+            foreach ($data as $list):
                 $pages = 1;
                 $page = 1;
-                $kk = explode(",", $key);
                 ?>
-                <div id="tabs-<?= $kk[0] ?>">
+                <div id="tabs-<?= $list['id'] ?>">
                     <?php
-                    if ($kk[2] > 100):
-                        $pages = ceil(1.0 * $kk[2] / 100);
-                        $page = get_page($kk[0]);
-                        //echo $pages;
-                        //echo ';'.$kk[2];
+                    if ($list['counter'] > 100):
+                        $pages = ceil((double)$list['counter'] / 100);
+                        $page = get_page(intval($list['id']));
                         ?>
                     <?php endif; ?>
-                    <h5>Всего записей: <?= $kk[2] ?>. Выгрузить <a href="<?= $url_export . "&c_id=" . $kk[0] ?>">excel</a>, 
-                        <a href="<?= $url_export . "&c_id=" . $kk[0] ?>&csv=1">csv</a></h5>
+                    <h5>Всего записей: <?= $list['counter'] ?>. Выгрузить <a href="<?= $url_export . "&c_id=" . $list['id'] ?>">excel</a></h5>
 
                     <table class="table">
                         <thead>
@@ -77,53 +74,30 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
                         </thead>
                         <tbody>
                             <?php
-                            for ($i = 0; $i < sizeof($list); $i++) {
-                                $elem = $list[$i]['_source'];
+                            for ($i = 0; $i < sizeof($list['data']); $i++) {
+                                $elem = $list['data'][$i]['_source'];
                                 $num = $i + 1;
-                                $regnum = '';
-                                //if (isset($elem['regnum']))
-                                    $regnum = $elem['regnum'];
-
-                                //$regnum = $elem['record']['numReg'];
-                                //if (!$regnum)
-                                    //$regnum = $elem['record']['numLiteral'];
+                                $regnum = $elem['regnum'];
 
                                 if ($page > 1)
                                     $num += 100 * ($page - 1);
+
                                 $fio = $elem['fio_display'];
-                                //$fio = $elem['record']['fio'];
-                                //$age = $elem['record']['age'];
                                 $age = $elem['age'];
                                 $dead_year = Helper::formatDate($elem['dead_date']);
                                 $rip_year = Helper::formatDate($elem['rip_date']);
-                                //$dead_year = Helper::formatDate($elem['record']['death_date']);
-                                //$rip_year = Helper::formatDate($elem['record']['rip_date']);
-                                //$zags = \app\models\Helper::regionToText($elem['zags_num']);
-                                #$zags = $elem['zags_num'];
+                                $zags = $elem['zags'];
 
-                                #if ($zags == '-')
-                                    $zags = $elem['zags'];
-
-                                //$rip_style = \app\models\Record::ripStyleTypes()[$elem['record']['rip_style']];
-                                $rip_style = \app\models\Record::ripStyleTypes()[$elem['rip_style']];
+                                $rip_style = app\models\Record::ripStyleTypes()[$elem['rip_style']];
                                 if ((isset($elem['book_rip_style'])) && ($elem['book_rip_style'])) {
-                                    $rip_style = \app\models\Record::ripStyleTypes()[$elem['book_rip_style']];
+                                    $rip_style = app\models\Record::ripStyleTypes()[$elem['book_rip_style']];
                                 }
 
-                                //$docnum = $elem['record']['docnum'];
-                                //$areanum = $elem['record']['area_num'];
-                                //$rownum = $elem['record']['row_num'];
-                                //$ripnum = $elem['record']['rip_num'];
-                                //$relative = $elem['record']['relative_fio'];
                                 $docnum = $elem['docnum'];
                                 $areanum = $elem['areanum'];
                                 $rownum = $elem['rownum'];
                                 $ripnum = $elem['ripnum'];
                                 $relative = $elem['relative'];
-
-                                //$record = app\models\Record::find()->andWhere(['id'=>$elem['record_id']])->one();
-
-                                //$comment = $elem['record']['comment'];
                                 $comment = $elem['comment'];
 
                                 $dopInfo = "<span style='font-size:13px;'>св. $elem[svazka_num], кн. $elem[book_num], стр. $elem[page_num], строка: $elem[page_punkt]";
@@ -132,22 +106,16 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
                                     $comment .= " " . $elem['comment_book'];
                                 }
 
-
                                 if ($comment)
                                     $dopInfo .= "<br />$comment";
 
-                                $dopInfo .= "<br /><a class='link-primary' target='_blank' href='/web/search/book-cover/?record_id=$elem[record_id]'>обложка</a>";
-
+                                $dopInfo .= "<br /><a class='link-primary' target='_blank' href='/web/search/book-cover?book_id=$elem[book_id]'>обложка</a>";
                                 $dopInfo .= "</span>";
 
-                                //$flink = "/"
                                 $filelink = '';
                                 if ($elem['filename']) {
-
-                                    $im_url = "/upload/rip2/" . $elem['filename'];
-
-                                    $im_url = str_replace(" ", "%20", $im_url);
-
+                                    $im_url = Url::to(Yii::getAlias("@webimages/$elem[filename]"));
+                                    $im_url = str_replace("\\", "/", $im_url);
                                     $filelink = "<a target='_blank' href='$im_url'><img src='/img/view.png' width='24px' /></a>";
                                 }
 
@@ -195,7 +163,7 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
 
                                 <ul class="pagination">
                                     <?php
-                                    $current_page = get_page($kk[0]);
+                                    $current_page = get_page(intval($list['id']));
                                     if ($pages <= 30) {
                                         for ($i = 1; $i <= $pages; $i++) {
 
@@ -203,7 +171,7 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
                                             if ($i == $current_page)
                                                 $active = 'active';
                                             echo <<<HERE
-<li class="page-item pagenum pagenum$i $active" aria-current="page"><a class="page-link" href="javascript:next_page($kk[0],$i);"  >$i</a></li>
+<li class="page-item pagenum pagenum$i $active" aria-current="page"><a class="page-link" href="javascript:next_page({$list['id']},$i);"  >$i</a></li>
 HERE;
                                         }
                                     } else {
@@ -221,8 +189,6 @@ HERE;
                                         if ($pend > $pages)
                                             $pend = $pages;
 
-
-
                                         for ($i = $pstart; $i <= $pend; $i++) {
                                             $active = '';
                                             if ($i == $current_page)
@@ -235,7 +201,7 @@ HERE;
                                                 $lname = $i . ' >>';
 
                                             echo <<<HERE
-<li class="page-item pagenum pagenum$i $active" aria-current="page"><a class="page-link" href="javascript:next_page($kk[0],$i);"  >$lname</a></li>
+<li class="page-item pagenum pagenum$i $active" aria-current="page"><a class="page-link" href="javascript:next_page({$list['id']},$i);"  >$lname</a></li>
 HERE;
                                         }
                                     }
@@ -245,16 +211,11 @@ HERE;
 
                             </div>
                         </div>
-
                         <?php
-                    } else {
-                        //echo '000';
                     }
                     ?>
                 </div>            
             <?php endforeach; ?>
-
-
         </div> 
     </div>
 </div>

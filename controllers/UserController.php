@@ -19,28 +19,24 @@ class UserController extends Controller {
      */
     public function behaviors() {
         return array_merge(
-                parent::behaviors(),
-                [
-                    'verbs' => [
-                        'class' => VerbFilter::className(),
-                        'actions' => [
-                            'delete' => ['POST'],
+            parent::behaviors(),
+            [
+                'verbs' => [
+                    'class' => VerbFilter::className(),
+                    'actions' => [
+                        'delete' => ['POST'],
+                    ],
+                ],
+                'access' => [
+                    'class' => AccessControl::className(),
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
                         ],
                     ],
-                    'access' => [
-                        'class' => AccessControl::className(),
-                        'rules' => [
-                            [
-                                'allow' => false,
-                                'roles' => ['?'],
-                            ],
-                            [
-                                'allow' => true,
-                                'roles' => ['@'],
-                            ],
-                        ],
-                    ],
-                ]
+                ],
+            ]
         );
     }
 
@@ -73,21 +69,11 @@ class UserController extends Controller {
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-                /*
-                  'pagination' => [
-                  'pageSize' => 50
-                  ],
-                  'sort' => [
-                  'defaultOrder' => [
-                  'id' => SORT_DESC,
-                  ]
-                  ],
-                 */
         ]);
 
         return $this->render('index', [
-                    'dataProvider' => $dataProvider,
-                    'model' => $user
+            'dataProvider' => $dataProvider,
+            'model' => $user
         ]);
     }
 
@@ -101,6 +87,7 @@ class UserController extends Controller {
         if (isset($_GET['delbook'])) {
             $user = $this->findModel($id);
             $book = \app\models\Book::find()->andWhere(['id' => $user->book_id])->one();
+
             if ($book) {
                 $book->status = 1;
                 $book->save();
@@ -110,7 +97,7 @@ class UserController extends Controller {
         }
 
         return $this->render('view', [
-                    'model' => $this->findModel($id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -137,7 +124,7 @@ class UserController extends Controller {
         }
 
         return $this->render('create', [
-                    'model' => $model,
+            'model' => $model,
         ]);
     }
 
@@ -164,7 +151,7 @@ class UserController extends Controller {
         }
 
         return $this->render('update', [
-                    'model' => $model,
+            'model' => $model,
         ]);
     }
 
@@ -197,12 +184,14 @@ class UserController extends Controller {
     }
 
     public function beforeAction($action) {
+        if (!parent::beforeAction($action)) {
+            return false;
+        }
 
         $user = \app\models\User::findIdentity(\Yii::$app->user->id);
         if ($user->role != 1) {
             $this->redirect(['/']);
         }
-
 
         return parent::beforeAction($action);
     }

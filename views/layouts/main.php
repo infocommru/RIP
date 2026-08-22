@@ -1,10 +1,9 @@
 <?php
-/** @var yii\web\View $this */
-
-/** @var string $content */
+/** @var yii\web\View $this
+* @var string $content 
+*/
 use app\assets\AppAsset;
 use app\widgets\Alert;
-use app\models\Part;
 use yii\bootstrap5\Breadcrumbs;
 use yii\bootstrap5\Html;
 use yii\bootstrap5\Nav;
@@ -43,8 +42,6 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 
             $items = [
                 ['label' => 'Главная', 'url' => ['/site/index']],
-                    //['label' => 'About', 'url' => ['/site/about']],
-                    //['label' => 'Contact', 'url' => ['/site/contact']],
             ];
 
             if (!Yii::$app->user->isGuest) {
@@ -65,9 +62,6 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                         ],
                     ];
 
-                    //$items[] = ['label' => 'Логи загрузки', 'url' => ['/book-upload']];
-
-
                     $items[] = ['label' => 'Пользователи',
                         'items' => [
                             ['label' => 'Пользователи', 'url' => '/web/user'],
@@ -75,9 +69,6 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                         ],
                     ];
 
-                    //$items[] = ['label' => 'Дебаг',
-                    //    'url' => '/web/bad'
-                    //];
                 } else {
 
                     $items[] = ['label' => 'Книги',
@@ -97,36 +88,14 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                         ],
                     ];
                 }
-                if ($user->role == 22) {
-                    $items[] = ['label' => 'Книги', 'url' => ['/operator/book']];
-                    if ($user->book)
-                        $items[] = ['label' => '  ' . $user->book->name, 'url' => ['/record?book=' . $user->book_id]];
-
-                    $items[] = ['label' => 'Справка', 'url' => ['/operator/help']];
-                }
-
-                if (in_array($user->role, [1, 3])) {//($user->role == 3) {
-                    $items[] = ['label' => 'Партии', 'url' => ['/part']];
-                    $part = Part::find()
-                            ->andWhere(['user_id' => $user->id])
-                            ->andWhere(['status' => 1])
-                            ->one();
-                    if ($part) {
-                        $items[] = ['label' => $part->cemetery->name . ', партия #' . $part->id, 'url' => ['/part/update-record?part_id=' . $part->id]];
-                    }
-                    /*
-                      if ($user->book)
-                      $items[] = ['label' => '  ' . $user->book->name, 'url' => ['/record?book=' . $user->book_id]];
-
-                      $items[] = ['label' => 'Справка', 'url' => ['/operator/help']];
-                     */
-                }
             }
 
+            /** @var \app\models\User|null $user */
+            $user = Yii::$app->user->identity;
             $items[] = Yii::$app->user->isGuest ? ['label' => 'Войти', 'url' => ['/site/login']] : '<li class="nav-item">'
                     . Html::beginForm(['/site/logout'])
                     . Html::submitButton(
-                            'Выйти (' . Yii::$app->user->identity->username . ')',
+                            'Выйти (' . $user->username . ')',
                             ['class' => 'nav-link btn btn-link logout']
                     )
                     . Html::endForm()

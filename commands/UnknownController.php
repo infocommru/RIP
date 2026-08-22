@@ -3,18 +3,17 @@
 namespace app\commands;
 
 use yii\console\Controller;
-use yii\console\ExitCode;
 use app\models\Book;
-use app\models\Part;
-use app\models\Helper;
 use app\models\Cemetery;
-use app\models\BookUpload;
-use app\models\HelperCsv;
 use app\models\HelperLevoshkin;
-use app\models\Record;
 
 class UnknownController extends Controller {
 
+    /**
+     * Creates the search index.
+     * @return void
+	 * @param int $cemetery_id
+     */
     public function actionIndex($cemetery_id = 0) {
         if ($cemetery_id)
             $cemeteries = Cemetery::find()->andWhere(['id' => $cemetery_id])->all();
@@ -26,8 +25,8 @@ class UnknownController extends Controller {
             $c_id = $cemetery->id;
 
             $books = Book::find()
-                    ->andWhere(['cemetery_id' => $cemetery->id])
-                    ->all();
+                ->andWhere(['cemetery_id' => $cemetery->id])
+                ->all();
 
             foreach ($books as $book) {
                 $updated = \app\models\HelperLevoshkin::update_unknown($book);
@@ -37,7 +36,5 @@ class UnknownController extends Controller {
                 }
             }
         }
-
-        exit;
     }
 }

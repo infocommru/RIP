@@ -1,17 +1,19 @@
 <?php
 
-$params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
     'name' =>"Сведения о захоронении",
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
-        'language' => 'ru-RU', // язык перевода — русский
+    'bootstrap' => ['log', 'queue'],
+    'language' => 'ru-RU',
+    'timeZone' => getenv('TZ'),
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
+        '@images' => '@app/upload/rip2',
+        '@webimages' => '/upload/rip2',
     ],
      'container' => [
         'definitions' => [
@@ -41,18 +43,19 @@ $config = [
            //'class' => 'yii\caching\FileCache',
            'class' => 'yii\redis\Cache',
         ],
+        'queue' => [
+            'class' => \yii\queue\redis\Queue::class,
+            'redis' => 'redis',
+            'channel' => 'queue',
+            'as log' => \yii\queue\LogBehavior::class,
+            'ttr' => 86400,
+        ],
         'user' => [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
-        ],
-        'mailer' => [
-            'class' => \yii\symfonymailer\Mailer::class,
-            'viewPath' => '@app/mail',
-            // send all mails to a file by default.
-            'useFileTransport' => true,
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
@@ -73,7 +76,6 @@ $config = [
         ],
         
     ],
-    'params' => $params,
 ];
 
 if (YII_ENV_DEV) {

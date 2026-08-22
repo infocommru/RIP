@@ -3,35 +3,15 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use app\models\HelperLevoshkin;
+use app\models\HelperImg;
+use yii\helpers\StringHelper;
 
-/** @var yii\web\View $this */
-/** @var app\models\Record $model */
-/** @var yii\widgets\ActiveForm $form */
-?>
+/** @var yii\web\View $this
+* @var app\models\Record $model
+* @var yii\widgets\ActiveForm $form
+* @var bool $is_create
+*/
 
-<?php
-$images_list = [];
-if ($model->filename)
-    $images_list = \app\models\HelperImg::getImages($model->filename, 8888, 8888);
-$images_list_short = [];
-$images_short_to_path = [];
-foreach ($images_list as $img) {
-    $images_list_short[] = $img['src3'];
-    $images_short_to_path[$img['src3']] = $img;
-
-    //print_r($img);
-    //exit;
-}
-
-$f_img_name = '';
-
-if ($model->filename) {
-    $f_img = $model->filename;
-    $f_img_name = explode('/', str_replace("\\", "/", $f_img));
-    $f_img_name = end($f_img_name);
-}
-//echo $f_img_name;
-//exit;
 ?>
 
 <div class="record-form">
@@ -46,39 +26,26 @@ if ($model->filename) {
             </div>
             <div class="col-sm-3">
                 <label for ='select_fname'>Выбрать файл</label>
-                <select onchange='change_select_img()' id="select_fname" class="form-control" >
-                    <?php
-                    foreach ($images_list_short as $short):
-                        $checked = '';
-                        if ($short == $f_img_name)
-                            $checked = "selected checked ='checked' ";
-                        ?>
-                        <option <?= $checked ?> value='<?= $images_short_to_path[$short]['src2'] ?>' ><?= $short ?></option>
-                    <?php endforeach; ?>
-                </select>
+                <select id="select_fname" class="form-control"></select>
             </div>
             <?php if (!$is_create): ?>
-                <div class="col-sm-2"  >
+                <div class="col-sm-2 d-flex align-items-center">
                     <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
-                </div>           
+                </div>
             <?php endif; ?>
 
         </div>
         <div class="row">
-            <?php //$form->field($model, 'book_id')->textInput()    ?>
             <div class="col-sm-2">
                 <?= $form->field($model, 'numReg')->textInput() ?>
             </div>
             <div class="col-sm-2">
                 <?= $form->field($model, 'numLiteral')->textInput(['maxlength' => true]) ?>
             </div>
-            <div class="col-sm-3">
+            <div class="col-sm-3 parent-speller">
                 <?= $form->field($model, 'fio')->textInput(['maxlength' => true]) ?>
-
-                <div class='valid-feedback fio_label' ONCLICK='javascript:help_fio();'></div>
-
+                <div class="speller mb-2" style="color: green; cursor: pointer;"></div>
             </div>
-
             <div class="col-sm-1">
                 <?= $form->field($model, 'age')->textInput() ?>
             </div>
@@ -92,25 +59,12 @@ if ($model->filename) {
         </div>
 
         <div class="row">
-            <?php //$form->field($model, 'book_id')->textInput()      ?>
-
             <div class="col-sm-2">
                 <?= $form->field($model, 'docnum')->textInput(['maxlength' => true]) ?>
-
-
-
-            </div>            <div class="col-sm-2">
+            </div>
+            <div class="col-sm-2 parent-speller">
                 <?= $form->field($model, 'zags')->textInput() ?>
-                <?php
-                if ($model->zags) {
-                    $reg = HelperLevoshkin::region($model->zags);
-                    if (($reg[1] < 100) and ($reg[1] > 80)) {
-                        echo "<div style='display:block;' class='valid-feedback region_valid' ONCLICK='javascript:help_region();'>$reg[0]</div>";
-                    }
-                }
-                ?>
-
-
+                <div class="speller mb-2" style="color: green; cursor: pointer;"></div>
             </div>
             <div class="col-sm-2">
                 <?= $form->field($model, 'area_num')->textInput(['maxlength' => true]) ?>
@@ -124,24 +78,20 @@ if ($model->filename) {
 
         </div>
 
-
-
         <div class="row">
-            <div class="col-sm-4">
+            <div class="col-sm-4 parent-speller">
                 <?= $form->field($model, 'relative_fio')->textInput(['maxlength' => true]) ?>
-
-                <div class='valid-feedback relative_fio_label' ONCLICK='javascript:help_relative_fio();'></div>
-
+                <div class="speller mb-2" style="color: green; cursor: pointer;"></div>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-6 parent-speller">
                 <?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
+                <div class="speller mb-2" style="color: green; cursor: pointer;"></div>
             </div>
             <div class="col-sm-2">
                 <?= $form->field($model, 'rip_style')->dropDownList(\app\models\Record::ripStyleTypes()) ?>
                 <input type="hidden" id='pageNum' name='pageNum' value='1' />
             </div>
         </div>
-
 
         <?php if ($is_create): ?>
             <div class="row">
@@ -150,9 +100,96 @@ if ($model->filename) {
                 </div>           
             </div>           
         <?php endif; ?>
-
     </div>
 
     <?php ActiveForm::end(); ?>
 
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let timer;
+
+        document.querySelectorAll(".parent-speller").forEach(el => {
+            setSpellValue(el.querySelector('input'), el.querySelector('.speller'));
+        });
+
+        function setSpellValue(recordDom, spellerDom)
+        {
+            if(recordDom.value){
+                speller(recordDom.value).then(result => {
+                    if(result && result !== recordDom.value)
+                        spellerDom.textContent = result;
+                    else
+                        spellerDom.textContent = '';
+                });
+            }
+            else
+                spellerDom.textContent = '';
+
+        }
+
+        async function speller(text) {
+            let text_array = text.trim().split(/\s+/);
+            const positions = [...text.matchAll(/\S+/g)].map(m => m.index);
+
+            try {
+                const response = await fetch(
+                    "https://speller.yandex.net/services/spellservice.json/checkText",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: new URLSearchParams({
+                            text: text,
+                            lang: "ru",
+                            options: 0
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(`Speller HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                result.forEach(index => {
+                    if (index.s && index.s.length > 0) {
+                        text_array[positions.indexOf(index.pos)] = index.s[0];
+                    }
+                });
+
+                return text_array.join(" ");
+
+            } catch (error) {
+                console.error(error);
+                return false;
+            }
+        }
+
+        document.querySelectorAll(".speller").forEach(el => {
+            el.addEventListener('click', (e) => {
+                const inputDom = e.target.parentElement
+                    .querySelector('input');
+
+                inputDom.value = el.textContent;
+                el.textContent = '';
+            });
+        });
+
+        document.querySelectorAll(".parent-speller").forEach(el => {
+            el.querySelector('input').addEventListener('input', (e) => {
+                clearTimeout(timer);
+
+                timer = setTimeout(async () => {
+                        const spellerDom = e.target
+                            .closest('.parent-speller')
+                            .querySelector('.speller');
+
+                        setSpellValue(e.target, spellerDom);
+                }, 500);
+            });
+        });
+    });
+</script>

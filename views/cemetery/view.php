@@ -2,9 +2,11 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
 /** @var app\models\Cemetery $model */
+
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => 'Кладбища', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
@@ -46,14 +48,18 @@ $this->params['breadcrumbs'][] = $this->title;
     <hr />
 
     <h3>Вгрузить архив книг (.zip)</h3>
-    <form enctype="multipart/form-data" method="post">
-        <input name="zipfile" type="file"> 
-        <input type="hidden" name="_csrf" value="<?= Yii::$app->request->getCsrfToken() ?>" />
-        <input type="checkbox" id="create_part" name="create_part" >
-        <label for="create_part">Партия на проверку</label>
-        <input type="submit" value="Отправить">
 
+    <?php
+        ActiveForm::begin([
+            'method' => 'post',
+            'options' => ['enctype' => 'multipart/form-data']
+        ]);
 
-    </form>
+        echo Html::fileInput('zipfile', null, 
+            ['class' => 'form-control', 'accept' => 'application/zip, application/x-zip-compressed']);
+        echo Html::submitButton('Отправить', ['class' => 'btn btn-success mt-2']);
+
+        ActiveForm::end();
+    ?>
 
 </div>

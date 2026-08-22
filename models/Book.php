@@ -10,17 +10,18 @@ use Yii;
  * @property int $id
  * @property int $cemetery_id
  * @property int|null $part_id
- * @property string $name
+ * @property string|null $name
  * @property string|null $number
  * @property string|null $svazka
- * @property string $year1
- * @property string $year2
+ * @property string|null $year1
+ * @property string|null $year2
  * @property string $records
- * @property string $per_page
+ * @property int $per_page
  * @property int $status
- * @property string $comment
+ * @property string|null $comment
  * @property int $rip_style
- * @property int $deleted 
+ * @property int $deleted
+ * @property int $dbg
  * 
  * @property Cemetery $cemetery
  */
@@ -39,7 +40,7 @@ class Book extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['cemetery_id', 'name', 'records'], 'required'],
-            [['cemetery_id', 'part_id', 'per_page', 'status', 'rip_style'], 'integer'],
+            [['cemetery_id', 'part_id', 'per_page', 'status', 'rip_style', 'dbg'], 'integer'],
             [['number', 'svazka'], 'string', 'max' => 128],
             [['year1', 'year2', 'records'], 'string', 'max' => 32],
             [['comment'], 'string'],
@@ -66,6 +67,7 @@ class Book extends \yii\db\ActiveRecord {
             'comment' => 'Комментарий',
             'rip_style' => 'Захоронение',
             'deleted' => 'Удалено',
+            'dbg' => '',
         ];
     }
 
@@ -78,6 +80,10 @@ class Book extends \yii\db\ActiveRecord {
         return $this->hasOne(Cemetery::class, ['id' => 'cemetery_id']);
     }
 
+    /**
+     * @return array<int, string>
+     */
+    
     public static function getStatuses() {
         $statuses = [
             1 => 'свободен',
@@ -92,20 +98,15 @@ class Book extends \yii\db\ActiveRecord {
     }
 
     /**
-     * Gets query for [[Part]].
-     *
-     * @return \yii\db\ActiveQuery
+     * @return array<int, string>
      */
-    public function getPart() {
-        return $this->hasOne(Part::class, ['id' => 'part_id']);
-    }
 
     public static function ripStyleTypes() {
         $types = [
             0 => "-",
             1 => "Гроб",
             2 => "Урна",
-                        3 => "Урна, стена",
+            3 => "Урна, стена",
             4 => "Урна, земля",
         ];
 

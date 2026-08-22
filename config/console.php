@@ -1,17 +1,20 @@
 <?php
 
-$params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic-console',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'queue'],
     'controllerNamespace' => 'app\commands',
+    'timeZone' => getenv('TZ'),
+    'language' => 'ru-RU',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
         '@tests' => '@app/tests',
+        '@images' => '@app/upload/rip2',
+        '@webimages' => '/upload/rip2',
     ],
     'components' => [
     	'redis' => [
@@ -32,6 +35,13 @@ $config = [
             //'class' => 'yii\caching\FileCache',
             'class' => 'yii\redis\Cache',
         ],
+        'queue' => [
+            'class' => \yii\queue\redis\Queue::class,
+            'redis' => 'redis',
+            'channel' => 'queue',
+            'as log' => \yii\queue\LogBehavior::class,
+            'ttr' => 86400,
+        ],
         'log' => [
             'targets' => [
                 [
@@ -42,7 +52,6 @@ $config = [
         ],
         'db' => $db,
     ],
-    'params' => $params,
     /*
     'controllerMap' => [
         'fixture' => [ // Fixture generation command line.

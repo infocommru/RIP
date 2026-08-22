@@ -6,17 +6,19 @@ use Yii;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use app\models\Book;
-use app\models\Part;
 use app\models\Helper;
 use app\models\Cemetery;
 use app\models\BookUpload;
-use app\models\HelperCsv;
 use app\models\HelperLevoshkin;
 use app\models\CacheRecords;
 
 class SearchCacheController extends Controller {
 
-	private function createIndex() {
+	/**
+     * Creates the search index.
+     * * @return void
+     */
+	private function createIndex(): void {
 		$db = CacheRecords::getDb();
 		$command = $db->createCommand();
 
@@ -112,14 +114,19 @@ class SearchCacheController extends Controller {
 		]);
 	}
     
-    public function actionIndex($cemetery_id = 0) {  	
-        //$zags_list = Helper::regions();
-        
+	/**
+     * Creates the search index.
+     * @return void
+	 * @param int $cemetery_id
+	 * @param string|null $cacheKey
+     */
+    public function actionIndex(int $cemetery_id = 0, ?string $cacheKey = null): void {
         if ($cemetery_id) {
             $cemeteries = Cemetery::find()
 				->andWhere(['id' => $cemetery_id])
 				->andWhere(['deleted' => 0])
 				->all();
+
 			\app\models\HelperCache::deleteCemetery($cemetery_id);
 		}
 		else {
@@ -127,14 +134,34 @@ class SearchCacheController extends Controller {
 			$this->createIndex();
 		}
 
-        foreach ($cemeteries as $cemetery) {
-			echo $cemetery->name . PHP_EOL;
+		$totalCemeteries = count($cemeteries);
+
+		for($count = 0; $count != $totalCemeteries; ++$count){
+			echo $cemeteries[$count]->name . PHP_EOL;
+			$updateStatus = null;
+
+			if($cacheKey){
+				$cemeteryName = $cemeteries[$count]->name;
+				$percentage = round(($count / $totalCemeteries) * 100);
+
+				$updateStatus = function() use ($cemeteryName, $percentage, $cacheKey) {
+					$oldLogs = Yii::$app->cache->get($cacheKey);
+            		$oldLogs = ($oldLogs) ? $oldLogs['logs'] : '';
+
+					Yii::$app->cache->set($cacheKey, [
+						'name' => $cemeteryName,
+						'percentage' => $percentage,
+						'error' => false,
+						'logs' => $oldLogs
+					], 120);
+				};
+			}
 	
 			$books = Book::find()
-                   ->andWhere(['cemetery_id' => $cemetery->id])
-                   ->all();
+				->andWhere(['cemetery_id' => $cemeteries[$count]->id])
+				->all();
 
-            \app\models\HelperCache::updateCache($books);
+            \app\models\HelperCache::updateCache($books, $updateStatus);
        	}
     }
 }

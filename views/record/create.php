@@ -2,8 +2,10 @@
 
 use yii\helpers\Html;
 
-/** @var yii\web\View $this */
-/** @var app\models\Record $model */
+/** @var yii\web\View $this
+ *  @var app\models\Record $model
+ *  @var app\models\Book $book
+*/
 $this->title = 'Новая запись (' . $book->name . ')';
 $this->params['breadcrumbs'][] = ['label' => $book->name, 'url' => ['index', 'book' => $book->id]];
 $this->params['breadcrumbs'][] = $this->title;

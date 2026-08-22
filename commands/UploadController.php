@@ -7,96 +7,67 @@ use yii\console\ExitCode;
 use app\models\Book;
 use app\models\Cemetery;
 use app\models\BookUpload;
-use app\models\HelperCsv;
+use app\models\HelperExcel;
 use app\models\HelperLevoshkin;
+use yii\helpers\FileHelper;
+use \avadim\FastExcelReader\Excel;
+use yii\helpers\StringHelper;
+use Yii;
 
 class UploadController extends Controller {
 
-    private function rglob($pattern, $flags = 0) {
-        $files = glob($pattern, $flags);
-        foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
-            $files = array_merge(
-                    [],
-                    ...[$files, $this->rglob($dir . "/" . basename($pattern), $flags)]
-            );
-        }
-        return $files;
-    }
-
-    private function getFiles($folder) {
-        $dh = opendir($folder);
-        $result = [];
-        while ($f = readdir($dh)) {
-            if ($f == '..')
-                continue;
-            if ($f == '.')
-                continue;
-
-            $fpath = $folder . '/' . $f;
-
-            if (is_dir(($fpath))) {
-                $result = array_merge($result, $this->getFiles($fpath));
-            } else {
-                $result[] = $fpath;
-            }
-        }
-
-        closedir($dh);
-
-        return $result;
-    }
-
-    public function getBooksInfo($upload) {
-        $infodata = [];
-        $f = fopen($upload->id . '/info.txt', 'r');
-        if ($f) {
-            while (($line = fgets($f)) !== false) {
-                $line = trim($line);
-                $ll = explode("=", $line);
-                if (sizeof($ll) < 2)
-                    continue;
-                $infodata[intval($ll[0])] = $ll[1];
-            }
-            fclose($f);
-        }
-
-        return $infodata;
-    }
-
-    public function getBookinfo($upload, $index, $bookline) {
+    /**
+     * Creates the search index.
+     * @return array{number: string, svazka: string, name: string}
+	 * @param string $bookline
+     */
+    public function getBookinfo(string $bookline): array {
 
         $result = ['number' => "", 'svazka' => ''];
 
-        $book = (explode("/", strtr($bookline, ["\\" => '/'])));
-        $book = end($book);
-        $book = strtr($book, ['.xlsx' => '']);
-
+        $book = StringHelper::basename($bookline);
+        $book = pathinfo($book, PATHINFO_FILENAME);
         $result['name'] = $book;
+
         if (preg_match("#.*?(\d+).*?(\d+).*?#", $book, $match)) {
 
             $result['number'] = $match[2];
             $result['svazka'] = $match[1];
         }
-
-        $data = trim(file_get_contents($upload->id . '/' . $index . '.csv'));
-
-        $result['records'] = substr_count($data, "\n") - 1;
-
+        
         return $result;
     }
 
-    public function processUpload($upload) {
-        $cwd = getcwd();
-        chdir("./web/upload/book");
-        exec("rm -rf  " . $upload->id);
-        echo "unzip me!\n";
-        exec("unzip " . $upload->id . ".zip -d $upload->id");
-        echo "unzipped\n";
-        exec('python3 ../../temp/upload.py ' . $upload->id);
+    /**
+     * Creates the search index.
+     * @return void
+	 * @param BookUpload $upload
+     * @param (\Closure(string=): void)|null $updateStatus
+     */
+    public function processUpload(BookUpload $upload, ?\Closure $updateStatus = null): void {
+        $dirPath = \Yii::getAlias('@app/web/upload/book/' . $upload->id);
+        $dirPath = FileHelper::normalizePath($dirPath);
+        $extractFile = \Yii::getAlias('@app/web/upload/book/' . $upload->id . '.zip');
+        $extractFile = FileHelper::normalizePath($extractFile);
 
-        $bInfo = $this->getBooksInfo($upload);
-        foreach ($bInfo as $index => $bookline) {
-            $bookData = $this->getBookinfo($upload, $index, $bookline);
+        if (is_dir($dirPath)) {
+            FileHelper::removeDirectory($dirPath);
+        }
+        else {
+            FileHelper::createDirectory($dirPath);
+        }
+
+        exec("unzip ". "$extractFile -d $dirPath");
+
+        // Ищем файлы рекурсивно
+        $excelFiles = FileHelper::findFiles($dirPath, [
+            'only' => ['*.xlsx'], // Искать только файлы с расширением .xlsx
+            'recursive' => true,  // Заходить во все вложенные папки
+        ]);
+
+        foreach ($excelFiles as $bookline) {
+            $bookData = $this->getBookinfo($bookline);
+
             $book = new Book();
             $book->cemetery_id = $upload->cemetery_id;
             $book->name = $bookData['name'];
@@ -111,41 +82,66 @@ class UploadController extends Controller {
 
             $book->number = $bookData['number'];
             $book->svazka = $bookData['svazka'];
-            $book->records = $bookData['records'] . '';
-
+            $book->records = '0';
             $book->save();
 
-            $statInfo = HelperCsv::processBookCsv($book->id, $upload->id . "/$index.csv");
+            $statInfo = HelperExcel::processBookExcel($book->id, $bookline, $updateStatus);
 
             $book->year1 = $statInfo['year1'] . '';
             $book->year2 = $statInfo['year2'] . '';
             $book->records = $statInfo['records'] . '';
             $book->per_page = $statInfo['per_page'];
-
             $book->save();
-            if ($upload->part_flag)
-                HelperLevoshkin::setBookPart($book);
         }
-
-        chdir($cwd);
     }
 
-    public function actionIndex() {
+    /**
+     * Creates the search index.
+     * @return void
+     * @param string|null $cacheKey
+     */
+    public function actionIndex(?string $cacheKey = null): void {
         $uploads = BookUpload::find()->andWhere(['status' => 0])->all();
-        foreach ($uploads as $upload) {
-            if(Cemetery::find()->andWhere(['id'=>$upload->cemetery_id])->andWhere(['deleted'=>0])->one() == null){
-                $upload->status = 3;
-                $upload->save();
+        $totalUploads = count($uploads);
+
+        for ($upload = 0; $upload !== $totalUploads; ++$upload) {
+            if(Cemetery::find()->andWhere(['id'=>$uploads[$upload]->cemetery_id])->andWhere(['deleted'=>0])->one() == null){
+                $uploads[$upload]->status = 3;
+                $uploads[$upload]->save();
                 continue;
             }
 
-            $upload->status = 1;
-            $upload->save();
-            $this->processUpload($upload);
-            $upload->status = 2;
-            $upload->save();
-        }
+            $updateStatus = null;
 
-        HelperLevoshkin::setPartRecords();
+            if($cacheKey){
+				$uploadName = $uploads[$upload]->filename;
+				$percentage = round(($upload / $totalUploads) * 100);
+
+				$updateStatus = function(string $logs = '') use ($uploadName, $percentage, $cacheKey) {
+					$oldLogs = Yii::$app->cache->get($cacheKey);
+            		$oldLogs = ($oldLogs) ? $oldLogs['logs'] : '';
+
+                    if($logs)
+                        $oldLogs = ($oldLogs !== '') ? $oldLogs . PHP_EOL . $logs : $logs;
+
+                    $oldLogs = mb_substr($oldLogs, -50000);
+
+					Yii::$app->cache->set($cacheKey, [
+						'name' => $uploadName,
+						'percentage' => $percentage,
+						'error' => false,
+						'logs' => $oldLogs
+					], 360);
+				};
+			}
+
+            $uploads[$upload]->status = 1;
+            $uploads[$upload]->save();
+
+            $this->processUpload($uploads[$upload], $updateStatus);
+
+            $uploads[$upload]->status = 2;
+            $uploads[$upload]->save();
+        }
     }
 }

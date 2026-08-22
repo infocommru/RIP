@@ -3,9 +3,15 @@
 use yii\helpers\Html;
 use app\models\HelperImg;
 
-/** @var yii\web\View $this */
-/** @var app\models\Record $model */
-$this->title = $model->book->name . ", запись #" . $model->id; //'Обновить запись: ' . $model->id;
+/** @var yii\web\View $this
+ * @var app\models\Record $model
+ * @var app\models\Record|null $prev
+ * @var app\models\Record|null $next
+ * @var app\models\Record|null $first
+ * @var app\models\User $user
+*/
+$this->title = $model->book->name . ", запись #" . $model->id;
+
 if ($user->role == 1) {
     $this->params['breadcrumbs'][] = ['label' => $model->book->name, 'url' => "/web/record/index?book=" . $model->book_id];
     $this->params['breadcrumbs'][] = ['label' => '#' . $model->id, 'url' => ['view', 'id' => $model->id]];
@@ -25,161 +31,133 @@ if ($user->role == 1) {
             (Обновлено <?= date("Y-m-d H:i", $model->updated_at) ?>)
         <?php endif; ?>
     </h3>
-    <?php
-    $im_url = "/upload/rip2/Южное кладбище/Св. 49/Кн. 284/0098.jpg";
-    $im_url = "/upload/rip2/" . $model->filename;
-
-    //if(file_exists("/var/www/html".$im_url)){
-    //    phpinfo();exit;
-    //}
-    //$im_url = "/upload/rip3/0098.jpg";
-    $im_url = str_replace(" ", "%20", $im_url);
-
-    $items = HelperImg::getImages($model->filename);
-
-    //echo HelperImg::findImages($model->filename);exit;
-//print_r(HelperImg::getImages($model->filename));
-    ?>
-    <?php if (2 > 3): ?>
-
-        <img id="imageZoomExtraPlus" src="<?= $im_url ?>" alt="A image to apply the ImageZoom plugin">
-    <?php endif; ?>
-
 
     <script>
-        var model_id = <?= $model->id ?>;
-        var images_files_urls = [];
-        var images_files = [];
-        var images_files_short = [];
-        var current_img_index = 2;
-        var pnum = 1;
-        pnum = <?php echo (isset($_GET['pnum'])) ? $_GET['pnum'] : 1; ?>;
+        document.addEventListener('DOMContentLoaded', function() {
+            let images_files_urls = [];
+            let images_files = [];
+            let images_files_short = [];
+        
+            fetch('/web/book/get-images-path?book_id=<?= json_encode($model->book->id) ?>')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
 
-<?php
-foreach ($items as $item) {
-    echo "images_files_urls.push('" . $item['url'] . "');";
-    echo "images_files.push('" . $item['src2'] . "');";
-    echo "images_files_short.push('" . $item['src3'] . "');";
-}
-?>
+                    return response.json();
+                })
+                .then(data => {
+                    images_files_urls = data.map(item => item.url) || [];
+                    images_files = data.map(item => item.src2) || [];
+                    images_files_short = data.map(item => item.src3) || [];
 
-        window.onload = () => {
-            open_image_bottom(pnum);
-            jQuery(".gallery-item").eq(current_img_index).addClass('current_gallery_elem');
-            jQuery(".img_gal").eq(current_img_index).addClass('current_gallery_elem');
-        }
+                    open_image_bottom(1);
+                    create_top_selector();
+                    fillSelector();
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки изображений:', error);
+                });
 
-        function open_image_bottom(num) {
-            for (var i = 1; i <= 5; i++) {
-                jQuery('#image_bottom').removeClass('bottom_img_offet' + i);
+            function fillSelector(){
+                const select = document.getElementById('select_fname');
+                const filename = document.getElementById('record-filename');
+                const index = images_files.indexOf(filename.value);
 
+                for (let i = 0; i < images_files.length; i++){
+                    const option = new Option(images_files_short[i], images_files[i]);
+
+                    if(i === index)
+                        option.selected = true;
+
+                    select.add(option);
+                }
             }
 
-            jQuery('#image_bottom').addClass('bottom_img_offet' + num);
-            jQuery('.pagenum').removeClass('active');
-            jQuery('.pagenum' + num).addClass('active');
-            jQuery('#pageNum').val(num);
-        }
+            function create_top_selector(){
+                if(images_files_urls.length > 0){
+                    const container = document.getElementById('images-top-selector');
+                    container.replaceChildren();
 
+                    const current_img_index = 2;
 
-        hotkeys('alt+t,alt+r,alt+s,alt+n', function (event, handler) {
-            //alert(111);
-            switch (handler.key) {
-                case 'alt+t':
-                    if (jQuery("#go_f")) {
-                        var href = jQuery("#go_f").attr('href');
-                        location.assign(href);
+                    let index = images_files.indexOf(jQuery('#record-filename').val());
+                    index = index === -1 ? 0 : index;
+                    
+                    const startIndex = Math.max(0, index - current_img_index);
+
+                    images_files_short.slice(startIndex, index + current_img_index * 2 + 1).forEach((item, i) => {
+                        const originalIndex = startIndex + i;
+                    
+                        const link = document.createElement('a');
+                        link.className = `img_gal img_gal${originalIndex} d-inline-block btn btn-link text-danger text-decoration-none p-0 me-1`;
+                        link.href = '#';
+                        
+                        // Безопасная обработка клика
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            click_image(originalIndex);
+                        });
+
+                        const p = document.createElement('p');
+                        p.className = 'm-0 d-inline';
+                        p.textContent = item; // textContent защищает от XSS
+
+                        link.appendChild(p);
+                        container.appendChild(link);
+                    });
+
+                    if(jQuery('#record-filename').val() === images_files[index]){
+                        jQuery(".img_gal").eq(index).addClass('current_gallery_elem');
+                        click_image(index);
                     }
-                    break;
-                case 'alt+r':
-                    if (jQuery("#go_b")) {
-                        var href = jQuery("#go_b").attr('href');
-                        location.assign(href);
-                        //alert('you pressed ctrl+b!');
-                    }
-                    break;
-                case 'alt+s':
-                    var form = jQuery('#w1');
-                    form.submit();
-                    //alert('you pressed r!');
-                    break;
-                case 'alt+n':
-                    var href = jQuery("#go_new").attr('href');
-                    //location.assign(href);
-                    window.open(href, '_blank');
-                    break;
-                default:
-                //alert(event);
+                }
             }
+
+            document.querySelectorAll('.pagenum').forEach(element => {
+                element.addEventListener('click', function () {
+                    open_image_bottom(this.dataset.num);
+                });
+            });
+
+            function open_image_bottom(num) {
+                const imageBottom = document.querySelector('#image_bottom');
+
+                for (let i = 1; i <= 5; i++) {
+                    imageBottom.classList.remove('bottom_img_offet' + i);
+                }
+
+                imageBottom.classList.add('bottom_img_offet' + num);
+
+                document.querySelectorAll('.pagenum').forEach(element => {
+                    element.classList.remove('active');
+                });
+
+                document.querySelector(`.pagenum[data-num="${num}"]`)
+                    .classList.add('active');
+
+                document.querySelector('#pageNum').value = num;
+            }
+
+            function click_image(index) {
+                jQuery('.img_gal').removeClass('current_gallery_elem');
+                jQuery('.img_gal' + index).addClass('current_gallery_elem');
+                jQuery("#record-filename").val(images_files[index]);
+                jQuery("#image_shower").removeClass("d-none");
+                jQuery('#select_fname').val(images_files[index]);
+
+                jQuery("#image_bottom").attr("src", images_files_urls[index]);
+            }
+
+            document.getElementById("select_fname").addEventListener('change', (e) => {
+                let val = jQuery('#select_fname').val();
+                jQuery('#record-filename').val(val);
+                create_top_selector();
+            });
         });
-
-
-        function help_region() {
-            var rg = jQuery('.region_valid').html();
-            rg = jQuery.trim(rg);
-            jQuery('#record-zags').val(rg);
-            //alert(rg);
-        }
-
-        function help_fio() {
-            var fio = jQuery('.fio_label').html();
-            fio = jQuery.trim(fio);
-            jQuery('#record-fio').val(fio);
-        }
-
-        function help_relative_fio() {
-            var fio = jQuery('.relative_fio_label').html();
-            fio = jQuery.trim(fio);
-            jQuery('#record-relative_fio').val(fio);
-        }
-
-
-        function click_image(index) {
-            //alert(num);
-            jQuery('.img_gal').removeClass('current_gallery_elem');
-            jQuery('.img_gal' + index).addClass('current_gallery_elem');
-            jQuery("#record-filename").val(images_files[index]);
-            jQuery("#image_bottom").attr("src", images_files_urls[index]);
-
-        }
-
-        function change_select_img() {
-            var val = jQuery('#select_fname').val();
-            jQuery('#record-filename').val(val);
-            jQuery('#image_bottom').attr("src", "/upload/rip2/" + val);
-            //alert(val);
-        }
-
     </script>
-    <?php
-//print_r($items);
-    for ($i = 0; $i < sizeof($items); $i++) {
-        $item = $items[$i];
-        $num = $i + 1;
 
-        echo "<a class='img_gal img_gal$i ' href='javascript:click_image($i)'><img src='$item[src]' /></a>";
-
-        //print_r($item);
-    }
-    ?>
-    <?php
-    dosamigos\gallery\Gallery::widget([
-        'items' => $items,
-        'clientEvents' => [
-            'onslide' => 'function(index, slide) {
-            //console.log(slide);
-            console.log(index);
-            current_img_index = index;
-            jQuery("#record-filename").val(images_files[index]);
-            jQuery(".current_gallery_elem").removeClass("current_gallery_elem");
-            $(".gallery-item").eq(current_img_index).addClass("current_gallery_elem");
-            jQuery("#image_bottom").attr("src",images_files_urls[index]);
-        }',
-        //'onopen' => 'function(this) {console.log(this);}'
-        ]
-            ]
-    );
-    ?>
+    <div id="images-top-selector" class="p-3 my-2 border rounded d-flex flex-wrap gap-2 align-items-center"></div>
 
     <div class="container">
         <div class="row">
@@ -191,11 +169,6 @@ foreach ($items as $item) {
             <?php if ($next): ?>
                 <div class="col-sm">
                     <a id="go_f" href="/web/record/update?id=<?= $next->id ?>" class="btn btn-link">Вперед &#10132;</a>
-                </div>
-            <?php endif; ?>          
-            <?php if (($first) && (false)): ?>
-                <div class="col-sm">
-                    <a id="go_ff" href="/web/record/update?id=<?= $first->id ?>" class="btn btn-info">Первая необработанная</a>
                 </div>
             <?php endif; ?>
             <?php if ($model->updated_at): ?>
@@ -210,25 +183,31 @@ foreach ($items as $item) {
     </div>
     <hr />
     <?=
-    $this->render('_form', [
-        'model' => $model,
-        'is_create' => false,
-    ])
+        $this->render('_form', [
+            'model' => $model,
+            'is_create' => false,
+        ])
     ?>
     <hr />
 
-    <div class="container">
+    <div id="image_shower" class="container d-none">
         <div class="row">
             <div class="col-sm-12">
-
                 <ul class="pagination">
-
-                    <li class="page-item pagenum pagenum1 active" aria-current="page"><a class="page-link" href="javascript:open_image_bottom(1)"  >1</a></li>
-                    <li class="page-item pagenum pagenum2"><a class="page-link" href="javascript:open_image_bottom(2)"  >2</a></li>
-                    <li class="page-item pagenum pagenum3"><a class="page-link" href="javascript:open_image_bottom(3)"  >3</a></li>
-                    <li class="page-item pagenum pagenum4"><a class="page-link" href="javascript:open_image_bottom(4)"  >4</a>
+                    <li class="page-item pagenum active" data-num="1" aria-current="page">
+                        <button type="button" class="page-link">1</a>
                     </li>
-                    <li class="page-item pagenum pagenum5"><a class="page-link" href="javascript:open_image_bottom(5)"  >5</a>
+                    <li class="page-item pagenum" data-num="2">
+                        <button type="button" class="page-link">2</a>
+                    </li>
+                    <li class="page-item pagenum" data-num="3">
+                        <button type="button" class="page-link">3</a>
+                    </li>
+                    <li class="page-item pagenum" data-num="4">
+                        <button type="button" class="page-link">4</a>
+                    </li>
+                    <li class="page-item pagenum" data-num="5">
+                        <button type="button" class="page-link">5</a>
                     </li>
                 </ul>
 
@@ -236,15 +215,10 @@ foreach ($items as $item) {
         </div>
         <div class="row">
             <div class="col-sm-12">
-
                 <div id='image_bottom_top' style='width:100%;overflow-y: hidden;min-height: 900px;'>
-                    <img style="width: 100%; min-height: 900px;" src='<?= $im_url ?>' id='image_bottom'>
+                    <img style="width: 100%; min-height: 900px;" id='image_bottom'>
                 </div>
-
-
-
             </div>
         </div>
     </div>
-
 </div>

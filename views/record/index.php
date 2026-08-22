@@ -6,8 +6,12 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 
-/** @var yii\web\View $this */
-/** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var yii\web\View $this
+ *  @var yii\data\ActiveDataProvider $dataProvider
+ *  @var app\models\Book $book
+ *  @var app\models\Record $model
+ *  @var int $book_id
+*/
 $this->title = $book->name;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -17,7 +21,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('Добавить запись', ['create', 'book_id' => $book_id], ['class' => 'btn btn-success']) ?>
-        <?= Html::a('Экспорт CSV', "/web/record/export-csv?id=" . $book_id, ['class' => 'btn btn-warning']) ?>
         <?= Html::a('Экспорт Excel', "/web/record/export-excel?id=" . $book_id, ['class' => 'btn btn-warning']) ?>
         <?= Html::a('Сбросить фильтры', "/web/record/index?book=" . $book_id, ['class' => 'btn btn-info']) ?>
     </p>
@@ -70,18 +73,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'delete' => function ($model) {
                         $user = Yii::$app->user->identity;
                         return true;
-                        return $user->role == 1;
                     },
                     'view' => function ($model) {
-                        //if($model->user_id)return false;
-                        //$user = Yii::$app->user->identity;
-
                         return true;
                     },
                     'update' => function ($model) {
                         $user = Yii::$app->user->identity;
                         return true;
-                        return $user->role == 1;
                     },
                 ],
             ],

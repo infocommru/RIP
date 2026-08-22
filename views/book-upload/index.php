@@ -16,9 +16,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?php Html::a('Create Book Upload', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Создать заново поисковый кэш', ['start-search-cache'], ['class' => 'btn btn-danger']) ?>
+        <?= Html::a('Загрузить в базу записи', ['start-upload-books'], ['class' => 'btn btn-success']) ?>
     </p>
-
 
     <?=
     GridView::widget([
@@ -54,16 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 }
             ],
-        /*
-          [
-          'class' => ActionColumn::className(),
-          'urlCreator' => function ($action, BookUpload $model, $key, $index, $column) {
-          return Url::toRoute([$action, 'id' => $model->id]);
-          }
-          ], */
         ],
     ]);
     ?>
-
-
 </div>

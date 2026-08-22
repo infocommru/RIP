@@ -6,12 +6,19 @@ use app\models\HelperLevoshkin;
 use app\models\Cemetery;
 use app\models\Helper;
 
+/** @var yii\web\View $this
+ * @var app\models\Record $model
+ * @var yii\widgets\ActiveForm $form
+ * @var yii\web\View $this
+ * @var false|array<string, mixed> $search_data
+*/
+
 $this->title = 'Поиск по захоронениям г. Санкт-Петербурга';
 
-/** @var yii\web\View $this */
-/** @var app\models\Record $model */
-
-/** @var yii\widgets\ActiveForm $form */
+/**
+ * @param string $txt
+ * @return string
+ */
 function get_input_value($txt) {
     if (!empty($_GET[$txt])) {
         return strtr($_GET[$txt], ['"' => '']);
@@ -20,9 +27,12 @@ function get_input_value($txt) {
     return "";
 }
 
+/**
+ * @param string $name
+ * @return string
+ */
 function echo_select_soderzit($name) {
     $r = "<label for = \"$name\">Вхождение</label>";
-    //$r = '';
     $r .= "<select id = \"$name\" name='$name' class=\"form-control\">";
 
     $values = [
@@ -48,9 +58,13 @@ function echo_select_soderzit($name) {
     $r .= "</select>";
     return $r;
 }
+
+/**
+ * @param string $name
+ * @return string
+ */
 function echo_select_fuzziness($name) {
     $r = "<label for = \"$name\">Вхождение</label>";
-    //$r = '';
     $r .= "<select id = \"$name\" name='$name' class=\"form-control\">";
 
     $values = [
@@ -341,44 +355,6 @@ function echo_select_fuzziness($name) {
             <div id='additional_search_params' >
                 <h4>Дополнительные параметры</h4>
                 <div class="row">
-
-                    <?php if (0): ?>
-                        <div class="col-sm-2">
-                            <label for="rip_year">Год захоронения</label>
-                            <input value="<?= get_input_value("rip_year") ?>" type=text class='form-control' id='rip_year' name='rip_year' />
-                        </div>
-
-
-                        <?php
-                        $selected = ['selected', '', ''];
-                        if (isset($_GET['rip_year_cmp'])) {
-                            switch (intval($_GET['rip_year_cmp'])) {
-                                case 2:
-                                    $selected = ['', 'selected', ''];
-                                    BREAK;
-                                case 3:
-                                    $selected = ['', '', 'selected'];
-                                    BREAK;
-                            }
-                        }
-                        ?>
-
-
-
-                        <div class="col-sm-2">
-                            <label for="rip_year_cmp">Сравнение</label>
-                            <select id="rip_year_cmp" name='rip_year_cmp' class="form-control">
-                                <option <?= $selected[0] ?> value='1'>Равно</option>
-                                <option <?= $selected[1] ?> value='2'>Меньше</option>
-                                <option <?= $selected[2] ?> value='3'>Больше</option>
-
-                            </select>
-                        </div>
-                    <?php endif; ?>
-
-                </div>
-
-                <div class="row">
                     <div class="col-sm-2">
                         <label for="areanum">Номер участка</label>
                         <input value="<?= get_input_value("areanum") ?>" type=text class='form-control' id='areanum' name='areanum' />
@@ -420,8 +396,10 @@ function echo_select_fuzziness($name) {
             <?php
             if ($search_data) {
                 echo Yii::$app->controller->renderPartial('_search_result',
-                        ['data' => $search_data]);
-            } else if (isset($_GET['fam'])) {
+                    ['data' => $search_data]);
+
+            }
+            else if (isset($_GET['fam'])) {
                 $url_f2 = '/web/print/not-found-f2';
                 $url_f2 .= "?params=" . rawurlencode(base64_encode(serialize($_GET)));
                 echo "<h5>По вашему запросу ничего не найдено, попробуйте уточнить критерии поиска <a target='_blank' href='$url_f2'>Форма Ф2</a></h5>";
@@ -497,7 +475,6 @@ function echo_select_fuzziness($name) {
         var docnum = jQuery('#docnum').val();
         var comment = jQuery('#comment').val();
 
-        //alert(cemetery);
         if ((!nam) && (!regnum) && (!fam) && (!ot) && (!age) && (!dead_year) && (!dead_m) && (!dead_d) && (!rip_year) && (!rip_m) && (!rip_d) && (!unk) && (!zags) && (!docnum) && (!comment) && (cemetery == '0')) {
             if (show_alert)
                 alert("Требуются данные основного поиска")
@@ -510,7 +487,6 @@ function echo_select_fuzziness($name) {
 
     function extended_search() {
         if (jQuery("#additional_search_params").is(":visible")) {
-            //alert(1)
             jQuery("#additional_search_params").fadeOut(100);
             jQuery("#ext_search").prop("checked", !true);
 
@@ -530,20 +506,18 @@ function echo_select_fuzziness($name) {
             alert("Данные отправлены на уточнение");
             jQuery('#vopros' + record_id).fadeOut(400);
         });
-        //alert(record_id);
     }
 
 
     function next_page(cemetery_id, page) {
         var val = jQuery('#pager').val();
-        //alert(val);
+
         if (val)
             val += ";";
+
         val += cemetery_id + "," + page;
-        jQuery('#pager').val(val)
-        jQuery('.search_btn').click()
-
-
+        jQuery('#pager').val(val);
+        jQuery('.search_btn').click();
     }
 
 </script>

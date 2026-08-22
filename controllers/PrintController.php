@@ -21,6 +21,25 @@ class PrintController extends Controller {
      * @inheritDoc
      */
 
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['@'], // '@' означает только авторизованные пользователи
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return string
+     * @param int $record_id
+     */
     public function actionIndex($record_id) {
         $record = Record::find()
             ->andWhere(['id' => $record_id])
@@ -36,17 +55,20 @@ class PrintController extends Controller {
 
         $sdata = CacheRecords::find()->query(['term' => ['record_id' => $record_id]])->one();
         $user = \app\models\User::findIdentity(\Yii::$app->user->id);
-        return $this->render('index',
-            [
-                'record' => $record,
-                'book' => $book,
-                'sdata' => $sdata,
-                'user' => $user,
-                'cemetery' => $cemetery
-            ]
+
+        return $this->render('index', [
+            'record' => $record,
+            'book' => $book,
+            'sdata' => $sdata,
+            'user' => $user,
+            'cemetery' => $cemetery
+        ]
         );
     }
 
+    /**
+     * @return string
+     */
     public function actionNotFoundF2() {
         $user = \app\models\User::findIdentity(\Yii::$app->user->id);
 
@@ -55,14 +77,16 @@ class PrintController extends Controller {
             $params = @unserialize(base64_decode($_GET['params']));
         }
 
-        return $this->render('notfoundf2',
-            [
-                'user' => $user,
-                'params' => $params
-            ]
+        return $this->render('notfoundf2', [
+            'user' => $user,
+            'params' => $params
+        ]
         );
     }
 
+    /**
+     * @return void
+     */
     public function actionForma() {
         $fname = "forma_f" . $_GET['spravka'] . '_N_' . $_GET['nn'] . date("_d_m_Y");
 
@@ -99,9 +123,9 @@ class PrintController extends Controller {
         $fname = "forma_f" . $_GET['spravka'] . '_N_' . $_GET['nn'] . date("_d_m_Y");
         
         if ($_GET['spravka'] == '1') {
-            $htmlRender = $this->render('form1',);
+            $htmlRender = $this->render('form1', ['mpdfObject' => $pdf]);
         } else {
-            $htmlRender = $this->render('form2',);
+            $htmlRender = $this->render('form2', ['mpdfObject' => $pdf]);
         }
 
         $pdf->WriteHTML($htmlRender);

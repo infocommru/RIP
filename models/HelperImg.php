@@ -1,91 +1,121 @@
 <?php
 
 namespace app\models;
+use Yii;
+use yii\helpers\FileHelper;
+use app\models\Book;
+use app\models\Record;
+use yii\helpers\StringHelper;
 
 class HelperImg {
+    /**
+     * Возвращает относительный путь папки, где хранятся сканы, 
+     * если папки не существует, то возвращает пустую строку или наиболее повторяющееся значение пути из записей
+     *
+     * @param Book $book
+     * @param boolean $returnNoExistedPath
+     * @return array{path: string, existed: bool}
+     */
+    public static function getImagesFilepath(Book $book, bool $returnNoExistedPath = false): array {
+        $filenames = Record::find()->select('filename')->
+            andWhere(['book_id' => $book->id])->orderBy('filename')->column();
 
-    public static function checkImages($filepath) {
-        $filepath = str_replace("\\", "/", $filepath);
+        if(!$filenames)
+            return ['path' => '', 'existed' => false];
 
-        $index_last = strrpos($filepath, "/");
-        $folderpath = substr($filepath, 0, $index_last);
-        $fname = substr($filepath, $index_last + 1);
+        $oldDirpath = [];
 
-        $fullpath = "../upload/rip2/$folderpath";
+        foreach($filenames as $filename){
+            if(!$filename)
+                continue;
+    
+            $dirpath = FileHelper::normalizePath(Yii::getAlias("@images/" . $filename));
 
-        $files = glob($fullpath . "/*.*");
-        $files = array_map(function ($elem) {
-            $index_last = strrpos($elem, "/");
-            return $fname = substr($elem, $index_last + 1);
-            ;
-        }, $files);
-
-        if ($files)
-            return true;
-        return false;
-    }
-
-    public static function findImages($filepath) {
-        $filepath = str_replace("\\", "/", $filepath);
-
-        $result = $filepath;
-        if (self::checkImages($result))
-            return $result;
-
-        $result = strtr($filepath, ["Книга" => 'Кн.']);
-        if (self::checkImages($result))
-            return $result;
-    }
-
-    public static function getImages($filepath, $from = 2, $to = 5) {
-        $filepath = str_replace("\\", "/", $filepath);
-
-        $index_last = strrpos($filepath, "/");
-        $folderpath = substr($filepath, 0, $index_last);
-        $fname = substr($filepath, $index_last + 1);
-
-        $fullpath = "../upload/rip2/$folderpath";
-
-        $files = glob($fullpath . "/*.*");
-        $files = array_map(function ($elem) {
-            $index_last = strrpos($elem, "/");
-            return $fname = substr($elem, $index_last + 1);
-            ;
-        }, $files);
-
-        $index = array_search($fname, $files);
-
-        $result = [];
-
-        if ($index >= 0) {
-            $index_start = $index - $from;
-            if ($index_start < 0)
-                $index_start = 0;
-
-            $index_end = $index + $to;
-
-            for ($i = $index_start; ($i < $index_end) && ($i < sizeof($files)); $i++) {
-
-                $upath = "/upload/rip2/$folderpath/" . $files[$i];
-                $upath2 = str_replace(" ", "%20", $upath);
-                $upath22 = $folderpath . "/" . $files[$i];
-                $upath3 = $files[$i];
-
-                $small = "/im.php?t=" . $files[$i];
-
-                $result[] = [
-                    'url' => $upath2,
-                    'src' => $small,
-                    'src2' => $upath22,
-                    'src3' => $upath3,
-                    'options' => array('title' => $files[$i])
-                ];
+            if(is_file($dirpath) || str_contains(basename($dirpath), '.')){
+                $dirpath = StringHelper::dirname($dirpath);
+                $relativePath = StringHelper::dirname($filename);
             }
+            else
+                $relativePath = $filename;
 
-            return $result;
+            if (!$relativePath)
+                continue;
+
+            if(!is_dir($dirpath)){
+                if($returnNoExistedPath){
+                    $oldDirpath[$relativePath] = ($oldDirpath[$relativePath] ?? 0) + 1;
+                }
+
+                continue;
+            }
+            else
+                return [ 'path' => $relativePath, 'existed' => true ];
         }
 
+        $maxKey = !empty($oldDirpath) ? array_search(max($oldDirpath), $oldDirpath) : '';
+        if($maxKey === false) $maxKey = '';
 
-        return [];
+        return [ 'path' => $maxKey, 'existed' => false];
+    }
+
+    /**
+     * Возвращает путь титульника книги
+     * @param \app\models\Book $book
+     * @return string
+     */
+    public static function getTitleImage(Book $book): string {
+        $record = Record::find()->andWhere(['book_id' => $book->id])->orderBy('id')->one();
+        $value = self::getImagesFilepath($book);
+
+        if(!$value['existed'])
+            return '';
+
+        $dirpath = FileHelper::normalizePath(Yii::getAlias("@images/" .  $value['path']));
+        $files = FileHelper::findFiles($dirpath, [
+            'recursive' => false,]);
+
+        natcasesort($files);
+        $files = array_values($files);
+
+        if(!$files)
+            return '';
+
+        $webPath = Yii::getAlias("@webimages") . "/" . dirname(str_replace('\\', '/', $record->filename));
+        return "$webPath/" . StringHelper::basename($files[0]);
+    }
+
+    /**
+     * @return list<array<string, array<string, string>|string>>
+     * @param \app\models\Book $book
+     */
+    public static function getImages(Book $book): array {
+        $dirpath = self::getImagesFilepath($book);
+
+        if(!$dirpath['existed'])
+            return [];
+
+        $canonicalPath = FileHelper::normalizePath(Yii::getAlias("@images") . '/' . $dirpath['path']);
+
+        $files = FileHelper::findFiles($canonicalPath, [
+            'recursive' => false,]);
+
+        natcasesort($files);
+        $files = array_values($files);
+        $files = array_map('basename', $files);
+
+        $result = [];
+        $webPath = Yii::getAlias("@webimages") . '/' . str_replace('\\', '/', $dirpath['path']);
+
+        foreach ($files as $file) {
+            $upath = "$webPath/$file";
+            
+            $result[] = [
+                'url' => str_replace(' ', '%20', $upath),
+                'src2' => $dirpath['path'] . '\\' . $file,
+                'src3' => $file,
+            ];
+        }
+
+        return $result;
     }
 }

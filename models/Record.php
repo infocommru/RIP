@@ -9,28 +9,29 @@ use Yii;
  *
  * @property int $id
  * @property int $book_id
- * @property int $user_id
- * @property int $numReg
+ * @property int|null $user_id
+ * @property int|null $numReg
  * @property string|null $numLiteral
- * @property string|null $fio
- * @property string|null $age
- * @property string|null $death_date
- * @property string|null $rip_date
- * @property string|null $docnum
- * @property string|null $zags
- * @property string|null $riper
- * @property string|null $area_num
- * @property string|null $row_num
- * @property string|null $rip_num
- * @property string|null $relative_fio
- * @property string|null $filename
- * @property string|null $filename2
- * @property string|null $comment
- * @property int|null $rip_style
+ * @property string $fio
+ * @property string $age
+ * @property string $death_date
+ * @property string $rip_date
+ * @property string $docnum
+ * @property string $zags
+ * @property string $riper
+ * @property string $area_num
+ * @property string $row_num
+ * @property string $rip_num
+ * @property string $relative_fio
+ * @property string $filename
+ * @property string $comment
+ * @property int $rip_style
  * @property int|null $updated_at
  * @property int $vopros
  * @property int $is_unknown
  * @property int $gos
+ * @property int $dubl
+ * @property int $bad_flag
  * @property int $deleted
  *
  * @property Book $book
@@ -56,8 +57,7 @@ class Record extends \yii\db\ActiveRecord {
             [['comment'], 'string'],
             [['numLiteral', 'death_date', 'rip_date'], 'string', 'max' => 32],
             [['fio', 'zags', 'age', 'area_num', 'row_num', 'rip_num', 'docnum'], 'string', 'max' => 128],
-            [['riper'], 'string', 'max' => 64],
-            [['relative_fio', 'filename', 'filename2'], 'string', 'max' => 256],
+            [['relative_fio', 'filename'], 'string', 'max' => 256],
             [['book_id'], 'exist', 'skipOnError' => true, 'targetClass' => Book::class, 'targetAttribute' => ['book_id' => 'id']],
         ];
     }
@@ -78,13 +78,11 @@ class Record extends \yii\db\ActiveRecord {
             'rip_date' => 'Дата захоронения',
             'docnum' => 'Номер документа ЗАГС',
             'zags' => 'ЗАГС',
-            'riper' => 'Землекоп',
             'area_num' => 'Номер участка',
             'row_num' => 'Номер ряда',
             'rip_num' => 'Номер могилы',
             'relative_fio' => 'Родственники',
-            'filename' => 'Файл', 'filename2' => 'Файл2',
-            'comment' => 'Комментарий',
+            'filename' => 'Файл',
             'rip_style' => 'Захоронение',
             'updated_at' => 'Обновлено',
             'vopros' => 'Есть вопросы',
@@ -113,6 +111,9 @@ class Record extends \yii\db\ActiveRecord {
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
+    /**
+     * @return array<int, string>
+     */
     public static function ripStyleTypes() {
         $types = [
             1 => "Гроб",
@@ -122,9 +123,5 @@ class Record extends \yii\db\ActiveRecord {
         ];
 
         return $types;
-    }
-
-    public function search($params) {
-        
     }
 }

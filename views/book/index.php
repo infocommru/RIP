@@ -6,8 +6,10 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 
-/** @var yii\web\View $this */
-/** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var yii\web\View $this
+ *  @var yii\data\ActiveDataProvider $dataProvider
+ *  @var Book $model
+ */
 $user = \app\models\User::findIdentity(\Yii::$app->user->id);
 $is_admin = $user->role == 1;
 
@@ -45,21 +47,19 @@ $this->params['breadcrumbs'][] = $this->title;
             'records',
             [
                 'class' => 'yii\grid\ActionColumn',
-                //'contentOptions' => 
                 'header' => '',
                 'template' => '{view} {update} {delete}',
                 'visibleButtons' => [
                     'delete' => function ($model) {
+                        /** @var \app\models\User $user */
                         $user = Yii::$app->user->identity;
                         return $user->role == 1;
                     },
                     'view' => function ($model) {
-                        //if($model->user_id)return false;
-                        //$user = Yii::$app->user->identity;
-
                         return true;
                     },
                     'update' => function ($model) {
+                        /** @var \app\models\User $user */
                         $user = Yii::$app->user->identity;
                         return $user->role == 1;
                     },

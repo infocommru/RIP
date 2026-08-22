@@ -7,6 +7,14 @@ use app\models\Record;
 use app\models\Cemetery;
 use app\models\Helper;
 
+/**
+ * @var \app\models\Record $record
+ * @var \app\models\Cemetery $cemetery
+ * @var \app\models\Book $book
+ * @var \app\models\CacheRecords $sdata
+ * @var yii\web\View $this
+ * @var \app\models\User $user
+ */
 $model = $record;
 
 $this->title = "Печать: " . $cemetery->name . ", " . $record->fio;

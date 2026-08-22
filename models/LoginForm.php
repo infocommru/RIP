@@ -17,11 +17,20 @@ class LoginForm extends Model
     public $password;
     public $rememberMe = true;
 
+    /**
+     * @var string $username
+     * @var string $password
+     * @var bool $rememberMe
+     */
+
+    /**
+     * @var User|bool|null
+     */
     private $_user = false;
 
 
     /**
-     * @return array the validation rules.
+     * @return array<int, list<list<string>|string>>
      */
     public function rules()
     {
@@ -38,9 +47,10 @@ class LoginForm extends Model
     /**
      * Validates the password.
      * This method serves as the inline validation for password.
-     *
+     * 
+     * @return void
      * @param string $attribute the attribute currently being validated
-     * @param array $params the additional name-value pairs given in the rule
+     * @param array<string, mixed> $params the additional name-value pairs given in the rule
      */
     public function validatePassword($attribute, $params)
     {
@@ -76,6 +86,7 @@ class LoginForm extends Model
             $this->_user = User::findByUsername($this->username);
         }
 
+        /** @var User|null */
         return $this->_user;
     }
 }

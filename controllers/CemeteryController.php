@@ -9,6 +9,9 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\helpers\FileHelper;
+use yii\validators\FileValidator;
+use yii\web\UploadedFile;
 
 /**
  * CemeteryController implements the CRUD actions for Cemetery model.
@@ -31,10 +34,6 @@ class CemeteryController extends Controller {
                     'access' => [
                         'class' => AccessControl::className(),
                         'rules' => [
-                            [
-                                'allow' => false,
-                                'roles' => ['?'],
-                            ],
                             [
                                 'allow' => true,
                                 'roles' => ['@'],
@@ -69,51 +68,50 @@ class CemeteryController extends Controller {
         ]);
 
         return $this->render('index', [
-                    'dataProvider' => $dataProvider,
-                    'model' => $cemetery
+            'dataProvider' => $dataProvider,
+            'model' => $cemetery
         ]);
     }
 
     /**
      * Displays a single Cemetery model.
      * @param int $id ID
-     * @return string
+     * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id) {
-    	$dir_book = './upload/book/';
-    	$part_book = './upload/part/';
+        $dir_book = \Yii::getAlias('@webroot/upload/book');
+
+        if (!is_dir($dir_book)) {
+            FileHelper::createDirectory($dir_book);
+        }
     	
-    	if(!is_dir($dir_book)){
-    		mkdir($dir_book, 0755, true);
-    	}
-    	
-    	if(!is_dir($part_book)){
-    		mkdir($part_book, 0755, true);
-    	}
-    	
-        if ($this->request->post()) {
-            //print_r($_FILES);
-            if (substr_count($_FILES['zipfile']['name'], ".zip")) {
+        if ($this->request->isPost) {
+            $file = UploadedFile::getInstanceByName('zipfile');
+            $validator = new FileValidator([
+                'extensions' => ['zip'],
+                'mimeTypes' => ['application/zip', 'application/x-zip-compressed'],
+            ]);
+
+            if ($validator->validate($file, $error)) {
                 $upload = new BookUpload();
                 $upload->cemetery_id = $id;
                 $upload->add_at = time();
-                $upload->filename = $_FILES['zipfile']['name'];
-                if (isset($_POST['create_part'])) {
-                    $upload->part_flag = 1;
-                }
+                $upload->filename = $file->name;
 
                 if ($upload->save()) {
-                    $destination_path = "./upload/book/" . $upload->id . '.zip';
-                    $source = $_FILES['zipfile']['tmp_name'];
-                    //echo $source.';'.$destination_path;exit;
-                    move_uploaded_file($_FILES['zipfile']['tmp_name'], $destination_path);
+                    $destination_path = FileHelper::normalizePath($dir_book . '/' . $upload->id . '.zip');
+                    $file->saveAs($destination_path);
                 }
+            }
+            else {
+                \Yii::$app->session->setFlash('error', $error);
+                return $this->refresh();
             }
         }
 
         return $this->render('view', [
-                    'model' => $this->findModel($id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -134,7 +132,7 @@ class CemeteryController extends Controller {
         }
 
         return $this->render('create', [
-                    'model' => $model,
+            'model' => $model,
         ]);
     }
 
@@ -190,12 +188,14 @@ class CemeteryController extends Controller {
     }
 
     public function beforeAction($action) {
+        if (!parent::beforeAction($action)) {
+            return false;
+        }
 
         $user = \app\models\User::findIdentity(\Yii::$app->user->id);
         if ($user->role != 1) {
             $this->redirect(['/']);
         }
-
 
         return parent::beforeAction($action);
     }

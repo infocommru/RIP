@@ -6,8 +6,12 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 
-/** @var yii\web\View $this */
-/** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var yii\web\View $this
+ *  @var yii\data\ActiveDataProvider $dataProvider
+ *  @var string $flash
+ *  @var int $book_id
+ *  @var app\models\Record $model
+*/
 $this->title = "Записи, которые были удалены";
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -19,14 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php endif; ?>
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if (0): ?>
-        <p>
-            <?= Html::a('Добавить запись', ['create', 'book_id' => $book_id], ['class' => 'btn btn-success']) ?>
-            <?= Html::a('Экспорт CSV', "/web/record/export-csv?id=" . $book_id, ['class' => 'btn btn-warning']) ?>
-            <?= Html::a('Сбросить фильтры', "/web/record/index?book=" . $book_id, ['class' => 'btn btn-info']) ?>
-        </p>
-        `<?php endif; ?>
-
+    
     <?=
     GridView::widget([
         'dataProvider' => $dataProvider,
@@ -36,7 +33,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'yii\grid\SerialColumn',
             ],
             'id',
-            //'book_id',
             [
                 'label' => 'Книга',
                 'value' => function ($model) {
@@ -59,14 +55,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'rip_date',
             'docnum',
             'zags',
-            //'riper',
             'area_num',
             'row_num',
             'rip_num',
             'relative_fio',
             'filename',
             'comment:ntext',
-            //'rip_style',
             [
                 'label' => 'Захоронение',
                 'value' => function ($model) {
@@ -74,29 +68,37 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'label' => ' ',
-                'format' => 'html',
-                'value' => function ($model) {
-                    $suffix = "?record_id=" . $model->id . "&a=";
-                    $html = "<a target='_blank' title='редактировать' href='/web/record/update?id=" . $model->id . "'> <img width='32px' src='/img/edit.png' /> </a>";
-                    $html .= "<a title='восстановить'   href='/web/record/deleted$suffix" . 'restore' . "'> <img width='32px' src='/img/restore.png' /> </a>";
-                    $html .= "<a title='удалить'   href='/web/record/deleted$suffix" . 'del' . "'> <img width='32px' src='/img/del.png' /> </a>";
-
-                    return $html;
-                }
+                'class' => ActionColumn::className(),
+                'header' => ' ',
+                'template' => '{update} {restore} {delete}', // Набор кнопок
+                'buttons' => [
+                    // Изменяем стандартную кнопку update, чтобы добавить картинку
+                    'update' => function ($url, $model, $key) {
+                        return Html::a(
+                            Html::img('/img/edit.png', ['width' => '24px']), 
+                            ['/record/update', 'id' => $model->id], 
+                            ['target' => '_blank', 'title' => 'редактировать']
+                        );
+                    },
+                    // Кастомная кнопка для восстановления
+                    'restore' => function ($url, $model, $key) {
+                        return Html::a(
+                            Html::img('/img/restore.png', ['width' => '24px']), 
+                            ['/record/deleted', 'record_id' => $model->id, 'a' => 'restore'], 
+                            ['title' => 'восстановить']
+                        );
+                    },
+                    // Кастомная кнопка для полного удаления
+                    'delete' => function ($url, $model, $key) {
+                        return Html::a(
+                            Html::img('/img/del.png', ['width' => '24px']), 
+                            ['/record/deleted', 'record_id' => $model->id, 'a' => 'del'], 
+                            ['title' => 'удалить']
+                        );
+                    },
+                ],
             ],
-        /*
-          [
-          'class' => ActionColumn::className(),
-          'urlCreator' => function ($action, Record $model, $key, $index, $column) {
-          return Url::toRoute([$action, 'id' => $model->id]);
-          }
-          ],
-         * 
-         */
         ],
     ]);
     ?>
-
-
 </div>

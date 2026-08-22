@@ -6,8 +6,10 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 
-/** @var yii\web\View $this */
-/** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var yii\web\View $this
+ * @var yii\data\ActiveDataProvider $dataProvider
+ * @var \app\models\User $model
+*/
 $this->title = 'Пользователи';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -39,16 +41,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     return User::roleList()[$model->role];
                 }
             ],
-            /*
-              [
-              'label' => 'Кладбище',
-              'value' => function ($model) {
-              if (!$model->cemetery_id)
-              return '-';
-              return $model->cemetery->name;
-              }
-              ],
-             */
             [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, User $model, $key, $index, $column) {
