@@ -119,7 +119,7 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
                                     $filelink = "<a target='_blank' href='$im_url'><img src='/img/view.png' width='24px' /></a>";
                                 }
 
-                                if ($user->role != -4) {
+                                if ($user->role != 4) {
 
                                     if (!$elem['vopros'])
                                         $filelink .= "<a id='vopros$elem[record_id]' title='требуется уточнить данные'   href='javascript:vopros(" . $elem['record_id'] . ");'><img src='/img/vopros.png' width='24px' /></a>";
