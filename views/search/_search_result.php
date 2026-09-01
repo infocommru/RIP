@@ -114,24 +114,23 @@ $url_export = strtr($url_export, ['/search' => '/search/export']);
 
                                 $filelink = '';
                                 if ($elem['filename']) {
-                                    $im_url = Url::to(Yii::getAlias("@webimages/$elem[filename]"));
-                                    $im_url = str_replace("\\", "/", $im_url);
-                                    $filelink = "<a target='_blank' href='$im_url'><img src='/img/view.png' width='24px' /></a>";
+                                    $im_url = Url::to(['image-viewer/index', 'path' => str_replace('\\', '/', $elem['filename'])]);
+                                    $filelink = "<a target='_blank' href='$im_url'><img src='/assets/img/view.png' width='24px' /></a>";
                                 }
 
                                 if ($user->role != 4) {
 
                                     if (!$elem['vopros'])
-                                        $filelink .= "<a id='vopros$elem[record_id]' title='требуется уточнить данные'   href='javascript:vopros(" . $elem['record_id'] . ");'><img src='/img/vopros.png' width='24px' /></a>";
+                                        $filelink .= "<a id='vopros$elem[record_id]' title='требуется уточнить данные'   href='javascript:vopros(" . $elem['record_id'] . ");'><img src='/assets/img/vopros.png' width='24px' /></a>";
 
                                     if ($elem['updated_at']) {
-                                        $filelink .= "<a target='_blank' id='vopros$elem[record_id]' title='история изменения'   href='/web/record-history/?record_id=" . $elem['record_id'] . "'><img src='/img/history.png' width='24px' /></a>";
+                                        $filelink .= "<a target='_blank' id='vopros$elem[record_id]' title='история изменения'   href='/web/record-history/?record_id=" . $elem['record_id'] . "'><img src='/assets/img/history.png' width='24px' /></a>";
                                     }
-                                    $filelink .= "<a target='_blank' id='print$elem[record_id]' title='печать'   href='/web/print/?record_id=$elem[record_id]'><img src='/img/print.png' width='24px' /></a>";
+                                    $filelink .= "<a target='_blank' id='print$elem[record_id]' title='печать'   href='/web/print/?record_id=$elem[record_id]'><img src='/assets/img/print.png' width='24px' /></a>";
                                 }
 
                                 if ($user->role != 2) {
-                                    $filelink .= "<a target='_blank' id='print$elem[record_id]' title='редактировать'   href='/web/record/update/?id=$elem[record_id]'><img src='/img/edit.png' width='24px' /></a>";
+                                    $filelink .= "<a target='_blank' id='print$elem[record_id]' title='редактировать'   href='/web/record/update/?id=$elem[record_id]'><img src='/assets/img/edit.png' width='24px' /></a>";
                                 }
 
                                 //////////////////////////////////

@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2cfcfe7de420e9a1c5c983a33a18bf3d",
+    "content-hash": "8f95cb3cead4ffc9719e8fa61378260d",
     "packages": [
         {
             "name": "avadim/fast-excel-helper",
-            "version": "v1.3.0",
+            "version": "v1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aVadim483/fast-excel-helper.git",
-                "reference": "5994f8afc69853f34669a9b71eccb4bf45025514"
+                "reference": "2076dcb484bebe18ecd512dc376ff78df7e78f65"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aVadim483/fast-excel-helper/zipball/5994f8afc69853f34669a9b71eccb4bf45025514",
-                "reference": "5994f8afc69853f34669a9b71eccb4bf45025514",
+                "url": "https://api.github.com/repos/aVadim483/fast-excel-helper/zipball/2076dcb484bebe18ecd512dc376ff78df7e78f65",
+                "reference": "2076dcb484bebe18ecd512dc376ff78df7e78f65",
                 "shasum": ""
             },
             "require": {
@@ -57,22 +57,22 @@
             ],
             "support": {
                 "issues": "https://github.com/aVadim483/fast-excel-helper/issues",
-                "source": "https://github.com/aVadim483/fast-excel-helper/tree/v1.3.0"
+                "source": "https://github.com/aVadim483/fast-excel-helper/tree/v1.4.0"
             },
-            "time": "2025-06-01T13:55:34+00:00"
+            "time": "2026-08-16T14:46:55+00:00"
         },
         {
             "name": "avadim/fast-excel-reader",
-            "version": "v3.0.2",
+            "version": "v3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aVadim483/fast-excel-reader.git",
-                "reference": "165d59be91d253b745d03fe38312738d66c46591"
+                "reference": "1bad984f90ed29ac23318d306162f7cf1199ab8f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aVadim483/fast-excel-reader/zipball/165d59be91d253b745d03fe38312738d66c46591",
-                "reference": "165d59be91d253b745d03fe38312738d66c46591",
+                "url": "https://api.github.com/repos/aVadim483/fast-excel-reader/zipball/1bad984f90ed29ac23318d306162f7cf1199ab8f",
+                "reference": "1bad984f90ed29ac23318d306162f7cf1199ab8f",
                 "shasum": ""
             },
             "require": {
@@ -115,26 +115,26 @@
             ],
             "support": {
                 "issues": "https://github.com/aVadim483/fast-excel-reader/issues",
-                "source": "https://github.com/aVadim483/fast-excel-reader/tree/v3.0.2"
+                "source": "https://github.com/aVadim483/fast-excel-reader/tree/v3.2.0"
             },
-            "time": "2026-05-22T18:03:19+00:00"
+            "time": "2026-07-21T19:58:26+00:00"
         },
         {
             "name": "avadim/fast-excel-writer",
-            "version": "v6.13.2",
+            "version": "v6.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aVadim483/fast-excel-writer.git",
-                "reference": "6232c3b2d1a5543cd1f2bc870893fa0e36d1d613"
+                "reference": "5510153588cb6164694334b6a5779e07260eded8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aVadim483/fast-excel-writer/zipball/6232c3b2d1a5543cd1f2bc870893fa0e36d1d613",
-                "reference": "6232c3b2d1a5543cd1f2bc870893fa0e36d1d613",
+                "url": "https://api.github.com/repos/aVadim483/fast-excel-writer/zipball/5510153588cb6164694334b6a5779e07260eded8",
+                "reference": "5510153588cb6164694334b6a5779e07260eded8",
                 "shasum": ""
             },
             "require": {
-                "avadim/fast-excel-helper": "^1.3",
+                "avadim/fast-excel-helper": "^1.4",
                 "ext-json": "*",
                 "ext-mbstring": "*",
                 "ext-zip": "*",
@@ -171,22 +171,22 @@
             ],
             "support": {
                 "issues": "https://github.com/aVadim483/fast-excel-writer/issues",
-                "source": "https://github.com/aVadim483/fast-excel-writer/tree/v6.13.2"
+                "source": "https://github.com/aVadim483/fast-excel-writer/tree/v6.16"
             },
-            "time": "2026-06-30T19:09:27+00:00"
+            "time": "2026-08-16T16:22:36+00:00"
         },
         {
             "name": "bower-asset/inputmask",
-            "version": "5.0.9",
+            "version": "5.0.10",
             "source": {
                 "type": "git",
                 "url": "git@github.com:RobinHerbots/Inputmask.git",
-                "reference": "310a33557e2944daf86d5946a5e8c82b9118f8f7"
+                "reference": "325dde43365b7638393e5dc1a2b6463114ef14dd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/RobinHerbots/Inputmask/zipball/310a33557e2944daf86d5946a5e8c82b9118f8f7",
-                "reference": "310a33557e2944daf86d5946a5e8c82b9118f8f7"
+                "url": "https://api.github.com/repos/RobinHerbots/Inputmask/zipball/325dde43365b7638393e5dc1a2b6463114ef14dd",
+                "reference": "325dde43365b7638393e5dc1a2b6463114ef14dd"
             },
             "require": {
                 "bower-asset/jquery": ">=1.7"
@@ -201,7 +201,7 @@
             "version": "3.7.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:jquery/jquery-dist.git",
+                "url": "https://github.com/jquery/jquery-dist.git",
                 "reference": "fde1f76e2799dd877c176abde0ec836553246991"
             },
             "dist": {
@@ -572,20 +572,20 @@
         },
         {
             "name": "myclabs/deep-copy",
-            "version": "1.13.4",
+            "version": "1.14.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "07d290f0c47959fd5eed98c95ee5602db07e0b6a"
+                "reference": "8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/07d290f0c47959fd5eed98c95ee5602db07e0b6a",
-                "reference": "07d290f0c47959fd5eed98c95ee5602db07e0b6a",
+                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae",
+                "reference": "8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1 || ^8.0"
+                "php": "^8.0"
             },
             "conflict": {
                 "doctrine/collections": "<1.6.8",
@@ -620,15 +620,27 @@
             ],
             "support": {
                 "issues": "https://github.com/myclabs/DeepCopy/issues",
-                "source": "https://github.com/myclabs/DeepCopy/tree/1.13.4"
+                "source": "https://github.com/myclabs/DeepCopy/tree/1.14.0"
             },
             "funding": [
                 {
-                    "url": "https://tidelift.com/funding/github/packagist/myclabs/deep-copy",
-                    "type": "tidelift"
+                    "url": "https://github.com/mnapoli",
+                    "type": "github"
                 }
             ],
-            "time": "2025-08-01T08:46:24+00:00"
+            "time": "2026-08-11T10:17:44+00:00"
+        },
+        {
+            "name": "npm-asset/openseadragon",
+            "version": "6.1.0",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/openseadragon/-/openseadragon-6.1.0.tgz"
+            },
+            "type": "npm-asset",
+            "license": [
+                "BSD-3-Clause"
+            ]
         },
         {
             "name": "paragonie/random_compat",
@@ -746,16 +758,16 @@
         },
         {
             "name": "predis/predis",
-            "version": "v3.5.1",
+            "version": "v3.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/predis/predis.git",
-                "reference": "5c996db191ee2d9bafe651f454b1fca16754271b"
+                "reference": "2ff20c08bb63697245ffee3f198d1673086c302d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/predis/predis/zipball/5c996db191ee2d9bafe651f454b1fca16754271b",
-                "reference": "5c996db191ee2d9bafe651f454b1fca16754271b",
+                "url": "https://api.github.com/repos/predis/predis/zipball/2ff20c08bb63697245ffee3f198d1673086c302d",
+                "reference": "2ff20c08bb63697245ffee3f198d1673086c302d",
                 "shasum": ""
             },
             "require": {
@@ -797,7 +809,7 @@
             ],
             "support": {
                 "issues": "https://github.com/predis/predis/issues",
-                "source": "https://github.com/predis/predis/tree/v3.5.1"
+                "source": "https://github.com/predis/predis/tree/v3.6.0"
             },
             "funding": [
                 {
@@ -805,7 +817,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-06-11T16:56:53+00:00"
+            "time": "2026-08-14T23:07:56+00:00"
         },
         {
             "name": "psr/http-message",
@@ -984,16 +996,16 @@
         },
         {
             "name": "symfony/process",
-            "version": "v7.4.13",
+            "version": "v7.4.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/process.git",
-                "reference": "f5804be144caceb570f6747519999636b664f24c"
+                "reference": "058d17fc284cce14efb2385783b55014a461b176"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/f5804be144caceb570f6747519999636b664f24c",
-                "reference": "f5804be144caceb570f6747519999636b664f24c",
+                "url": "https://api.github.com/repos/symfony/process/zipball/058d17fc284cce14efb2385783b55014a461b176",
+                "reference": "058d17fc284cce14efb2385783b55014a461b176",
                 "shasum": ""
             },
             "require": {
@@ -1025,7 +1037,7 @@
             "description": "Executes commands in sub-processes",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/process/tree/v7.4.13"
+                "source": "https://github.com/symfony/process/tree/v7.4.17"
             },
             "funding": [
                 {
@@ -1045,7 +1057,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-23T16:05:06+00:00"
+            "time": "2026-08-21T17:40:08+00:00"
         },
         {
             "name": "twbs/bootstrap",
@@ -1791,7 +1803,7 @@
                     "homepage": "http://github.com/chrisboulton"
                 }
             ],
-            "description": "A comprehensive library for generating differences between two hashable objects (strings or arrays).",
+            "description": "A comprehensive library for generating differences between two hashable objects(strings or arrays).",
             "support": {
                 "source": "https://github.com/phpspec/php-diff/tree/v1.1.3"
             },
@@ -1847,11 +1859,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.2.5",
+            "version": "2.2.9",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/909c1e5fef7989ac0d0c1c5c42e32a5c4f6198a0",
-                "reference": "909c1e5fef7989ac0d0c1c5c42e32a5c4f6198a0",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/13d6b4f347bad222da436580c8304fa6f83e6bd0",
+                "reference": "13d6b4f347bad222da436580c8304fa6f83e6bd0",
                 "shasum": ""
             },
             "require": {
@@ -1907,7 +1919,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-07-05T06:31:06+00:00"
+            "time": "2026-08-22T07:38:16+00:00"
         },
         {
             "name": "yii2-extensions/phpstan",

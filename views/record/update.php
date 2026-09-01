@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use app\models\HelperImg;
+use app\assets\OpenSeadragonAsset;
 
 /** @var yii\web\View $this
  * @var app\models\Record $model
@@ -19,6 +20,10 @@ if ($user->role == 1) {
 } else {
     $this->params['breadcrumbs'][] = $this->title;
 }
+
+$assetBundle = OpenSeadragonAsset::register($this);
+$imagesUrl = $assetBundle->baseUrl . '/images/';
+
 ?>
 <div class="record-update">
     <?php if ($_POST): ?>

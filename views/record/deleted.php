@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     // Изменяем стандартную кнопку update, чтобы добавить картинку
                     'update' => function ($url, $model, $key) {
                         return Html::a(
-                            Html::img('/img/edit.png', ['width' => '24px']), 
+                            Html::img('/assets/img/edit.png', ['width' => '24px']), 
                             ['/record/update', 'id' => $model->id], 
                             ['target' => '_blank', 'title' => 'редактировать']
                         );
@@ -83,7 +83,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     // Кастомная кнопка для восстановления
                     'restore' => function ($url, $model, $key) {
                         return Html::a(
-                            Html::img('/img/restore.png', ['width' => '24px']), 
+                            Html::img('/assets/img/restore.png', ['width' => '24px']), 
                             ['/record/deleted', 'record_id' => $model->id, 'a' => 'restore'], 
                             ['title' => 'восстановить']
                         );
@@ -91,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     // Кастомная кнопка для полного удаления
                     'delete' => function ($url, $model, $key) {
                         return Html::a(
-                            Html::img('/img/del.png', ['width' => '24px']), 
+                            Html::img('/assets/img/del.png', ['width' => '24px']), 
                             ['/record/deleted', 'record_id' => $model->id, 'a' => 'del'], 
                             ['title' => 'удалить']
                         );

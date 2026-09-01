@@ -151,7 +151,7 @@ if(!$titlePath['path'])
                             . Html::hiddenInput('id', $record->book->id)
                             . Html::hiddenInput('filename', $record->filename)
                             . Html::button(
-                                Html::img('/img/edit.png', ['width' => '24px']),
+                                Html::img('/assets/img/edit.png', ['width' => '24px']),
                                 [
                                     'type' => 'button',
                                     'class' => 'btn btn-sm p-0',
@@ -166,8 +166,8 @@ if(!$titlePath['path'])
                                 return '';
 
                             return Html::a(
-                                Html::img('/img/view.png', ['width' => '24px']),
-                                str_replace('\\', '/', Yii::getAlias("@webimages/{$record->filename}")),
+                                Html::img('/assets/img/view.png', ['width' => '24px']),
+                                ['image-viewer/index', 'path' => str_replace('\\', '/', $record->filename) ],
                                 [
                                     'class' => 'btn btn-sm p-0',
                                     'title' => 'Показать скан',

@@ -6,6 +6,7 @@ use yii\helpers\FileHelper;
 use app\models\Book;
 use app\models\Record;
 use yii\helpers\StringHelper;
+use yii\helpers\Url;
 
 class HelperImg {
     /**
@@ -80,8 +81,8 @@ class HelperImg {
         if(!$files)
             return '';
 
-        $webPath = Yii::getAlias("@webimages") . "/" . dirname(str_replace('\\', '/', $record->filename));
-        return "$webPath/" . StringHelper::basename($files[0]);
+        $filePath = StringHelper::dirname($record->filename) . '\\' . StringHelper::basename($files[0]);
+        return Url::to(['image-viewer/index', 'path' => str_replace('\\', '/', $filePath)]);
     }
 
     /**

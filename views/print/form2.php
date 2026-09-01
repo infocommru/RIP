@@ -27,13 +27,13 @@ $normal = 'verdana';
 <!doctype html>
 <html>
     <head>
-        <link rel="stylesheet" href="/css/printer.css" />
+        <link rel="stylesheet" href="/assets/css/printer.css" />
     </head>
     <body>
         <table>
             <tr>
                 <td class="title">
-                    <div><img width='43px' src='/img/print_logo.png' /></div>
+                    <div><img width='43px' src='/assets/img/print_logo.png' /></div>
                     <div class='upper_text'> 
                         Правительство Санкт-Петербурга <br />
                         Комитет по промышленной политике,<br />
