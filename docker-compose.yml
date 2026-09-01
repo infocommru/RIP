@@ -1,10 +1,9 @@
-name: opensearch
+name: rip
 
 services:
   rip:
-    image: rip
+    image: ghcr.io/infocommru/rip:latest
     init: true
-    build: .
     restart: unless-stopped
     volumes:
 #      - /mnt/images:/var/www/html/upload/rip2 Поменять на свое значение
@@ -31,9 +30,8 @@ services:
       - rip-queue
 
   rip-queue:
-    image: rip
+    image: ghcr.io/infocommru/rip:latest
     init: true
-    build: .
     restart: unless-stopped
     volumes:
       - rip_upload:/var/www/html/web/upload
