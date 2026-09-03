@@ -365,16 +365,6 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                     </ul>
                 </div>
             </div>
-
-            <?php
-                /*if ($search_data)
-                    echo Yii::$app->controller->renderPartial('_search_result', ['data' => $search_data]);
-                else if (isset($_GET['fam'])) {
-                    $url_f2 = '/web/print/not-found-f2';
-                    $url_f2 .= "?params=" . rawurlencode(base64_encode(serialize($_GET)));
-                    echo "<h5>По вашему запросу ничего не найдено, попробуйте уточнить критерии поиска <a target='_blank' href='$url_f2'>Форма Ф2</a></h5>";
-                }*/
-            ?>
         </div>
     </div>
 <script>
@@ -438,6 +428,46 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
 
         // Глобальная переменная для хранения текущих фильтров поиска
         let currentFilterObject = {};
+
+        document.addEventListener('click', async (e) => {
+            // Находим ближайшую кнопку с классом .btn-vopros
+            const btn = e.target.closest('.btn-vopros');
+            if (!btn) return;
+
+            e.preventDefault();
+
+            const recordId = btn.dataset.id; // Получаем data-id
+
+            try {
+                // Формируем URL с GET-параметром
+                const url = new URL("<?= \yii\helpers\Url::to(['search/vopros']) ?>", window.location.origin);
+                url.searchParams.append('record_id', recordId);
+
+                const response = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest' // Флаг AJAX-запроса для Yii2
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка сервера: ${response.status}`);
+                }
+
+                alert('Данные отправлены на уточнение');
+
+                // Анимация плавного исчезновения (аналог fadeOut)
+                btn.style.transition = 'opacity 0.4s ease';
+                btn.style.opacity = '0';
+
+                setTimeout(() => {
+                    btn.style.display = 'none';
+                }, 400);
+
+            } catch (error) {
+                alert('Ошибка при отправке запроса');
+                console.error(error);
+            }
+        });
 
         // 3. Выполнение поиска и построение вкладок
         document.getElementById('find_results').addEventListener('click', (event) => {
@@ -559,23 +589,4 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
             return isValid;
         }
     });
-
-    /*function vopros(record_id) {
-        jQuery.get("/web/search/vopros", {"record_id": record_id}, function (data) {
-            alert("Данные отправлены на уточнение");
-            jQuery('#vopros' + record_id).fadeOut(400);
-        });
-    }*/
-
-    /*function next_page(cemetery_id, page) {
-        var val = jQuery('#pager').val();
-
-        if (val)
-            val += ";";
-
-        val += cemetery_id + "," + page;
-        jQuery('#pager').val(val);
-        jQuery('.search_btn').click();
-    }*/
-
 </script>

@@ -413,7 +413,7 @@ class SearchController extends Controller {
         ]);
 
         // 5. Используем renderAjax для передачи фрагмента во вкладку
-        return $this->renderAjax('test_result', [
+        return $this->renderAjax('search_result', [
             'dataProvider' => $dataProvider,
             'count_result' => $count,
             'tabId' => $search['cemetery'], // Передаем ID для Pjax
@@ -549,7 +549,8 @@ class SearchController extends Controller {
         $record = Record::find()->andWhere(['id' => $record_id])->one();
         $record->vopros = 1;
         $record->save();
-        echo $record->fio;
+
+        \app\models\HelperLevoshkin::updateSearchRecord($record);
     }
 
     /**
