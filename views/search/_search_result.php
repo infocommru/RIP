@@ -25,14 +25,13 @@ $user = app\models\User::findIdentity(Yii::$app->user->id);
 
 $url_export = $_SERVER['REQUEST_URI'];
 $url_export = strtr($url_export, ['/search' => '/search/export']);
-?><div class="row">
+?>
+<div class="row">
     <div class="col-sm-12">
         <div id="tabs">
             <ul>
-                <?php
-                /** @var false|array<string, mixed> $data */
-                foreach ($data as $list):
-                    ?>
+                <?php /** @var false|array<string, mixed> $data */
+                foreach ($data as $list): ?>
                     <li><a href="#tabs-<?= $list['id'] ?>"><?= $list['name'] ?></a></li>
                 <?php endforeach; ?>
             </ul>

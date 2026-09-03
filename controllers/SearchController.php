@@ -4,13 +4,16 @@ namespace app\controllers;
 
 use app\models\Record;
 use app\models\Book;
+use app\models\Cemetery;
+use app\models\HelperImg;
+
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use \avadim\FastExcelWriter\Excel;
-use app\models\HelperImg;
+use yii\web\Response;
 use Yii;
 
 /**
@@ -204,7 +207,7 @@ class SearchController extends Controller {
      * @param string $name_var
      * @return array<string, mixed>
      */
-    protected function searchValue($switch ,$search_string, $name_var){
+    protected function searchValue(int $switch, string $search_string, string $name_var): array{
         switch ($switch) {
             case 1:
                 $condition = self::searchTermConditions($search_string, $name_var);
@@ -225,50 +228,44 @@ class SearchController extends Controller {
 
         return $condition;
     }
-    
-    /**
-     *
-     * @param int $c_id
-     * @return false|array{0: array<int, mixed>, 1: int}
-     */
-    protected function searchCemetery($c_id) {
-        if (empty($_GET)) {
+
+    protected function searchCemetery(array $search): array{
+        if (empty($search)) {
             return false;
         }
 
-        $query = \app\models\CacheRecords::find();
 		$elasticQuery = [];
-        $elasticQuery['bool']['must'][] = ['term' => ['cemetery_id' => $c_id]];
+        $elasticQuery['bool']['must'][] = ['term' => ['cemetery_id' => $search['cemetery']]];
 
-        if ($_GET['regnum']) {
-            $condition = self::searchTermConditions($_GET['regnum'], 'regnum');
+        if ($search['regnum']) {
+            $condition = self::searchTermConditions($search['regnum'], 'regnum');
             $elasticQuery['bool']['must'][] = $condition;
         }
 
-        if ($_GET['fam']) {
-            $elasticQuery['bool']['must'][] = self::searchValue($_GET['fam_cont'], $_GET['fam'], 'fam');
+        if ($search['fam']) {
+            $elasticQuery['bool']['must'][] = self::searchValue($search['fam_cont'], $search['fam'], 'fam');
         }
 
-        if ($_GET['nam']) {
-            $elasticQuery['bool']['must'][] = self::searchValue($_GET['nam_cont'], $_GET['nam'], 'nam');
+        if ($search['nam']) {
+            $elasticQuery['bool']['must'][] = self::searchValue($search['nam_cont'], $search['nam'], 'nam');
         }
 
-        if ($_GET['ot']) {
-            $elasticQuery['bool']['must'][] = self::searchValue($_GET['ot_cont'], $_GET['ot'], 'ot');
+        if ($search['ot']) {
+            $elasticQuery['bool']['must'][] = self::searchValue($search['ot_cont'], $search['ot'], 'ot');
         }
 
-        if (isset($_GET['unknown'])) {
+        if ($search['unknown']) {
         	$elasticQuery['bool']['must'][] = ['term' => ['unknown' => 1]];
         }
 
-        if ($_GET['unknown_number']) {
-            $elasticQuery['bool']['must'][] = self::searchTermConditions( $_GET['unknown_number'], 'unknown_number');
+        if ($search['unknown_number']) {
+            $elasticQuery['bool']['must'][] = self::searchTermConditions( $search['unknown_number'], 'unknown_number');
         }
 
-        if ($_GET['age']) {
-            $age = intval($_GET['age']);
+        if ($search['age']) {
+            $age = intval($search['age']);
 
-            switch (intval($_GET['age_cmp'])) {
+            switch (intval($search['age_cmp'])) {
                 case 3:
                     $condition = ['range' => ['age_int' => ['gt' => $age]]];
                     break;
@@ -281,8 +278,8 @@ class SearchController extends Controller {
             $elasticQuery['bool']['must'][] = $condition;
         }
 
-        if ($_GET['rip_style']) {
-            $rStyle = intval($_GET['rip_style']);
+        if ($search['rip_style']) {
+            $rStyle = intval($search['rip_style']);
 
             switch ($rStyle) {
                 case 2:
@@ -308,14 +305,14 @@ class SearchController extends Controller {
             }
         }
 
-        if ($_GET['dead_y']) {
-            $dead_year = intval($_GET['dead_y']);
-            $dead_m = intval($_GET['dead_m']);
-            $dead_d = intval($_GET['dead_d']);
+        if ($search['dead_y']) {
+            $dead_year = intval($search['dead_y']);
+            $dead_m = intval($search['dead_m']);
+            $dead_d = intval($search['dead_d']);
 
             $dead_date = ($dead_d < 10 ? '0' . $dead_d : $dead_d) . '/' . ($dead_m < 10 ? '0' . $dead_m : $dead_m) . '/' . $dead_year;
 
-            switch (intval($_GET['dead_year_cmp'])) {
+            switch (intval($search['dead_year_cmp'])) {
                 case 3:
                     $condition = ['range' => ['dead_date.date' => ['gt' => $dead_date]]];
                     break;
@@ -335,14 +332,14 @@ class SearchController extends Controller {
             $elasticQuery['bool']['must'][] = $condition;
         }
 
-        if ($_GET['rip_y']) {
-            $rip_year = intval($_GET['rip_y']);
-            $rip_m = intval($_GET['rip_m']);
-            $rip_d = intval($_GET['rip_d']);
+        if ($search['rip_y']) {
+            $rip_year = intval($search['rip_y']);
+            $rip_m = intval($search['rip_m']);
+            $rip_d = intval($search['rip_d']);
 
             $rip_date = ($rip_d < 10 ? '0' . $rip_d : $rip_d) . '/' . ($rip_m < 10 ? '0' . $rip_m : $rip_m) . '/' . $rip_year;
 
-            switch (intval($_GET['rip_year_cmp'])) {
+            switch (intval($search['rip_year_cmp'])) {
                 case 3:
                     $condition = ['range' => ['rip_date.date' => ['gt' => $rip_date]]];
                     break;
@@ -362,98 +359,104 @@ class SearchController extends Controller {
             $elasticQuery['bool']['must'][] = $condition;
         }
         
-        if ($_GET['zags']){
-            $elasticQuery['bool']['must'][] = self::searchValue($_GET['zags_cont'], $_GET['zags'], 'zags');
+        if ($search['zags']){
+            $elasticQuery['bool']['must'][] = self::searchValue($search['zags_cont'], $search['zags'], 'zags');
         }
         
-        if ($_GET['docnum']) {
-            $elasticQuery['bool']['must'][] = self::searchTermConditions($_GET['docnum'], 'docnum');
+        if ($search['docnum']) {
+            $elasticQuery['bool']['must'][] = self::searchTermConditions($search['docnum'], 'docnum');
         }
         
-        if ($_GET['comment']) {
-            $elasticQuery['bool']['must'][] = self::searchTermConditions($_GET['comment'], 'comment');
+        if ($search['comment']) {
+            $elasticQuery['bool']['must'][] = self::searchTermConditions($search['comment'], 'comment');
         }
 
-        if (isset($_GET['ext_search'])) {
-            if ($_GET['areanum']) {
-                $elasticQuery['bool']['must'][] = self::searchValue($_GET['area_cont'], $_GET['areanum'], 'areanum');
+        if ($search['ext_search']) {
+            if ($search['areanum']) {
+                $elasticQuery['bool']['must'][] = self::searchValue($search['area_cont'], $search['areanum'], 'areanum');
             }
 
-            if ($_GET['rownum']) {
-                $elasticQuery['bool']['must'][] = self::searchValue($_GET['row_cont'], $_GET['rownum'], 'rownum');
+            if ($search['rownum']) {
+                $elasticQuery['bool']['must'][] = self::searchValue($search['row_cont'], $search['rownum'], 'rownum');
             }
 
-            if ($_GET['ripnum']) {
-                $elasticQuery['bool']['must'][] = self::searchValue($_GET['rip_cont'], $_GET['ripnum'], 'ripnum');
+            if ($search['ripnum']) {
+                $elasticQuery['bool']['must'][] = self::searchValue($search['rip_cont'], $search['ripnum'], 'ripnum');
             }
 
-            if ($_GET['rel']) {
-            	$elasticQuery['bool']['must'][] = self::searchTermConditions($_GET['rel'], 'relative');
+            if ($search['rel']) {
+            	$elasticQuery['bool']['must'][] = self::searchTermConditions($search['rel'], 'relative');
             }
         }
 
-    	$query->query($elasticQuery);
+        return $elasticQuery;
+    }
+    
+    public function actionShowSearchResult(array $search, int $page = 1, int $paginator = 100): string 
+    {
+        $found = $this->searchCemetery($search);
+
+        $query = \app\models\CacheRecords::find()
+            ->query($found)
+            ->orderBy(['_score' => SORT_DESC, 'record_id' => SORT_DESC]);
+
         $count = $query->count();
 
-        $curpage = 1;
-        if (isset($_GET['pager'])) {
-            $pages = explode(';', $_GET['pager']);
-            $curpage = 1;
-            foreach ($pages as $p) {
-                $pp = explode(",", $p);
-                if ($pp[0] == $c_id)
-                    $curpage = $pp[1];
+        // 4. Передаем именно $query в ActiveDataProvider
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'page' => $page - 1,       // Yii2 считает страницы с 0
+                'pageSize' => $paginator,
+                'pageParam' => 'page',
+            ],
+        ]);
+
+        // 5. Используем renderAjax для передачи фрагмента во вкладку
+        return $this->renderAjax('test_result', [
+            'dataProvider' => $dataProvider,
+            'count_result' => $count,
+            'tabId' => $search['cemetery'], // Передаем ID для Pjax
+        ]);
+    }
+
+    public function actionFoundResultExists(array $search): array{
+        $result = [];
+
+        if($search['cemetery'] == 0){
+            $cemeteries = Cemetery::find()->select(['id', 'name'])->orderBy('name')->all();
+
+            foreach($cemeteries as $cemetery){
+                $search['cemetery'] = $cemetery->id;
+                $found = $this->searchCemetery($search);
+                $query = \app\models\CacheRecords::find();
+                
+                $search['cemetery'] =  $cemetery->id;
+                $result[] = ['id' => $cemetery->id, 'name' => $cemetery->name, 'exists' => $query->query($found)->exists() ];
             }
         }
+        else{
+            $cemetery = Cemetery::find()->where(['id' => $search['cemetery']])->one();
 
-        $offset = ($curpage - 1) * $this->searchLimit;
-       
-        $result = $query->orderBy(['_score' => SORT_DESC, 'record_id' => SORT_DESC])
-        	->offset($offset)
-			->limit($this->searchLimit)
-			->asArray()
-			->all();
-			
-        return [$result, $count];
+            if(!$cemetery)
+                return [];
+
+            $found = $this->searchCemetery($search);
+            $query = \app\models\CacheRecords::find();
+
+            $result[] = ['id' => $cemetery->id, 'name' => $cemetery->name, 'exists' => $query->query($found)->exists() ];
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return $result;
     }
 
     /**
      *
      * @return string
      */
-    public function actionIndex() {
-        $search_data = false;
-
-        if (isset($_GET['fam'])) {
-            $search_data = [];
-            $cemeteries = \app\models\Cemetery::find()
-                ->orderBy("name");
-
-            if ($_GET['cemetery'] != '0') {
-                $cemeteries->andWhere(['id' => $_GET['cemetery']]);
-            }
-
-            $cemeteries = $cemeteries->all();
-
-            foreach ($cemeteries as $cemetery) {
-                $data = $this->searchCemetery($cemetery->id);
-                $counter = $data[1];
-                $data = $data[0];
-                
-                if ($data) {
-                    $search_data[] = [
-                        'id' => $cemetery->id,
-                        'name' => $cemetery->name,
-                        'counter' => $counter,
-                        'data' => $data
-                    ];
-                }
-            }
-        }
-
-        return $this->render('index', [
-        	'search_data' => $search_data
-        ]);
+    public function actionIndex(): string {
+        return $this->render('index', []);
     }
 
     /**
