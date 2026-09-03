@@ -42,6 +42,12 @@ $imagesUrl = $assetBundle->baseUrl . '/images/';
             let images_files_urls = [];
             let images_files = [];
             let images_files_short = [];
+
+            const viewer = OpenSeadragon({
+                id: "openseadragon-viewer",
+                prefixUrl: "<?= $imagesUrl ?>",
+                drawer: "html",
+            });
         
             fetch('/web/book/get-images-path?book_id=<?= json_encode($model->book->id) ?>')
                 .then(response => {
@@ -56,9 +62,8 @@ $imagesUrl = $assetBundle->baseUrl . '/images/';
                     images_files = data.map(item => item.src2) || [];
                     images_files_short = data.map(item => item.src3) || [];
 
-                    open_image_bottom(1);
-                    create_top_selector();
                     fillSelector();
+                    create_top_selector();
                 })
                 .catch(error => {
                     console.error('Ошибка загрузки изображений:', error);
@@ -82,6 +87,7 @@ $imagesUrl = $assetBundle->baseUrl . '/images/';
             function create_top_selector(){
                 if(images_files_urls.length > 0){
                     const container = document.getElementById('images-top-selector');
+                    container.classList.remove('d-none');
                     container.replaceChildren();
 
                     const current_img_index = 2;
@@ -119,31 +125,6 @@ $imagesUrl = $assetBundle->baseUrl . '/images/';
                 }
             }
 
-            document.querySelectorAll('.pagenum').forEach(element => {
-                element.addEventListener('click', function () {
-                    open_image_bottom(this.dataset.num);
-                });
-            });
-
-            function open_image_bottom(num) {
-                const imageBottom = document.querySelector('#image_bottom');
-
-                for (let i = 1; i <= 5; i++) {
-                    imageBottom.classList.remove('bottom_img_offet' + i);
-                }
-
-                imageBottom.classList.add('bottom_img_offet' + num);
-
-                document.querySelectorAll('.pagenum').forEach(element => {
-                    element.classList.remove('active');
-                });
-
-                document.querySelector(`.pagenum[data-num="${num}"]`)
-                    .classList.add('active');
-
-                document.querySelector('#pageNum').value = num;
-            }
-
             function click_image(index) {
                 jQuery('.img_gal').removeClass('current_gallery_elem');
                 jQuery('.img_gal' + index).addClass('current_gallery_elem');
@@ -151,7 +132,12 @@ $imagesUrl = $assetBundle->baseUrl . '/images/';
                 jQuery("#image_shower").removeClass("d-none");
                 jQuery('#select_fname').val(images_files[index]);
 
-                jQuery("#image_bottom").attr("src", images_files_urls[index]);
+                setTimeout(() => {
+                    viewer.open({
+                        type: 'image',
+                        url: images_files_urls[index]
+                    });
+                }, 0);
             }
 
             document.getElementById("select_fname").addEventListener('change', (e) => {
@@ -198,31 +184,7 @@ $imagesUrl = $assetBundle->baseUrl . '/images/';
     <div id="image_shower" class="container d-none">
         <div class="row">
             <div class="col-sm-12">
-                <ul class="pagination">
-                    <li class="page-item pagenum active" data-num="1" aria-current="page">
-                        <button type="button" class="page-link">1</a>
-                    </li>
-                    <li class="page-item pagenum" data-num="2">
-                        <button type="button" class="page-link">2</a>
-                    </li>
-                    <li class="page-item pagenum" data-num="3">
-                        <button type="button" class="page-link">3</a>
-                    </li>
-                    <li class="page-item pagenum" data-num="4">
-                        <button type="button" class="page-link">4</a>
-                    </li>
-                    <li class="page-item pagenum" data-num="5">
-                        <button type="button" class="page-link">5</a>
-                    </li>
-                </ul>
-
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-12">
-                <div id='image_bottom_top' style='width:100%;overflow-y: hidden;min-height: 900px;'>
-                    <img style="width: 100%; min-height: 900px;" id='image_bottom'>
-                </div>
+                <div id="openseadragon-viewer" style="width: 100%; height: 900px; background-color: #333;"></div>
             </div>
         </div>
     </div>

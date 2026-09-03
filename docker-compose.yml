@@ -44,7 +44,7 @@ services:
       - YII2_DEBUG=${YII2_DEBUG}
       - YII2_ENV=${YII2_ENV}
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
-      - TZ=Europe/Moscow
+      - TZ=${TIMEZONE}
     depends_on:
       - mysql
       - redis
@@ -69,7 +69,7 @@ services:
       - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_COLLATION=utf8mb4_unicode_ci
-      - TZ=Europe/Moscow
+      - TZ=${TIMEZONE}
     command:
       - "--innodb_flush_log_at_trx_commit=2"
       - "--innodb_flush_method=O_DIRECT"
@@ -87,7 +87,7 @@ services:
     environment:
       - PMA_HOST=mysql
       - PMA_ABSOLUTE_URI=http://0.0.0.0/pma/
-      - TZ=Europe/Moscow
+      - TZ=${TIMEZONE}
       - UPLOAD_LIMIT=10000M
     labels:
       - "traefik.enable=true"

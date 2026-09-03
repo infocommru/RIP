@@ -45,7 +45,6 @@ if(!$titlePath['path'])
             ?>
             <div id="path-builder">
                 <label class="mb-2">Путь к папке со сканами</label>
-                <div class="folder-row d-flex align-items-center gap-2 mb-2"></div>
             </div>
 
             <div class="hide-render d-none">

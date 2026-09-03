@@ -5,6 +5,8 @@ namespace app\controllers;
 use yii\web\Controller;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\helpers\FileHelper;
+use yii\web\NotFoundHttpException;
 use Yii;
 
 class ImageViewerController extends Controller {
@@ -38,6 +40,11 @@ class ImageViewerController extends Controller {
      */
     public function actionIndex($path): string {
         $this->layout = 'viewer';
+
+        $filePath = FileHelper::normalizePath(Yii::getAlias("@images/" . $path));
+
+        if(!is_file($filePath))
+            throw new NotFoundHttpException("Файл $path не найден");
 
         $path = str_replace('\\', '/', Yii::getAlias("@webimages/{$path}"));
 
