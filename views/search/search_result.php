@@ -4,23 +4,36 @@ use app\models\Helper;
 use app\models\User;
 use app\models\Record;
 use yii\helpers\Url;
+use yii\web\View;
 
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
-$tabId = $tabId ?? Yii::$app->request->get('id', 'default');
+$this->registerCssFile('assets/css/search_result.css', [
+    'depends' => [\yii\bootstrap5\BootstrapAsset::class], // или BootstrapPluginAsset
+]);
+
+$this->registerJsFile('assets/js/search_result.js', [
+    'depends' => [\yii\web\JqueryAsset::class], // Обязательно подгружать ПОСЛЕ jQuery
+    'position' => View::POS_END, // Вставка перед закрывающим тегом </body>
+]);
+
+$search['cemetery'] = $search['cemetery'] ?? Yii::$app->request->get('id', 'default');
 ?>
 
-<h5>Всего записей: <?= $count_result ?>. Выгрузить <a href="<?= "&c_id=" ?>">excel</a></h5>
+<h5>Всего записей: <?= $count_result ?>. 
+    Выгрузить <a href="<?= \yii\helpers\Url::to(['search/export', 'search' => $search]) ?>">excel</a></h5>
 
 <?php Pjax::begin([
-    'id' => 'pjax-tab-' . $tabId,
+    'id' => 'pjax-tab-' . $search['cemetery'],
     'enablePushState' => false, // Чтобы клик по странице не переписывал URL браузера
     'timeout' => 5000,
 ]); ?>
 
+
 <?= GridView::widget([
     'dataProvider' => $dataProvider,
+    'options' => ['class' => 'grid-view sticky-table-wrapper'],
     'columns' => [
         ['class' => 'yii\grid\SerialColumn'],
 
@@ -79,7 +92,8 @@ $tabId = $tabId ?? Yii::$app->request->get('id', 'default');
                 }
 
                 if ($comment !== '') {
-                    $dopInfo .= ', ' . \yii\helpers\Html::encode($comment);
+                    $encodedComment = \yii\helpers\Html::encode($comment);
+                    $dopInfo .= ', ' . \yii\helpers\Html::tag('span', $encodedComment, ['class' => 'text-danger']);
                 }
 
                 // Генерируем ссылку через хелпер Yii
@@ -87,7 +101,11 @@ $tabId = $tabId ?? Yii::$app->request->get('id', 'default');
                     $link = \yii\helpers\Html::a(
                         'обложка',
                         ['/search/book-cover', 'book_id' => $model->book_id],
-                        ['class' => 'link-primary', 'target' => '_blank']
+                        [
+                            'class' => 'link-primary', 
+                            'target' => '_blank',
+                            'data-pjax' => '0',
+                        ]
                     );
                     $dopInfo .= "<br />" . $link;
                 }
@@ -109,7 +127,11 @@ $tabId = $tabId ?? Yii::$app->request->get('id', 'default');
                     $links[] = \yii\helpers\Html::a(
                         \yii\helpers\Html::img('/assets/img/view.png', ['width' => '24px', 'alt' => 'просмотр']),
                         ['image-viewer/index', 'path' => $path],
-                        ['target' => '_blank', 'title' => 'Просмотр']
+                        [
+                            'target' => '_blank',
+                            'title' => 'Просмотр',
+                            'data-pjax' => '0',
+                        ]
                     );
                 }
 
@@ -135,6 +157,7 @@ $tabId = $tabId ?? Yii::$app->request->get('id', 'default');
                             'target' => '_blank',
                             'id' => 'history-' . $model->record_id,
                             'title' => 'История изменения',
+                            'data-pjax' => '0',
                         ]
                     );
                 }
@@ -147,6 +170,7 @@ $tabId = $tabId ?? Yii::$app->request->get('id', 'default');
                         'target' => '_blank',
                         'id' => 'print-' . $model->record_id,
                         'title' => 'Печать',
+                        'data-pjax' => '0',
                     ]
                 );
 
@@ -159,6 +183,7 @@ $tabId = $tabId ?? Yii::$app->request->get('id', 'default');
                             'target' => '_blank',
                             'id' => 'edit-' . $model->record_id,
                             'title' => 'Редактировать',
+                            'data-pjax' => '0',
                         ]
                     );
                 }

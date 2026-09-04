@@ -20,50 +20,6 @@ $user = app\models\User::findIdentity(Yii::$app->user->id);
 $this->title = 'Поиск по захоронениям г. Санкт-Петербурга';
 
 /**
- * @param string $txt
- * @return string
- */
-function get_input_value($txt) {
-    if (!empty($_GET[$txt])) {
-        return strtr($_GET[$txt], ['"' => '']);
-    }
-
-    return "";
-}
-
-/**
- * @param string $name
- * @return string
- */
-function echo_select_soderzit($name) {
-    $r = "<label for = \"$name\">Вхождение</label>";
-    $r .= "<select id = \"$name\" name='$name' class=\"form-control\">";
-
-    $values = [
-        1 => 'равно',
-        2 => 'содержит',
-        3 => 'начинается с',
-        4 => 'заканчивается на',
-    ];
-
-    foreach ($values as $k => $v) {
-        $selected = '';
-        if (isset($_GET[$name])) {
-            if ($_GET[$name] == $k)
-                $selected = "selected";
-        } else {
-            if ($k == 1)
-                $selected = "selected";
-        }
-
-        $r .= "<option $selected value='$k'>" . $v . "</option>";
-    }
-
-    $r .= "</select>";
-    return $r;
-}
-
-/**
  * @param string $name
  * @return string
  */
@@ -78,18 +34,8 @@ function echo_select_fuzziness($name) {
         4 => 'заканчивается на'
     ];
 
-    foreach ($values as $k => $v) {
-        $selected = '';
-        if (isset($_GET[$name])) {
-            if ($_GET[$name] == $k)
-                $selected = "selected";
-        } else {
-            if ($k == 1)
-                $selected = "selected";
-        }
-
-        $r .= "<option $selected value='$k'>" . $v . "</option>";
-    }
+    foreach ($values as $k => $v)
+        $r .= "<option value='$k'>" . $v . "</option>";
 
     $r .= "</select>";
     return $r;
@@ -112,28 +58,28 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
             <div class="row">
                 <div class="col-sm-2">
                     <label for='fam'>Фамилия</label>
-                    <input value="<?= get_input_value("fam") ?>" type="text" class='form-control' name='fam' id='fam' />
+                    <input type="text" class='form-control' name='fam' id='fam' />
                 </div>
                 <div class="col-sm-1">
                     <?= echo_select_fuzziness('fam_cont') ?>
                 </div>
                 <div class="col-sm-2">
                     <label for='nam'>Имя</label>
-                    <input value="<?= get_input_value("nam") ?>" type="text" class='form-control' name='nam' id='nam' />
+                    <input type="text" class='form-control' name='nam' id='nam' />
                 </div>
                 <div class="col-sm-1">
                     <?= echo_select_fuzziness('nam_cont') ?>
                 </div>
                 <div class="col-sm-2">
                     <label for='ot'>Отчество</label>
-                    <input value="<?= get_input_value("ot") ?>" type="text" class='form-control' name='ot' id='ot' />
+                    <input type="text" class='form-control' name='ot' id='ot' />
                 </div>
                 <div class="col-sm-1">
                     <?= echo_select_fuzziness('ot_cont') ?>
                 </div>
                 <div class="col-sm-2">
                     <label for='regnum'>Номер записи</label>
-                    <input value="<?= get_input_value("regnum") ?>" type="text" class='form-control' name='regnum' id='regnum' />
+                    <input type="text" class='form-control' name='regnum' id='regnum' />
                 </div>
             </div>
             <div class='row'>
@@ -143,18 +89,8 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                         <select id="cemetery" name='cemetery' class="form-control">
                             <option value='0'>-</option>
                             <?php
-                                $c_id = 0;
-                                if ((isset($_GET['cemetery'])) && ($_GET['cemetery'] != '0')) {
-                                    $c_id = intval($_GET['cemetery']);
-                                }
-
-                                foreach ($cemeteries as $cemetery) {
-                                    $selected = '';
-                                    if ($cemetery->id == $c_id) {
-                                        $selected = "selected";
-                                    }
-                                    echo "<option $selected value='" . $cemetery->id . "'>" . $cemetery->name . "</option>";
-                                }
+                                foreach ($cemeteries as $cemetery)
+                                    echo "<option value='" . $cemetery->id . "'>" . $cemetery->name . "</option>";
                             ?>
                         </select>
                     </div>
@@ -166,19 +102,10 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                         <select id="rip_style" name='rip_style' class="form-control">
                             <option value='0'>-</option>
                             <?php
-                                $r_id = 0;
-                                if ((isset($_GET['rip_style'])) && ($_GET['rip_style'] != '0')) {
-                                    $r_id = intval($_GET['rip_style']);
-                                }
-
                                 $riplist = \app\models\Record::ripStyleTypes();
-                                foreach ($riplist as $rip_id => $rip_val) {
-                                    $selected = '';
-                                    if ($rip_id == $r_id) {
-                                        $selected = "selected";
-                                    }
-                                    echo "<option $selected value='" . $rip_id . "'>" . $rip_val . "</option>";
-                                }
+
+                                foreach ($riplist as $rip_id => $rip_val)
+                                    echo "<option value='" . $rip_id . "'>" . $rip_val . "</option>";
                             ?>
 
                         </select>
@@ -187,13 +114,13 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                 <div class="col-sm-2">
                     <br />
                     <div class="form-group">
-                        <input  <?php if (isset($_GET['unknown'])) echo 'checked'; ?> type='checkbox' name='unknown' id='unknown' />
+                        <input type='checkbox' name='unknown' id='unknown' />
                         <label style='color:#cc0000' for="unknown">Неизвестный</label>
                     </div>
                 </div>
                 <div class="col-sm-2">
                     <label for="unknown_number">Номер неизвестного</label>
-                    <input value="<?= get_input_value("unknown_number") ?>"  type=text class='form-control' id='unknown_number' name='unknown_number' />
+                    <input type=text class='form-control' id='unknown_number' name='unknown_number' />
                 </div>
                 <div class="col-sm-4">
                     <br />
@@ -203,95 +130,55 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
             <div class="row">
                 <div class="col-sm-1">
                     <label for="age">Возраст</label>
-                    <input value="<?= get_input_value("age") ?>"  type=text class='form-control' id='age' name='age' />
+                    <input type=text class='form-control' id='age' name='age' />
                 </div>
                 <div class="col-sm-1">
                     <label for="age_cmp">Сравнение</label>
 
-                    <?php
-                    $selected = ['selected', '', ''];
-                    if (isset($_GET['age_cmp'])) {
-                        switch (intval($_GET['age_cmp'])) {
-                            case 2:
-                                $selected = ['', 'selected', ''];
-                                BREAK;
-                            case 3:
-                                $selected = ['', '', 'selected'];
-                                BREAK;
-                        }
-                    }
-                    ?>
-
                     <select id="age_cmp" name='age_cmp' class="form-control">
-                        <option <?= $selected[0] ?> value='1'>Равно</option>
-                        <option <?= $selected[1] ?> value='2'>Меньше</option>
-                        <option <?= $selected[2] ?> value='3'>Больше</option>
+                        <option value='1'>Равно</option>
+                        <option value='2'>Меньше</option>
+                        <option value='3'>Больше</option>
                     </select>
                 </div>
 
                 <div class="col-sm-3">
                     <label for="dead_year">Дата смерти</label>
                     <div class="input-group mb-2">
-                        <input value="<?= get_input_value("dead_y") ?>" id="dead_y" name="dead_y" type="text" class="form-control" placeholder="Год" >
+                        <input id="dead_y" name="dead_y" type="text" class="form-control" placeholder="Год" >
                         <span class="input-group-text">.</span>
-                        <input value="<?= get_input_value("dead_m") ?>" id="dead_m" name="dead_m" type="text" class="form-control" placeholder="Месяц" >
+                        <input id="dead_m" name="dead_m" type="text" class="form-control" placeholder="Месяц" >
                         <span class="input-group-text">.</span>
-                        <input value="<?= get_input_value("dead_d") ?>" id="dead_d" name="dead_d" type="text" class="form-control" placeholder="День" >
+                        <input id="dead_d" name="dead_d" type="text" class="form-control" placeholder="День" >
                     </div>
                 </div>  
-
-                <?php
-                $selected = ['selected', '', ''];
-                if (isset($_GET['dead_year_cmp'])) {
-                    switch (intval($_GET['dead_year_cmp'])) {
-                        case 2:
-                            $selected = ['', 'selected', ''];
-                            BREAK;
-                        case 3:
-                            $selected = ['', '', 'selected'];
-                            BREAK;
-                    }
-                }
-
-                $selected2 = ['selected', '', ''];
-                if (isset($_GET['rip_year_cmp'])) {
-                    switch (intval($_GET['rip_year_cmp'])) {
-                        case 2:
-                            $selected2 = ['', 'selected', ''];
-                            BREAK;
-                        case 3:
-                            $selected2 = ['', '', 'selected'];
-                            BREAK;
-                    }
-                }
-                ?>
 
                 <div class="col-sm-1">
                     <label for="dead_year_cmp">Сравнение</label>
                     <select id="dead_year_cmp" name='dead_year_cmp' class="form-control">
-                        <option  <?= $selected[0] ?> value='1'>Равно</option>
-                        <option  <?= $selected[1] ?> value='2'>Меньше</option>
-                        <option  <?= $selected[2] ?> value='3'>Больше</option>
+                        <option value='1'>Равно</option>
+                        <option value='2'>Меньше</option>
+                        <option value='3'>Больше</option>
                     </select>
                 </div>
 
                 <div class="col-sm-3">
                     <label for="dead_year">Дата захоронения</label>
                     <div class="input-group mb-2">
-                        <input value="<?= get_input_value("rip_y") ?>" id="rip_y" name="rip_y" type="text" class="form-control" placeholder="Год" >
+                        <input id="rip_y" name="rip_y" type="text" class="form-control" placeholder="Год" >
                         <span class="input-group-text">.</span>
-                        <input value="<?= get_input_value("rip_m") ?>" id="rip_m" name="rip_m" type="text" class="form-control" placeholder="Месяц" >
+                        <input id="rip_m" name="rip_m" type="text" class="form-control" placeholder="Месяц" >
                         <span class="input-group-text">.</span>
-                        <input value="<?= get_input_value("rip_d") ?>" id="rip_d" name="rip_d" type="text" class="form-control" placeholder="День" >
+                        <input id="rip_d" name="rip_d" type="text" class="form-control" placeholder="День" >
                     </div>
                 </div>  
 
                 <div class="col-sm-1">
                     <label for="rip_year_cmp">Сравнение</label>
                     <select id="rip_year_cmp" name='rip_year_cmp' class="form-control">
-                        <option <?= $selected2[0] ?> value='1'>Равно</option>
-                        <option <?= $selected2[1] ?> value='2'>Меньше</option>
-                        <option <?= $selected2[2] ?> value='3'>Больше</option>
+                        <option value='1'>Равно</option>
+                        <option value='2'>Меньше</option>
+                        <option value='3'>Больше</option>
                     </select>
                 </div>
             </div>
@@ -299,7 +186,7 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                 <div class="col-sm-3">
                     <div class="form-group">
                         <label for="zags">ЗАГС</label>
-                        <input name="zags" id="zags" class="form-control" value="<?= get_input_value("zags") ?>">
+                        <input name="zags" id="zags" class="form-control">
                     </div>
                 </div>
                 <div class="col-sm-1">
@@ -308,42 +195,43 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label for="docnum">Номер документа</label>
-                        <input value="<?= get_input_value("docnum") ?>" type=text class='form-control' id='docnum' name='docnum' />
+                        <input type=text class='form-control' id='docnum' name='docnum' />
                     </div>
                 </div>
                 <div class="col-sm-5">
                     <div class="form-group">
                         <label for="comment">Комментарий</label>
-                        <input value="<?= get_input_value("comment") ?>" type=text class='form-control' id='comment' name='comment' />
+                        <input type=text class='form-control' id='comment' name='comment' />
                     </div>
                 </div>           
                 <div class="col-sm-2">
-                    <button type="submit" id="find_results" class="btn btn-primary btn-lg btn-block search_btn">Найти</button>            
+                    <button type="submit" id="find_results" class="btn btn-primary btn-lg btn-block search_btn">Найти</button>
+                </div>
+                <div class="col-sm-2">
+                    <a href="<?= \yii\helpers\Url::to(['print/index']) ?>" class="btn btn-success btn-lg btn-block search_btn" target="_blank">Создать форму</a>
                 </div>
             </div>
-
-            <hr />
-
             <div id='additional_search_params' class='d-none'>
+                <hr />
                 <h4>Дополнительные параметры</h4>
                 <div class="row">
                     <div class="col-sm-2">
                         <label for="areanum">Номер участка</label>
-                        <input value="<?= get_input_value("areanum") ?>" type=text class='form-control' id='areanum' name='areanum' />
+                        <input type=text class='form-control' id='areanum' name='areanum' />
                     </div>
                     <div class="col-sm-2">
                         <?= echo_select_fuzziness('area_cont') ?>
                     </div>
                     <div class="col-sm-2">
                         <label for="rownum">Номер ряда</label>
-                        <input value="<?= get_input_value("rownum") ?>" type=text class='form-control' id='rownum' name='rownum' />
+                        <input type=text class='form-control' id='rownum' name='rownum' />
                     </div>
                     <div class="col-sm-2">
                         <?= echo_select_fuzziness('row_cont') ?>
                     </div>
                     <div class="col-sm-2">
                         <label for="ripnum">Номер могилы</label>
-                        <input value="<?= get_input_value("ripnum") ?>" type=text class='form-control' id='ripnum' name='ripnum' />
+                        <input type=text class='form-control' id='ripnum' name='ripnum' />
                     </div>
                     <div class="col-sm-2">
                         <?= echo_select_fuzziness('rip_cont') ?>
@@ -352,7 +240,7 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                 <div class="row">
                     <div class="col-sm-12">
                         <label for="rel">Родственники</label>
-                        <input value="<?= get_input_value("rel") ?>" type=text class='form-control' id='rel' name='rel' />
+                        <input type=text class='form-control' id='rel' name='rel' />
                     </div>
                 </div>
             </div>
@@ -361,7 +249,7 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
 
             <div class="row d-none" id="search_results">
                 <div class="col-sm-12">
-                    <ul id="tabs">
+                    <ul id="tabs" style="padding-left: 0px;">
                     </ul>
                 </div>
             </div>
@@ -485,13 +373,21 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                 }
             });
 
+            $('#tabs').html(`
+                <div class="text-center p-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                </div>
+            `);
+
             $.ajax({
                 url: '<?= \yii\helpers\Url::to(['search/found-result-exists']) ?>',
                 type: 'GET',
                 data: { search: currentFilterObject },
                 success: function(response) {
                     const $tabsContainer = $('#tabs');
-                    
+
                     // Уничтожаем старый экземпляр jQuery UI Tabs
                     if ($tabsContainer.data('ui-tabs')) {
                         $tabsContainer.tabs('destroy');
@@ -501,7 +397,8 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
 
                     const activeItems = response.filter(item => item.exists);
                     if (activeItems.length === 0) {
-                        alert('Ничего не найдено');
+                        $tabsContainer.html('<div class="alert alert-danger p-3">Ничего не найдено</div>');
+                        document.querySelector('#search_results').classList.remove('d-none');
                         return;
                     }
 
@@ -514,7 +411,11 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                         
                         $tabsContainer.append(`
                             <div id="tabs-${item.id}" data-id="${item.id}" data-loaded="false">
-                                <div class="p-3">Загрузка данных...</div>
+                                <div class="text-center p-4 spinner-container">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Загрузка...</span>
+                                    </div>
+                                </div>
                             </div>
                         `);
                     });
@@ -564,6 +465,11 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                         $tabPanel.html('<div class="p-3 text-danger">Ошибка при загрузке данных.</div>');
                     }
                 });
+            }
+            else {
+                // Если таб уже был загружен ранее, просто пересчитываем позицию скролла
+                if (typeof window.reinitFloatingScroll === 'function')
+                    window.reinitFloatingScroll();
             }
         }
 

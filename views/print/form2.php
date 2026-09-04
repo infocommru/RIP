@@ -119,16 +119,14 @@ $normal = 'verdana';
                 </span> году
             </div>
             <?php
-                $string = trim($_GET['comment']);
-                Helper::tablePrint('', $string, 545, 545, 7, $normal, $mpdfObject, 10);
+                if (isset($_GET['print_comment'])){
+                    $string = trim($_GET['comment']);
+                    Helper::tablePrint('', $string, 545, 545, 7, $normal, $mpdfObject, 10);
+                }
             ?>
-            <?php if (isset($_GET['print_comment'])): ?>
-
-                <div class="comment_ips"> 
-                    Справка сформирована на основе ИПС "Поиск захоронений"
-                </div>
-
-            <?php endif; ?>
+            <div class="comment_ips"> 
+                Справка сформирована на основе ИПС "Поиск захоронений"
+            </div>
 
             <div class="worker">
                 Специалист по работе с архивом 

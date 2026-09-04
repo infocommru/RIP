@@ -20,13 +20,6 @@ use Yii;
  * RecordController implements the CRUD actions for Record model.
  */
 class SearchController extends Controller {
-
-    /**
-     *
-     * @var integer $searchLimit
-     */
-    public $searchLimit = 100;
-
     /**
      * @inheritDoc
      */
@@ -416,7 +409,7 @@ class SearchController extends Controller {
         return $this->renderAjax('search_result', [
             'dataProvider' => $dataProvider,
             'count_result' => $count,
-            'tabId' => $search['cemetery'], // Передаем ID для Pjax
+            'search' => $search,
         ]);
     }
 
@@ -464,15 +457,15 @@ class SearchController extends Controller {
      * @param int $c_id
      * @return array{0: array<int, array<int, mixed>>, 1: array<int, string>}
      */
-    private function exportData(int $c_id): array {
-        $cemetery = \app\models\Cemetery::find()->andWhere(['id' => $c_id])->one();
+    private function exportData(array $search): array {
+        $query = $this->searchCemetery($search);
 
-        if (isset($_GET['pager'])) {
-            unset($_GET['pager']);
-        }
-
-        $this->searchLimit = 10000;
-        $data = $this->searchCemetery($cemetery->id);
+        $data = \app\models\CacheRecords::find()
+            ->query($query)
+            ->orderBy(['_score' => SORT_DESC, 'record_id' => SORT_DESC])
+            ->limit(10000)
+            ->asArray()
+            ->all();
     
         $header = [
             'Номер записи',
@@ -492,16 +485,16 @@ class SearchController extends Controller {
 
         $data_all = [];
 
-        foreach ($data[0] as $elem) {
+        foreach ($data as $elem) {
             $one = [];
 
-            $one[] = $elem['_source']['regnum'];
-            $one[] = $elem['_source']['fio_display'];
-            $one[] = $elem['_source']['age'];
-            $one[] = $elem['_source']['dead_date'];
-            $one[] = $elem['_source']['rip_date'];
-            $one[] = $elem['_source']['docnum'];
-            $one[] = $elem['_source']['zags'];
+            $one[] = $elem['_source']['regnum'] ?? '';
+            $one[] = $elem['_source']['fio_display'] ?? '';
+            $one[] = $elem['_source']['age'] ?? '';
+            $one[] = $elem['_source']['dead_date'] ?? '';
+            $one[] = $elem['_source']['rip_date'] ?? '';
+            $one[] = $elem['_source']['docnum'] ?? '';
+            $one[] = $elem['_source']['zags'] ?? '';
             $one[] = $elem['_source']['rip_style'] == 1 ? "Гроб" : "Урна";
             $one[] = $elem['_source']['areanum'] ?? '';
             $one[] = $elem['_source']['rownum'] ?? '';
@@ -522,11 +515,11 @@ class SearchController extends Controller {
 
     /**
      *
-     * @param int $c_id
+     * @param array $c_id
      * @return void
      */
-    public function actionExport(int $c_id): void {
-        $data = $this->exportData($c_id);
+    public function actionExport(array $search): void {
+        $data = $this->exportData($search);
 
         $excel = Excel::create();
         $sheet = $excel->sheet();

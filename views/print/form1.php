@@ -25,7 +25,6 @@ $vidano = trim(strtr($_GET['vidano'], ["  " => " "]));
 $vd = explode(" ", $vidano);
 $vd_len = mb_strlen($vidano, 'utf8');
 
-$record = Record::find()->andWhere(['id' => $_GET['record_id']])->one();
 $normal = 'verdana';
 ?>
 
@@ -173,13 +172,12 @@ $normal = 'verdana';
                 книга <span class="information_underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $_GET['book_num'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> , стр. <span class="information_underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $_GET['page_num'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> , п/п <span class="information_underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $_GET['pp'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
             </div> 
             <?php
-                Helper::tablePrint('', trim($_GET['comment']), 545, 545, 7, $normal, $mpdfObject, 10);
+                if (isset($_GET['print_comment']))
+                    Helper::tablePrint('', trim($_GET['comment']), 545, 545, 7, $normal, $mpdfObject, 10);
             ?>
-            <?php if (isset($_GET['print_comment'])): ?>
-                <div class="comment_ips"> 
-                    Справка сформирована на основе ИПС "Поиск захоронений"
-                </div>
-            <?php endif; ?>
+            <div class="comment_ips"> 
+                Справка сформирована на основе ИПС "Поиск захоронений"
+            </div>
             <div class="worker">
                 Специалист по работе с архивом  
                 <span class="information_underline">

@@ -116,6 +116,7 @@ class Record extends \yii\db\ActiveRecord {
      */
     public static function ripStyleTypes() {
         $types = [
+            0 => "-",
             1 => "Гроб",
             2 => "Урна",
             3 => "Урна, стена",
