@@ -275,6 +275,8 @@ class SearchController extends Controller {
             $rStyle = intval($search['rip_style']);
 
             switch ($rStyle) {
+                case 4:
+                case 3:
                 case 2:
                 case 1:
                 	$elasticQuery['bool']['must'][] = [
@@ -298,57 +300,97 @@ class SearchController extends Controller {
             }
         }
 
-        if ($search['dead_y']) {
-            $dead_year = intval($search['dead_y']);
-            $dead_m = intval($search['dead_m']);
-            $dead_d = intval($search['dead_d']);
+        if (!empty($search['dead_y'])) {
+            $dead_year = abs(intval($search['dead_y']));
 
-            $dead_date = ($dead_d < 10 ? '0' . $dead_d : $dead_d) . '/' . ($dead_m < 10 ? '0' . $dead_m : $dead_m) . '/' . $dead_year;
+            $dead_m = (!empty($search['dead_m']) && $search['dead_m'] >= 1 && $search['dead_m'] <= 12) 
+                ? abs(intval($search['dead_m']))
+                : null;
 
-            switch (intval($search['dead_year_cmp'])) {
-                case 3:
+            $dead_d = (!empty($search['dead_d']) && $search['dead_d'] >= 1 && $search['dead_d'] <= 31) 
+                ? abs(intval($search['dead_d']))
+                : null;
+
+            $cmp = isset($search['dead_year_cmp']) ? intval($search['dead_year_cmp']) : 0;
+
+            switch ($cmp) {
+                case 3: // Позже даты
+                    $m = $dead_m ? sprintf('%02d', $dead_m) : '12';
+                    $d = $dead_d ? sprintf('%02d', $dead_d) : '31';
+                    $dead_date = sprintf('%s/%s/%04d', $d, $m, $dead_year);
                     $condition = ['range' => ['dead_date.date' => ['gt' => $dead_date]]];
                     break;
-                case 2:
+
+                case 2: // Раньше даты
+                    $m = $dead_m ? sprintf('%02d', $dead_m) : '01';
+                    $d = $dead_d ? sprintf('%02d', $dead_d) : '01';
+                    $dead_date = sprintf('%s/%s/%04d', $d, $m, $dead_year);
                     $condition = ['range' => ['dead_date.date' => ['lt' => $dead_date]]];
                     break;
-                default:
-                	$condition = ['bool' => ['must' => []]];
-                	$condition['bool']['must'][] = ['term' => ['dead_year' => $dead_year]];
-                	
-                    if ($dead_m)
-                        $condition['bool']['must'][] = ['term' => ['dead_month' => $dead_m]];
-                    if ($dead_d)
-                        $condition['bool']['must'][] = ['term' => ['dead_day' => $dead_d]];
+
+                default: // Точное совпадение по отдельным полям
+                    $mustConditions = [
+                        ['term' => ['dead_year' => $dead_year]]
+                    ];
+
+                    if ($dead_m) {
+                        $mustConditions[] = ['term' => ['dead_month' => $dead_m]];
+                    }
+                    if ($dead_d) {
+                        $mustConditions[] = ['term' => ['dead_day' => $dead_d]];
+                    }
+
+                    $condition = ['bool' => ['must' => $mustConditions]];
+                    break;
             }
-            
+
             $elasticQuery['bool']['must'][] = $condition;
         }
 
-        if ($search['rip_y']) {
-            $rip_year = intval($search['rip_y']);
-            $rip_m = intval($search['rip_m']);
-            $rip_d = intval($search['rip_d']);
+        if (!empty($search['rip_y'])) {
+            $rip_year = abs(intval($search['rip_y']));
 
-            $rip_date = ($rip_d < 10 ? '0' . $rip_d : $rip_d) . '/' . ($rip_m < 10 ? '0' . $rip_m : $rip_m) . '/' . $rip_year;
+            $rip_m = (!empty($search['rip_m']) && $search['rip_m'] >= 1 && $search['rip_m'] <= 12) 
+                ? abs(intval($search['rip_m']))
+                : null;
 
-            switch (intval($search['rip_year_cmp'])) {
-                case 3:
+            $rip_d = (!empty($search['rip_d']) && $search['rip_d'] >= 1 && $search['rip_d'] <= 31) 
+                ? abs(intval($search['rip_d']))
+                : null;
+
+            $cmp = isset($search['rip_year_cmp']) ? intval($search['rip_year_cmp']) : 0;
+
+            switch ($cmp) {
+                case 3: // Позже даты
+                    $m = $rip_m ? sprintf('%02d', $rip_m) : '12';
+                    $d = $rip_d ? sprintf('%02d', $rip_d) : '31';
+                    $rip_date = sprintf('%s/%s/%04d', $d, $m, $rip_year);
                     $condition = ['range' => ['rip_date.date' => ['gt' => $rip_date]]];
                     break;
-                case 2:
+
+                case 2: // Раньше даты
+                    $m = $rip_m ? sprintf('%02d', $rip_m) : '01';
+                    $d = $rip_d ? sprintf('%02d', $rip_d) : '01';
+                    $rip_date = sprintf('%s/%s/%04d', $d, $m, $rip_year);
                     $condition = ['range' => ['rip_date.date' => ['lt' => $rip_date]]];
                     break;
-                default:
-                	$condition = ['bool' => ['must' => []]];
-                    $condition['bool']['must'][] = ['term' => ['rip_year' => $rip_year]];
-                    
-                    if ($rip_m)
-                        $condition['bool']['must'][] = ['term' => ['rip_month' => $rip_m]];
-                    if ($rip_d)
-                    	$condition['bool']['must'][] = ['term' => ['rip_day' => $rip_d]];
+
+                default: // Точное совпадение по отдельным полям
+                    $mustConditions = [
+                        ['term' => ['rip_year' => $rip_year]]
+                    ];
+
+                    if ($rip_m) {
+                        $mustConditions[] = ['term' => ['rip_month' => $rip_m]];
+                    }
+                    if ($rip_d) {
+                        $mustConditions[] = ['term' => ['rip_day' => $rip_d]];
+                    }
+
+                    $condition = ['bool' => ['must' => $mustConditions]];
+                    break;
             }
-            
+
             $elasticQuery['bool']['must'][] = $condition;
         }
         

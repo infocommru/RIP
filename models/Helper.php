@@ -76,6 +76,9 @@ class Helper {
      * @param string|null $date
      */
     public static function formatDate($date) {
+        if(!$date)
+            return '';
+
         $date = strtr($date ?? '', ['00:00:00' => '']);
         $date = trim($date);
 

@@ -100,14 +100,11 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                     <div class="form-group">
                         <label for="rip_style">Захоронение</label>
                         <select id="rip_style" name='rip_style' class="form-control">
-                            <option value='0'>-</option>
                             <?php
                                 $riplist = \app\models\Record::ripStyleTypes();
-
                                 foreach ($riplist as $rip_id => $rip_val)
                                     echo "<option value='" . $rip_id . "'>" . $rip_val . "</option>";
                             ?>
-
                         </select>
                     </div>
                 </div>
@@ -124,7 +121,10 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                 </div>
                 <div class="col-sm-4">
                     <br />
-                    <a><input type='checkbox' id='ext_search' name='ext_search'>Дополнительные параметры</a>
+                    <div class="form-group">
+                        <input type='checkbox' id='ext_search' name='ext_search'/>
+                        <label for="ext_search">Дополнительные параметры</label>
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -381,13 +381,13 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                 </div>
             `);
 
+            const $tabsContainer = $('#tabs');
+
             $.ajax({
                 url: '<?= \yii\helpers\Url::to(['search/found-result-exists']) ?>',
                 type: 'GET',
                 data: { search: currentFilterObject },
                 success: function(response) {
-                    const $tabsContainer = $('#tabs');
-
                     // Уничтожаем старый экземпляр jQuery UI Tabs
                     if ($tabsContainer.data('ui-tabs')) {
                         $tabsContainer.tabs('destroy');
@@ -438,6 +438,9 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
                     if ($firstPanel.length) {
                         loadTabContent($firstPanel);
                     }
+                },
+                error: function() {
+                    $tabsContainer.html('<div class="p-3 border border-danger-subtle alert alert-danger border-danger rounded text-danger-emphasis">Ошибка при загрузке данных</div>');
                 }
             });
         });

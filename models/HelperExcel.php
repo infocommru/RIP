@@ -170,11 +170,17 @@ class HelperExcel {
                         $record->comment = (string)$v;
                         break;
                     case 'Q':
-                        if (((string)$v == "Гроб") || ((string)$v == "гроб")) {
+                        if (mb_strtolower((string)$v, 'UTF-8') === "гроб")
                             $record->rip_style = 1;
-                        } else {
+                        else if (mb_strtolower((string)$v, 'UTF-8') === "урна c прахом")
                             $record->rip_style = 2;
-                        }
+                        else
+                            $record->rip_style = 2;
+                        /*else if (mb_strtolower((string)$v, 'UTF-8') === "урны")
+                            $record->rip_style = 3;
+                        else if (mb_strtolower((string)$v, 'UTF-8') === "урны")
+                            $record->rip_style = 4;*/
+                        
                         break;
                 }
             }
