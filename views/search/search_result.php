@@ -44,14 +44,14 @@ $search['cemetery'] = $search['cemetery'] ?? Yii::$app->request->get('id', 'defa
             'attribute' => 'dead_date',
             'label' => 'Дата смерти',
             'value' => function ($model) {
-                return Helper::formatDate($model->dead_date);
+                return Helper::formatDate((string)$model->dead_date);
             },
         ],
         [
             'attribute' => 'rip_date',
             'label' => 'Дата захоронения',
             'value' => function ($model) {
-                return Helper::formatDate($model->rip_date);
+                return Helper::formatDate((string)$model->rip_date);
             },
         ],
         'zags:text:ЗАГС',

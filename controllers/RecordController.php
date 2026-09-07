@@ -289,6 +289,7 @@ class RecordController extends Controller {
         $first = Record::find()->andWhere("user_id is null")->andWhere(['book_id' => $model->book_id])->orderBy("id")->one();
 
         if ($this->request->isPost && $model->load($this->request->post())) {
+            $model->fio = preg_replace('/\s+/', ' ', trim((string)$model->fio));
             $model->updated_at = time();
             $model->user_id = Yii::$app->user->id;
             $model->filename = strtr($model->filename, [
@@ -311,11 +312,10 @@ class RecordController extends Controller {
                 \app\models\HelperLevoshkin::updateSearchRecord($model);
 
                 $id_next = $next ? $next->id : $model->id;
-
                 $pnum = 1;
-                if (($next) && ($model->filename == $next->filename)) {
+
+                if (($next) && ($model->filename == $next->filename))
                     $pnum = $_POST['pageNum'];
-                }
             }
         }
 

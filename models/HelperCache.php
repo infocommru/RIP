@@ -133,6 +133,28 @@ class HelperCache {
         }
     }
 
+    public static function splitFIO(string $FIO): array {
+        $value = [
+            'fam' => '',
+            'nam' => '',
+            'ot' => ''
+        ];
+
+        $FIO = trim(preg_replace('/\s+/', ' ', trim($FIO)));
+        
+        if ($FIO) {
+            $ff = explode(" ", $FIO);
+            $value["fam"] = $ff[0];
+
+            if (sizeof($ff) > 1)
+                $value["nam"] = $ff[1];
+            if (sizeof($ff) > 2)
+                $value["ot"] = $ff[2];
+        }
+
+        return $value;
+    }
+
     /**
      *
      * @param array<string, mixed> $record
@@ -149,17 +171,7 @@ class HelperCache {
         $value = [];
 
         $value["fio_display"] = preg_replace('/\s+/', ' ', trim((string)$record['fio']));
-        $value["fam"] = $value["nam"] = $value["ot"] = '';
-        
-        if ($value["fio_display"]) {
-            $ff = explode(" ", $value["fio_display"]);
-            $value["fam"] = $ff[0];
-
-            if (sizeof($ff) > 1)
-                $value["nam"] = $ff[1];
-            if (sizeof($ff) > 2)
-                $value["ot"] = $ff[2];
-        }
+        $value = array_merge($value, self::splitFIO($value["fio_display"]));
 
         $deadYearInf = \app\models\HelperLevoshkin::getDate((string)$record['death_date']);
         $ripYearInf = \app\models\HelperLevoshkin::getDate((string)$record['rip_date']);

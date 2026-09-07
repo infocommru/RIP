@@ -9,6 +9,7 @@ use app\models\Helper;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\Url;
+use yii\web\View;
 
 /** @var yii\web\View $this
  * @var app\models\Record $model
@@ -16,6 +17,12 @@ use yii\helpers\Url;
  * @var yii\web\View $this
  * @var false|array<string, mixed> $search_data
 */
+
+$this->registerJsFile('assets/js/autocomplete.js', [
+    'depends' => [\yii\web\JqueryAsset::class], // Обязательно подгружать ПОСЛЕ jQuery
+    'position' => View::POS_END, // Вставка перед закрывающим тегом </body>
+]);
+
 $user = app\models\User::findIdentity(Yii::$app->user->id);
 $this->title = 'Поиск по захоронениям г. Санкт-Петербурга';
 
@@ -257,24 +264,6 @@ $cemeteriesFormated = ArrayHelper::toArray($cemeteries, [
     </div>
 <script>
     document.addEventListener('DOMContentLoaded', () => { 
-        // 1. Универсальная функция инициализации Autocomplete
-        const initAutocomplete = (selector, variableName) => {
-            $(selector).autocomplete({
-                source: (request, response) => {
-                    $.ajax({
-                        url: "<?= \yii\helpers\Url::to(['search/search-suggest']) ?>",
-                        dataType: "json",
-                        data: {
-                            q: request.term,
-                            variable: variableName
-                        },
-                        success: data => response(data)
-                    });
-                },
-                minLength: 2
-            });
-        };
-
         // Массив полей для подключения автодополнения
         const autocompleteFields = [
             { selector: '#regnum', name: 'regnum' },

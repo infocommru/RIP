@@ -83,10 +83,8 @@ class HelperExcel {
                     }
                 }
             }
-            
-            if($rowNum <= 2) {
+            else if($rowNum < 2)
                 continue;
-            }
 
             foreach ($row as $k => $v) {
                 $v = $v ?? '';
@@ -118,7 +116,7 @@ class HelperExcel {
                         }
                         break;
                     case 'B':
-                        $record->fio = (string)$v;
+                        $record->fio = preg_replace('/\s+/', ' ', trim((string)$v));
                         break;
                     case 'C':
                         $record->age = (string)$v;

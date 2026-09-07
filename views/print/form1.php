@@ -21,7 +21,8 @@ if (sizeof($dd) > 1) {
 $number = str_repeat('&nbsp;', 10) . $number . str_repeat('&nbsp;', 20);
 $svid = str_repeat('&nbsp;', 10) . $svid . str_repeat('&nbsp;', 20);
 
-$vidano = trim(strtr($_GET['vidano'], ["  " => " "]));
+
+$vidano = trim(strtr("{$_GET['vidano-fam']} {$_GET['vidano-nam']} {$_GET['vidano-ot']}", ["  " => " "]));
 $vd = explode(" ", $vidano);
 $vd_len = mb_strlen($vidano, 'utf8');
 
@@ -66,7 +67,7 @@ $normal = 'verdana';
                             <?= $_GET['nn'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         </span> от
                         <span class="number_ubderline">&nbsp;&nbsp;&nbsp;
-                            <?= $_GET['date'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <?= date('d.m.Y', strtotime($_GET['date'])); ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         </span>
                         <br />
                     </div>
@@ -113,7 +114,8 @@ $normal = 'verdana';
                 ?>
             </div>
             <?php
-                $string = $_GET['fio'] . str_repeat("\u{00A0}", 12);
+                $string = "{$_GET['fam']} {$_GET['nam']} {$_GET['ot']}" . str_repeat("\u{00A0}", 12);
+
                 if ($_GET['age']){
                     $string .= ', ' . $_GET['age'];
 
@@ -131,8 +133,14 @@ $normal = 'verdana';
                 <div>
                     захоронен(а)
                 </div>
-                <?php 
-                    Helper::tablePrint('', $_GET['zahr'], 545, 545, 7, $normal, $mpdfObject, 4);
+                <?php
+                    $rip_style = (isset($_GET['print_grob']) && $_GET['zahr'] !== '-') ? ", {$_GET['zahr']}" : '';
+                    $place = $_GET['place'] ? ", {$_GET['place']}" : '';
+                    $zahoron = "{$_GET['cemetery']} $rip_style {$place}";
+                    $zahoron = trim($zahoron);
+                    $zahoron = ltrim($zahoron, ',');
+
+                    Helper::tablePrint('', $zahoron, 545, 545, 7, $normal, $mpdfObject, 4);
                 ?>
             </div> 
             <div class="hinttext">
