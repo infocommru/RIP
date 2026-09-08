@@ -168,13 +168,17 @@ $normal = 'verdana';
             </div>
             <?php
                 Helper::tablePrint('место государственной регистрации смерти', $_GET['zags'], 330, 545, 7, $normal, $mpdfObject);
-            ?>
-            <?php
                 Helper::tablePrint('ответственное лицо', $_GET['author2'], 445, 545, 7, $normal, $mpdfObject);
             ?>
             <div class="hinttext">
                 (фамилия, имя, отчество)
             </div>
+            <?php
+                if (isset($_GET['print_crem'])){
+                    Helper::tablePrint('Регистрационный № кремации', $_GET['num-crem-reg'], 390, 545, 7, $normal, $mpdfObject);
+                    Helper::tablePrint('№ счета по кремации', $_GET['num-crem-account'], 435, 545, 7, $normal, $mpdfObject);
+                }
+            ?>
             <div>
                 Основание: связка <span class="information_underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $_GET['svazka'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> , 
                 книга <span class="information_underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $_GET['book_num'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> , стр. <span class="information_underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $_GET['page_num'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> , п/п <span class="information_underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $_GET['pp'] ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>

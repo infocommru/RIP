@@ -58,6 +58,8 @@ $res = [
     'regnum'       => $sdata->regnum ?? '',
     'rip_date'     => Helper::formatDate($record->rip_date ?? ''),
     'death_date'   => Helper::formatDate($record->death_date ?? ''),
+    'num-crem-reg' => '', //заглушки
+    'num-crem-account' => '',
 ];
 
 $res = array_merge($res, HelperCache::splitFIO($record->fio ?? ''));
@@ -225,6 +227,16 @@ $res = array_merge($res, HelperCache::splitFIO($record->fio ?? ''));
                     </div>
 
                     <!-- Ряд 5 -->
+                     <div class="col-sm-6">
+                        <label for="num-crem-reg" class="form-label">Регистрационный № кремации</label>
+                        <input class="form-control" type="text" name="num-crem-reg" id="num-crem-reg" value="<?= $res['num-crem-reg'] ?>" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="num-crem-account" class="form-label">№ счета по кремации</label>
+                        <input class="form-control" type="text" name="num-crem-account" id="num-crem-account" value="<?= $res['num-crem-account'] ?>" />
+                    </div>
+
+                    <!-- Ряд 6 -->
                     <div class="col-12">
                         <label for="comment" class="form-label">Комментарий</label>
                         <input class="form-control" type="text" name="comment" id="comment" value="<?= $res['comment'] ?>" />
@@ -250,6 +262,10 @@ $res = array_merge($res, HelperCache::splitFIO($record->fio ?? ''));
                     <div class="form-check form-check-inline">
                         <input checked class="form-check-input" type="checkbox" name="print_comment" id="print_comment" value="2">
                         <label class="form-check-label" for="print_comment">Печатать комментарий</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="print_crem" id="print_crem" value="2">
+                        <label class="form-check-label" for="print_crem">Печатать номера кремации</label>
                     </div>
                 </div>
             </div>

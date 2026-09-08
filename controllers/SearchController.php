@@ -380,12 +380,10 @@ class SearchController extends Controller {
                         ['term' => ['rip_year' => $rip_year]]
                     ];
 
-                    if ($rip_m) {
+                    if ($rip_m)
                         $mustConditions[] = ['term' => ['rip_month' => $rip_m]];
-                    }
-                    if ($rip_d) {
+                    if ($rip_d)
                         $mustConditions[] = ['term' => ['rip_day' => $rip_d]];
-                    }
 
                     $condition = ['bool' => ['must' => $mustConditions]];
                     break;
